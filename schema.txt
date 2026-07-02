@@ -1,0 +1,72 @@
+table users {
+  id integer [primary key]
+  email email
+  password varchar
+  address_id integer
+  points integer
+}
+
+table addresses {
+  id integer [primary key]
+  building varchar
+  street varchar
+  postal_code varchar
+  city varchar
+  country varchar
+}
+
+table orders {
+  id integer [primary key]
+  user_id integer
+  created_at datetime
+  status enum(status)
+  payment_code uuid
+}
+
+enum status {
+  "PENDING"
+  "PAID"
+  "CANCELLED"
+}
+
+table order_instances {
+  id integer [primary key]
+  order_id integer
+  instance_id integer
+  startDate date
+  endDate date
+  price double // per day
+}
+
+table products {
+  id integer [primary key]
+  name varchar
+  description text
+  price double
+}
+
+table product_images {
+  id integer [primary key]
+  product_id integer
+  image image
+}
+
+table favorites {
+  id integer [primary key]
+  user_id integer
+  product_id integer
+}
+
+table instances {
+  id integer [primary key]
+  product_id integer
+}
+
+ref: users.id < orders.user_id
+ref: orders.id < order_instances.order_id
+ref: instances.id < order_instances.instance_id
+ref: products.id < instances.product_id
+ref: users.id < favorites.user_id
+ref: products.id < favorites.product_id
+ref: addresses.id - users.address_id
+ref: products.id < product_images.product_id
