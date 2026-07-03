@@ -1,9 +1,9 @@
 table users {
   id integer [primary key]
-  email email
-  password varchar
+  email email [unique, not null]
+  password varchar [not null]
   address_id integer
-  points integer
+  points integer // cache
   created_at datetime
   last_login datetime
 }
@@ -19,16 +19,16 @@ table addresses {
 
 table orders {
   id integer [primary key]
-  user_id integer
+  user_id integer [not null]
   created_at datetime
-  status enum(status)
+  status status [default: "PENDING"]
   payment_code uuid
 }
 
 table points_history {
   id integer [primary key]
-  user_id integer
-  order_id integer
+  user_id integer [not null]
+  order_id integer [not null]
   points integer
 }
 
@@ -43,8 +43,8 @@ enum status {
 
 table order_instances {
   id integer [primary key]
-  order_id integer
-  instance_id integer
+  order_id integer [not null]
+  instance_id integer [not null]
   startDate date
   endDate date
   price double // per day
@@ -52,26 +52,34 @@ table order_instances {
 
 table products {
   id integer [primary key]
-  name varchar
+  name varchar [not null]
   description text
   price double
 }
 
 table product_images {
   id integer [primary key]
-  product_id integer
+  product_id integer [not null]
   image image
 }
 
 table favorites {
   id integer [primary key]
-  user_id integer
-  product_id integer
+  user_id integer [not null]
+  product_id integer [not null]
+}
+
+enum instance_status {
+  "AVAILABLE"
+  "MAINTENANCE"
+  "BROKEN"
+  "RETIRED"
 }
 
 table instances {
   id integer [primary key]
-  product_id integer
+  product_id integer [not null]
+  status instance_status [default: "AVAILABLE"]
 }
 
 ref: users.id < orders.user_id
