@@ -4,6 +4,8 @@ table users {
   password varchar
   address_id integer
   points integer
+  created_at datetime
+  last_login datetime
 }
 
 table addresses {
@@ -21,6 +23,13 @@ table orders {
   created_at datetime
   status enum(status)
   payment_code uuid
+}
+
+table points_history {
+  id integer [primary key]
+  user_id integer
+  order_id integer
+  points integer
 }
 
 enum status {
@@ -70,3 +79,5 @@ ref: users.id < favorites.user_id
 ref: products.id < favorites.product_id
 ref: addresses.id - users.address_id
 ref: products.id < product_images.product_id
+ref: users.id < points_history.user_id
+ref: orders.id < points_history.order_id
