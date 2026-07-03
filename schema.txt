@@ -1,17 +1,22 @@
+Project rent {
+  database_type: 'PostgreSQL'
+}
+
 table users {
   id integer [primary key]
-  email email [unique, not null]
+  email varchar [unique, not null]
   password varchar [not null]
   address_id integer
   points integer // cache
   created_at datetime
-  last_login datetime
+  last_login_at datetime
+  newsletter_started_at datetime
 }
 
 table addresses {
   id integer [primary key]
-  building varchar
-  street varchar
+  first_line varchar
+  second_line varchar
   postal_code varchar
   city varchar
   country varchar
@@ -23,11 +28,11 @@ table orders {
   created_at datetime
   status status [default: "PENDING"]
   payment_code uuid
+  used_points bool [default: false]
 }
 
 table points_history {
   id integer [primary key]
-  user_id integer [not null]
   order_id integer [not null]
   points integer
 }
@@ -48,6 +53,11 @@ table order_instances {
   startDate date
   endDate date
   price double // per day
+
+  checks {
+    `startDate < endDate`
+    `price > 0`
+  }
 }
 
 table products {
@@ -55,12 +65,23 @@ table products {
   name varchar [not null]
   description text
   price double
+  slug varchar [unique]
+
+  checks {
+    `price > 0`
+  }
 }
 
 table product_images {
   id integer [primary key]
   product_id integer [not null]
   image image
+  alt_text varchar
+  display_order tinyint
+
+  indexes {
+    (product_id, display_order) [unique]
+  }
 }
 
 table favorites {
@@ -82,6 +103,18 @@ table instances {
   status instance_status [default: "AVAILABLE"]
 }
 
+table cart_items {
+  id integer [primary key]
+  user_id integer [not null]
+  product_id integer [not null]
+  start_date date
+  end_date date
+
+  checks {
+    `start_date < end_date`
+  }
+}
+
 ref: users.id < orders.user_id
 ref: orders.id < order_instances.order_id
 ref: instances.id < order_instances.instance_id
@@ -90,5 +123,5 @@ ref: users.id < favorites.user_id
 ref: products.id < favorites.product_id
 ref: addresses.id - users.address_id
 ref: products.id < product_images.product_id
-ref: users.id < points_history.user_id
 ref: orders.id < points_history.order_id
+ref: users.id < cart_items.user_id
