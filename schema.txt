@@ -34,7 +34,10 @@ table points_history {
 
 enum status {
   "PENDING"
+  "UNPAID"
   "PAID"
+  "GIVEN_OUT"
+  "FINISHED"
   "CANCELLED"
 }
 
