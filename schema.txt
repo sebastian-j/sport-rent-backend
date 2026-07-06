@@ -11,6 +11,7 @@ table users {
   created_at datetime
   last_login_at datetime
   newsletter_started_at datetime
+  internal_notes varchar
 }
 
 table addresses {
@@ -66,6 +67,8 @@ table products {
   description text
   price double
   slug varchar [unique]
+  meta_description varchar
+  visibility_status bool
 
   checks {
     `price > 0`
@@ -115,6 +118,18 @@ table cart_items {
   }
 }
 
+table calendar_blocks {
+  id integer [primary key]
+  instance_id integer [not null]
+  blocked_from date
+  blocked_until date
+  block_reason varchar
+
+  checks {
+    `blocked_from < blocked_until`
+  }
+}
+
 ref: users.id < orders.user_id
 ref: orders.id < order_instances.order_id
 ref: instances.id < order_instances.instance_id
@@ -125,3 +140,4 @@ ref: addresses.id - users.address_id
 ref: products.id < product_images.product_id
 ref: orders.id < points_history.order_id
 ref: users.id < cart_items.user_id
+ref: instances.id < calendar_blocks.instance_id
