@@ -87,6 +87,17 @@ table product_images {
   }
 }
 
+table product_sizes {
+  id integer [primary key]
+  product_id integer
+  size varchar
+  description text
+
+  indexes {
+    (product_id, size) [unique]
+  }
+}
+
 table favorites {
   id integer [primary key]
   user_id integer [not null]
@@ -104,6 +115,7 @@ table instances {
   id integer [primary key]
   product_id integer [not null]
   status instance_status [default: "AVAILABLE"]
+  size varchar
 }
 
 table cart_items {
@@ -141,3 +153,4 @@ ref: products.id < product_images.product_id
 ref: orders.id < points_history.order_id
 ref: users.id < cart_items.user_id
 ref: instances.id < calendar_blocks.instance_id
+ref: products.id < product_sizes.product_id
