@@ -56,7 +56,7 @@ table order_instances {
   price double // per day
 
   checks {
-    `startDate < endDate`
+    `startDate <= endDate`
     `price > 0`
   }
 }
@@ -126,7 +126,7 @@ table cart_items {
   end_date date
 
   checks {
-    `start_date < end_date`
+    `start_date <= end_date`
   }
 }
 
@@ -138,7 +138,7 @@ table calendar_blocks {
   block_reason varchar
 
   checks {
-    `blocked_from < blocked_until`
+    `blocked_from <= blocked_until`
   }
 }
 
