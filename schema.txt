@@ -14,8 +14,16 @@ table users {
   internal_notes varchar
 }
 
+table categories {
+  id integer [primary key]
+  name string
+  slug string
+}
+
 table addresses {
   id integer [primary key]
+  last_name varchar
+  second_name varchar
   first_line varchar
   second_line varchar
   postal_code varchar
@@ -69,6 +77,7 @@ table products {
   slug varchar [unique]
   meta_description varchar
   visibility_status bool
+  category_id integer
 
   checks {
     `price > 0`
@@ -122,11 +131,15 @@ table cart_items {
   id integer [primary key]
   user_id integer [not null]
   product_id integer [not null]
+  product_size_id integer
+  quantity integer
   start_date date
   end_date date
+  created_at date
 
   checks {
     `start_date <= end_date`
+    `quantity > 0`
   }
 }
 
