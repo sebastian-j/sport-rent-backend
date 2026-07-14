@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 
-from app.api.routes import health
-from app.api.routes import products
+from app.api.routes import health, products
 
 app = FastAPI()
 
