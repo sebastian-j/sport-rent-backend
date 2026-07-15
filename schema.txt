@@ -12,6 +12,7 @@ table users {
   last_login_at datetime
   newsletter_started_at datetime
   internal_notes varchar
+  privacy_policy_accepted bool [default: false]
 }
 
 table categories {
