@@ -50,7 +50,7 @@ Before running the project, make sure you have installed:
 ## Running the Application
 Start the development server with:
 ```bash
-uv run uvicorn app.main:app --reload
+uv run --env-file .env uvicorn app.main:app --reload
 ```
 The API will be available at:
 ```bash
