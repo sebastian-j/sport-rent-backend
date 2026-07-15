@@ -8,7 +8,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 # TODO: Add logic
 @router.post("/login", response_model=LoginResponse)
 def login(request: LoginRequest):
-    if request.email == "error":
+    if request.email.startswith("error"):
         raise HTTPException(status_code=401, detail="Email or password is wrong")
     
     user_email = request.email
