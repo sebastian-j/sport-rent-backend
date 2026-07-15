@@ -5,7 +5,7 @@ from fastapi.encoders import jsonable_encoder
 
 PAGE_SIZE = 10
 
-router = APIRouter(prefix="/product", tags=["products"])
+router = APIRouter(prefix="/product", tags=["product"])
 
 products_file_path = "app/api/mock_products.json"
 
