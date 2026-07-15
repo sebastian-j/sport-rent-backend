@@ -1,6 +1,6 @@
 import json
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from fastapi.encoders import jsonable_encoder
 
 PAGE_SIZE = 10
@@ -27,22 +27,20 @@ async def get_products(filter: str = None, page: int = 1):
         start_index = (page - 1) * PAGE_SIZE
         end_index = start_index + PAGE_SIZE
         products_list = jsonable_encoder(products[start_index:end_index])
-    else:
-        products_list = jsonable_encoder(products)
     return products_list
 
 
-@router.get("/{product_id}")
-async def get_product(product_id: int):
+@router.get("/{product_slug}")
+async def get_product(product_slug: str):
     product = next(
-        (product for product in products if product["id"] == product_id), None
+        (product for product in products if product["slug"] == product_slug), None
     )
     if product:
         return jsonable_encoder(product)
-    return {"error": "Product not found"}
+    raise HTTPException(status_code=404, detail="Product not found")
 
 
-@router.get("/{product_id}/availability")
-async def get_product_availability(product_id: int, start_date: str, end_date: str):
+@router.get("/{product_slug}/availability")
+async def get_product_availability(product_slug: str, start_date: str, end_date: str):
     # TODO: Implement logic to check product availability
     return {"available": True}
