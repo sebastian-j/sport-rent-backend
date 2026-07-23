@@ -8,7 +8,7 @@
             "images": ["01-road-bike.jpg"],
             "alt": "Rower szosowy",
             "category": "Rowery i akcesoria",
-            "description": "Lekki rower do szybkiej jazdy po asfalcie i dłuższych trasach.",
+            "description": "# Rower szosowy\n\n## Szybkość i wygoda\n\nLekki rower stworzony do szybkiej jazdy po asfalcie oraz pokonywania dłuższych tras.\n\n### Najważniejsze cechy\n\nTen model jest **lekki i dynamiczny**, <u>regularnie serwisowany</u> oraz *wygodny nawet podczas wielogodzinnej jazdy*.\n\n- lekka aluminiowa rama\n- precyzyjna zmiana biegów\n- opony o niskich oporach toczenia\n- wygodna, sportowa pozycja\n\n### Jak wypożyczyć?\n\n1. Wybierz odpowiedni rozmiar roweru.\n2. Ustal termin wypożyczenia.\n3. Dodaj produkt do koszyka.\n4. Odbierz przygotowany sprzęt.\n\n## Dla kogo?\n\nŚwietny wybór zarówno na weekendową przejażdżkę, jak i intensywny trening.",
             "sizes": [
             { "size": "S", "description": "wzrost 160-170 cm" },
             { "size": "M", "description": "wzrost 170-180 cm" },
@@ -23,7 +23,7 @@
             "images": ["02-mountain-bike.jpg"],
             "alt": "Rower górski MTB",
             "category": "Rowery i akcesoria",
-            "description": "Solidny rower terenowy na szlaki, leśne drogi i nierówne podłoże.",
+            "description": "## Rower na szlak\n\nSolidny rower terenowy na **szlaki, leśne drogi i nierówne podłoże**.\n\n*Dobry wybór na aktywny dzień poza miastem.*",
             "sizes": [
             { "size": "S", "description": "wzrost 160-170 cm" },
             { "size": "M", "description": "wzrost 170-180 cm" },
@@ -38,7 +38,7 @@
             "images": ["03-bike-helmet.jpg"],
             "alt": "Kask rowerowy",
             "category": "Rowery i akcesoria",
-            "description": "Lekki kask zapewniający wygodę i ochronę podczas jazdy rowerem.",
+            "description": "Lekki kask zapewniający wygodę i ochronę podczas jazdy rowerem.\n\n> Bezpieczeństwo podczas każdej przejażdżki.",
             "sizes": [
             { "size": "S/M", "description": "obwód głowy 54-58 cm" },
             { "size": "L/XL", "description": "obwód głowy 58-62 cm" }
@@ -52,7 +52,7 @@
             "images": ["04-child-bike-trailer.jpg"],
             "alt": "Przyczepka rowerowa dla dzieci",
             "category": "Przyczepki rowerowe",
-            "description": "Bezpieczna przyczepka dla najmłodszych pasażerów na rodzinne wyjazdy."
+            "description": "Bezpieczna przyczepka dla najmłodszych pasażerów na rodzinne wyjazdy.\n\n- wygodne siedzisko\n- stabilna konstrukcja"
         },
         {
             "id": 5,
@@ -62,7 +62,7 @@
             "images": ["05-cargo-bike-trailer.jpg"],
             "alt": "Przyczepka rowerowa bagażowa",
             "category": "Przyczepki rowerowe",
-            "description": "Praktyczna przyczepka do przewozu bagażu, zakupów i sprzętu."
+            "description": "### Przyczepka bagażowa\n\nPraktyczna przyczepka do przewozu **bagażu, zakupów i sprzętu**.\n\n1. Załaduj bagaż.\n2. Podepnij przyczepkę.\n3. Ruszaj w drogę."
         },
         {
             "id": 6,
@@ -72,7 +72,7 @@
             "images": ["06-dog-bike-trailer.jpg"],
             "alt": "Przyczepka rowerowa dla psa",
             "category": "Przyczepki rowerowe",
-            "description": "Wygodna przyczepka dla psa na wspólne przejażdżki i dłuższe trasy."
+            "description": "Wygodna przyczepka dla psa na wspólne przejażdżki i dłuższe trasy. *Twój pupil podróżuje komfortowo.*"
         },
         {
             "id": 7,
@@ -82,7 +82,7 @@
             "images": ["07-two-person-tent.jpg"],
             "alt": "Namiot dwuosobowy",
             "category": "Namioty osobowe",
-            "description": "Lekki namiot dla 2 osób, dobry na weekendowe wypady i biwaki."
+            "description": "# Namiot dwuosobowy\n\nLekki namiot dla 2 osób, dobry na weekendowe wypady i biwaki.\n\n<u>Szybki do rozstawienia</u> i łatwy do spakowania."
         },
         {
             "id": 8,
@@ -92,7 +92,7 @@
             "images": ["08-three-person-tent.jpg"],
             "alt": "Namiot trzyosobowy",
             "category": "Namioty osobowe",
-            "description": "Praktyczny namiot dla 3 osób z szybkim rozstawianiem."
+            "description": "Praktyczny namiot dla 3 osób z **szybkim rozstawianiem**.\n\n> Więcej czasu na odpoczynek, mniej na przygotowania."
         },
         {
             "id": 9,
@@ -102,7 +102,7 @@
             "images": ["09-four-person-tent.jpg"],
             "alt": "Namiot czteroosobowy",
             "category": "Namioty osobowe",
-            "description": "Przestronny namiot dla 4 osób na rodzinne wyjazdy."
+            "description": "## Rodzinny biwak\n\nPrzestronny namiot dla 4 osób na rodzinne wyjazdy.\n\n- miejsce dla całej rodziny\n- wygodny nocleg\n- przestrzeń na bagaż"
         },
         {
             "id": 10,
@@ -112,7 +112,7 @@
             "images": ["10-sup-board.jpg"],
             "alt": "Deska SUP",
             "category": "Sprzęt wodny",
-            "description": "Stabilna deska SUP do rekreacyjnego pływania po jeziorach i zatoce."
+            "description": "Stabilna deska SUP do rekreacyjnego pływania po jeziorach i zatoce. *Idealna na spokojny poranek nad wodą.*"
         },
         {
             "id": 11,
@@ -122,7 +122,7 @@
             "images": ["11-two-person-kayak.jpg"],
             "alt": "Kajak dwuosobowy",
             "category": "Sprzęt wodny",
-            "description": "Wygodny kajak dla dwóch osób na spokojne spływy i wycieczki."
+            "description": "### Kajak dla dwojga\n\nWygodny kajak dla dwóch osób na spokojne spływy i wycieczki.\n\n**Wspólna przygoda zaczyna się na wodzie.**"
         },
         {
             "id": 12,
@@ -132,7 +132,7 @@
             "images": ["12-life-jacket.jpg"],
             "alt": "Kamizelka asekuracyjna",
             "category": "Sprzęt wodny",
-            "description": "Kamizelka zwiększająca bezpieczeństwo podczas pływania i sportów wodnych."
+            "description": "Kamizelka zwiększająca bezpieczeństwo podczas pływania i sportów wodnych.\n\n<u>Załóż ją przed wejściem do wody.</u>"
         },
         {
             "id": 13,
@@ -142,7 +142,7 @@
             "images": ["13-via-ferrata-set.jpg"],
             "alt": "Zestaw via ferrata",
             "category": "Via ferraty i wspinanie",
-            "description": "Kompletny zestaw do bezpiecznego poruszania się po via ferratach."
+            "description": "## Via ferrata\n\nKompletny zestaw do bezpiecznego poruszania się po via ferratach.\n\n- lonże asekuracyjne\n- amortyzator\n- wygodne karabinki"
         },
         {
             "id": 14,
@@ -152,7 +152,7 @@
             "images": ["14-climbing-harness.jpg"],
             "alt": "Uprząż wspinaczkowa",
             "category": "Via ferraty i wspinanie",
-            "description": "Regulowana uprząż do wspinaczki i przejść po via ferratach.",
+            "description": "Regulowana uprząż do wspinaczki i przejść po via ferratach.\n\n*Dopasuj ją przed rozpoczęciem trasy.*",
             "sizes": [
             { "size": "S", "description": "obwód talii 65-75 cm" },
             { "size": "M", "description": "obwód talii 75-85 cm" },
@@ -167,7 +167,7 @@
             "images": ["15-climbing-helmet.jpg"],
             "alt": "Kask wspinaczkowy",
             "category": "Via ferraty i wspinanie",
-            "description": "Wytrzymały kask chroniący głowę podczas wspinaczki i trekkingu.",
+            "description": "Wytrzymały kask chroniący głowę podczas wspinaczki i trekkingu.\n\n**Ochrona, której możesz zaufać.**",
             "sizes": [
             { "size": "S/M", "description": "obwód głowy 54-58 cm" },
             { "size": "L/XL", "description": "obwód głowy 58-62 cm" }
@@ -181,7 +181,7 @@
             "images": ["16-child-carrier.jpg"],
             "alt": "Nosidełko turystyczne dla dziecka",
             "category": "Nosidełka turystyczne",
-            "description": "Stabilne nosidełko dla dziecka na wygodne spacery i górskie trasy."
+            "description": "Stabilne nosidełko dla dziecka na wygodne spacery i górskie trasy.\n\n- regulowane pasy\n- miękkie podparcie\n- kieszeń na drobiazgi"
         },
         {
             "id": 17,
@@ -191,7 +191,7 @@
             "images": ["17-light-child-carrier.jpg"],
             "alt": "Lekkie nosidełko turystyczne",
             "category": "Nosidełka turystyczne",
-            "description": "Lżejsza wersja nosidełka na krótsze wycieczki i codzienne spacery."
+            "description": "Lżejsza wersja nosidełka na krótsze wycieczki i codzienne spacery.\n\n*Komfort dla rodzica i dziecka.*"
         },
         {
             "id": 18,
@@ -201,7 +201,7 @@
             "images": ["18-family-tent.jpg"],
             "alt": "Namiot rodzinny",
             "category": "Namioty",
-            "description": "Duży namiot dla rodziny z miejscem na bagaż i wygodny nocleg."
+            "description": "### Namiot rodzinny\n\nDuży namiot dla rodziny z miejscem na bagaż i wygodny nocleg.\n\n<u>Przestrzeń na wspólne wieczory.</u>"
         },
         {
             "id": 19,
@@ -211,7 +211,7 @@
             "images": ["19-camping-tent.jpg"],
             "alt": "Namiot kempingowy",
             "category": "Namioty",
-            "description": "Uniwersalny namiot na biwak, kemping i krótsze wypady."
+            "description": "Uniwersalny namiot na biwak, kemping i krótsze wypady.\n\nSprawdzi się podczas:\n\n- biwaku\n- kempingu\n- weekendowej wycieczki"
         },
         {
             "id": 20,
@@ -221,7 +221,7 @@
             "images": ["20-rooftop-tent.jpg"],
             "alt": "Namiot dachowy",
             "category": "Namioty",
-            "description": "Namiot dachowy montowany na aucie, wygodny w podróży."
+            "description": "## Nocleg w podróży\n\nNamiot dachowy montowany na aucie, wygodny w podróży.\n\n*Rozbij obóz niemal wszędzie.*"
         },
         {
             "id": 21,
@@ -231,7 +231,7 @@
             "images": ["21-city-bike.jpg"],
             "alt": "Rower miejski",
             "category": "Rowery i akcesoria",
-            "description": "Wygodny rower do codziennej jazdy po mieście i ścieżkach rowerowych.",
+            "description": "Wygodny rower do codziennej jazdy po mieście i ścieżkach rowerowych.\n\n**Praktyczny towarzysz miejskich przejazdów.**",
             "sizes": [
             { "size": "S", "description": "wzrost 160-170 cm" },
             { "size": "M", "description": "wzrost 170-180 cm" },
@@ -246,7 +246,7 @@
             "images": ["22-electric-bike.jpg"],
             "alt": "Rower elektryczny",
             "category": "Rowery i akcesoria",
-            "description": "E-rower z wspomaganiem, idealny na dłuższe trasy i codzienne dojazdy.",
+            "description": "E-rower ze wspomaganiem, idealny na dłuższe trasy i codzienne dojazdy.\n\n<u>Jedź dalej bez nadmiernego wysiłku.</u>",
             "sizes": [
             { "size": "S", "description": "wzrost 160-170 cm" },
             { "size": "M", "description": "wzrost 170-180 cm" },
@@ -261,7 +261,7 @@
             "images": ["23-bike-panniers.jpg"],
             "alt": "Sakwy rowerowe",
             "category": "Rowery i akcesoria",
-            "description": "Pojemne sakwy na rower na bagaż, zakupy i rzeczy na wyjazd."
+            "description": "Pojemne sakwy na rower na bagaż, zakupy i rzeczy na wyjazd.\n\n- zakupy\n- ubrania\n- sprzęt turystyczny"
         },
         {
             "id": 24,
@@ -271,7 +271,7 @@
             "images": ["24-single-wheel-trailer.jpg"],
             "alt": "Jednokołowa przyczepka rowerowa",
             "category": "Przyczepki rowerowe",
-            "description": "Zwrotna przyczepka z jednym kołem do jazdy w terenie i po trasach."
+            "description": "Zwrotna przyczepka z jednym kołem do jazdy w terenie i po trasach. *Lekka i łatwa do prowadzenia.*"
         },
         {
             "id": 25,
@@ -281,7 +281,7 @@
             "images": ["25-folding-bike-trailer.jpg"],
             "alt": "Składana przyczepka rowerowa",
             "category": "Przyczepki rowerowe",
-            "description": "Składana przyczepka, którą łatwo przewieziesz i przechowasz."
+            "description": "### Łatwe przechowywanie\n\nSkładana przyczepka, którą łatwo przewieziesz i przechowasz.\n\n**Złóż ją po zakończonej trasie.**"
         },
         {
             "id": 26,
@@ -291,7 +291,7 @@
             "images": ["26-touring-tent.jpg"],
             "alt": "Namiot trekkingowy",
             "category": "Namioty osobowe",
-            "description": "Lekki namiot trekkingowy do plecaka i pieszych wypraw."
+            "description": "Lekki namiot trekkingowy do plecaka i pieszych wypraw.\n\n<u>Minimalny ciężar, maksimum swobody.</u>"
         },
         {
             "id": 27,
@@ -301,7 +301,7 @@
             "images": ["27-winter-tent.jpg"],
             "alt": "Namiot zimowy",
             "category": "Namioty osobowe",
-            "description": "Namiot przygotowany na niższe temperatury i trudniejsze warunki."
+            "description": "## Na chłodniejsze noce\n\nNamiot przygotowany na niższe temperatury i trudniejsze warunki.\n\n- wzmocniona konstrukcja\n- lepsza izolacja"
         },
         {
             "id": 28,
@@ -311,7 +311,7 @@
             "images": ["28-inflatable-kayak.jpg"],
             "alt": "Kajak dmuchany",
             "category": "Sprzęt wodny",
-            "description": "Lekki kajak dmuchany, który łatwo transportować i rozłożyć."
+            "description": "Lekki kajak dmuchany, który łatwo transportować i rozłożyć.\n\n*Spakuj go do bagażnika i ruszaj nad wodę.*"
         },
         {
             "id": 29,
@@ -321,7 +321,7 @@
             "images": ["29-canoe.jpg"],
             "alt": "Kanadyjka dwuosobowa",
             "category": "Sprzęt wodny",
-            "description": "Stabilna kanadyjka dla dwóch osób na spokojne spływy."
+            "description": "Stabilna kanadyjka dla dwóch osób na spokojne spływy.\n\n**Płynna i wygodna podczas wspólnej wyprawy.**"
         },
         {
             "id": 30,
@@ -331,7 +331,7 @@
             "images": ["30-kayak-paddle.jpg"],
             "alt": "Wiosło kajakowe",
             "category": "Sprzęt wodny",
-            "description": "Lekkie wiosło do kajaka na rekreacyjne pływanie."
+            "description": "Lekkie wiosło do kajaka na rekreacyjne pływanie.\n\n<u>Dobry chwyt i wygodne manewrowanie.</u>"
         },
         {
             "id": 31,
@@ -341,7 +341,7 @@
             "images": ["31-climbing-rope.jpg"],
             "alt": "Lina wspinaczkowa",
             "category": "Via ferraty i wspinanie",
-            "description": "60-metrowa lina do wspinaczki sportowej i asekuracji."
+            "description": "### Lina wspinaczkowa\n\n60-metrowa lina do wspinaczki sportowej i asekuracji.\n\n*Przed użyciem sprawdź jej stan.*"
         },
         {
             "id": 32,
@@ -351,7 +351,7 @@
             "images": ["32-carabiner-set.jpg"],
             "alt": "Zestaw karabinków wspinaczkowych",
             "category": "Via ferraty i wspinanie",
-            "description": "Zestaw karabinków do asekuracji i pracy z liną."
+            "description": "Zestaw karabinków do asekuracji i pracy z liną.\n\n- szybkie wpinanie\n- solidne zamki\n- poręczny komplet"
         },
         {
             "id": 33,
@@ -361,7 +361,7 @@
             "images": ["33-climbing-shoes.jpg"],
             "alt": "Buty wspinaczkowe",
             "category": "Via ferraty i wspinanie",
-            "description": "Precyzyjne buty wspinaczkowe zapewniające dobrą przyczepność na ścianie.",
+            "description": "Precyzyjne buty wspinaczkowe zapewniające dobrą przyczepność na ścianie.\n\n**Pewny krok na każdym stopniu.**",
             "sizes": [
             { "size": "37", "description": "orientacyjna długość stopy 23,5 cm" },
             { "size": "38", "description": "orientacyjna długość stopy 24 cm" },
@@ -381,7 +381,7 @@
             "images": ["34-hiking-carrier.jpg"],
             "alt": "Nosidełko turystyczne premium",
             "category": "Nosidełka turystyczne",
-            "description": "Wygodne nosidełko premium z lepszym wsparciem na dłuższe wycieczki."
+            "description": "Wygodne nosidełko premium z lepszym wsparciem na dłuższe wycieczki.\n\n## Komfort premium\n\n<u>Dla wymagających rodzin.</u>"
         },
         {
             "id": 35,
@@ -391,7 +391,7 @@
             "images": ["35-rain-cover-carrier.jpg"],
             "alt": "Nosidełko z osłoną przeciwdeszczową",
             "category": "Nosidełka turystyczne",
-            "description": "Nosidełko z osłoną chroniącą dziecko przed deszczem i wiatrem."
+            "description": "Nosidełko z osłoną chroniącą dziecko przed deszczem i wiatrem.\n\n*Pogoda nie musi kończyć spaceru.*"
         },
         {
             "id": 36,
@@ -401,7 +401,7 @@
             "images": ["36-tunnel-tent.jpg"],
             "alt": "Namiot tunelowy",
             "category": "Namioty",
-            "description": "Przestronny namiot tunelowy z dobrym wykorzystaniem miejsca."
+            "description": "Przestronny namiot tunelowy z dobrym wykorzystaniem miejsca.\n\n- duża sypialnia\n- funkcjonalny przedsionek"
         },
         {
             "id": 37,
@@ -411,7 +411,7 @@
             "images": ["37-pop-up-tent.jpg"],
             "alt": "Namiot samorozkładający",
             "category": "Namioty",
-            "description": "Szybkorozkładany namiot na spontaniczne wyjazdy i krótkie biwaki."
+            "description": "Szybkorozkładany namiot na spontaniczne wyjazdy i krótkie biwaki.\n\n**Rozstawienie zajmuje tylko chwilę.**"
         },
         {
             "id": 38,
@@ -421,7 +421,7 @@
             "images": ["38-expedition-tent.jpg"],
             "alt": "Namiot ekspedycyjny",
             "category": "Namioty",
-            "description": "Wytrzymały namiot ekspedycyjny na wymagające warunki i dłuższe wyprawy."
+            "description": "## Namiot ekspedycyjny\n\nWytrzymały namiot ekspedycyjny na wymagające warunki i dłuższe wyprawy.\n\n<u>Gotowy na trudniejsze wyzwania.</u>"
         },
         {
             "id": 39,
@@ -431,7 +431,7 @@
             "images": ["39-bike-repair-kit.jpg"],
             "alt": "Zestaw naprawczy do roweru",
             "category": "Rowery i akcesoria",
-            "description": "Poręczny zestaw do drobnych napraw i regulacji roweru w trasie."
+            "description": "Poręczny zestaw do drobnych napraw i regulacji roweru w trasie.\n\n1. Zlokalizuj usterkę.\n2. Wybierz właściwe narzędzie.\n3. Wróć na trasę."
         },
         {
             "id": 40,
@@ -441,7 +441,7 @@
             "images": ["40-waterproof-bag.jpg"],
             "alt": "Wodoodporny worek transportowy",
             "category": "Sprzęt wodny",
-            "description": "Worek chroniący rzeczy przed wodą, deszczem i zabrudzeniem."
+            "description": "Worek chroniący rzeczy przed wodą, deszczem i zabrudzeniem.\n\n**Suchy bagaż podczas każdej wyprawy.**"
         }
     ]
 }
