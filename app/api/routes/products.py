@@ -1,8 +1,13 @@
 import json
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 
-from app.schemas.product import ProductAvailabilityResponse, ProductResponse
+from app.schemas.product import (
+    ProductAvailabilityResponse,
+    ProductRequest,
+    ProductResponse,
+)
 
 router = APIRouter(prefix="/product", tags=["product"])
 
@@ -13,15 +18,33 @@ with open(products_file_path, encoding="utf-8") as f:
 
 
 @router.get("", response_model=list[ProductResponse])
-async def get_products(filter: str = None, page: int = 1, page_size: int = 10):
-    filtered_products = products
+async def get_products(request: Annotated[ProductRequest, Query()]):
+    sort = request.filter.sort if request.filter else None
+    order = request.filter.order if request.filter else None
+    min_price = request.filter.minPrice if request.filter else None
+    max_price = request.filter.maxPrice if request.filter else None
+    categories = request.filter.category if request.filter else None
 
-    if filter:
-        filtered_products = [
-            product
-            for product in filtered_products
-            if filter.lower() in product.get("name", "").lower()
-        ]
+    filtered_products = [
+        product
+        for product in products
+        if (min_price is None or product.get("price", 0) >= min_price)
+        and (max_price is None or product.get("price", 0) <= max_price)
+        and (not categories or product.get("category") in categories)
+    ]
+
+    if sort and order:
+        if sort == "price":
+            filtered_products.sort(
+                key=lambda x: x.get("price", 0), reverse=(order == "desc")
+            )
+        elif sort == "name":
+            filtered_products.sort(
+                key=lambda x: x.get("name", "").lower(), reverse=(order == "desc")
+            )
+
+    page = request.page or 1
+    page_size = request.pageSize or 10
 
     start_index = (page - 1) * page_size
     end_index = start_index + page_size
