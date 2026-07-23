@@ -2,7 +2,7 @@ import json
 
 from fastapi import APIRouter, HTTPException
 
-from app.api.routes.products import products_file_path
+from app.api.routes.product import products_file_path
 from app.schemas.user import (
     OrderDetailResponse,
     OrderItemDetailsResponse,

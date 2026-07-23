@@ -3,7 +3,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import auth, health, loyalty, products, users
+from app.api.routes import auth, health, loyalty, product, user
 
 app = FastAPI()
 
@@ -24,5 +24,5 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(health.router)
 app.include_router(loyalty.router)
-app.include_router(products.router)
-app.include_router(users.router)
+app.include_router(product.router)
+app.include_router(user.router)
