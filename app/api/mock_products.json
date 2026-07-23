@@ -10,9 +10,9 @@
             "category": "Rowery i akcesoria",
             "description": "Lekki rower do szybkiej jazdy po asfalcie i dłuższych trasach.",
             "sizes": [
-            { "size": "S", "description": "wzrost 160-170 cm", "available": true },
-            { "size": "M", "description": "wzrost 170-180 cm", "available": false },
-            { "size": "L", "description": "wzrost 180-190 cm", "available": true }
+            { "size": "S", "description": "wzrost 160-170 cm" },
+            { "size": "M", "description": "wzrost 170-180 cm" },
+            { "size": "L", "description": "wzrost 180-190 cm" }
             ]
         },
         {
@@ -25,9 +25,9 @@
             "category": "Rowery i akcesoria",
             "description": "Solidny rower terenowy na szlaki, leśne drogi i nierówne podłoże.",
             "sizes": [
-            { "size": "S", "description": "wzrost 160-170 cm", "available": true },
-            { "size": "M", "description": "wzrost 170-180 cm", "available": true },
-            { "size": "L", "description": "wzrost 180-190 cm", "available": false }
+            { "size": "S", "description": "wzrost 160-170 cm" },
+            { "size": "M", "description": "wzrost 170-180 cm" },
+            { "size": "L", "description": "wzrost 180-190 cm" }
             ]
         },
         {
@@ -40,8 +40,8 @@
             "category": "Rowery i akcesoria",
             "description": "Lekki kask zapewniający wygodę i ochronę podczas jazdy rowerem.",
             "sizes": [
-            { "size": "S/M", "description": "obwód głowy 54-58 cm", "available": true },
-            { "size": "L/XL", "description": "obwód głowy 58-62 cm", "available": false }
+            { "size": "S/M", "description": "obwód głowy 54-58 cm" },
+            { "size": "L/XL", "description": "obwód głowy 58-62 cm" }
             ]
         },
         {
@@ -154,9 +154,9 @@
             "category": "Via ferraty i wspinanie",
             "description": "Regulowana uprząż do wspinaczki i przejść po via ferratach.",
             "sizes": [
-            { "size": "S", "description": "obwód talii 65-75 cm", "available": false },
-            { "size": "M", "description": "obwód talii 75-85 cm", "available": true },
-            { "size": "L", "description": "obwód talii 85-95 cm", "available": true }
+            { "size": "S", "description": "obwód talii 65-75 cm" },
+            { "size": "M", "description": "obwód talii 75-85 cm" },
+            { "size": "L", "description": "obwód talii 85-95 cm" }
             ]
         },
         {
@@ -169,8 +169,8 @@
             "category": "Via ferraty i wspinanie",
             "description": "Wytrzymały kask chroniący głowę podczas wspinaczki i trekkingu.",
             "sizes": [
-            { "size": "S/M", "description": "obwód głowy 54-58 cm", "available": true },
-            { "size": "L/XL", "description": "obwód głowy 58-62 cm", "available": true }
+            { "size": "S/M", "description": "obwód głowy 54-58 cm" },
+            { "size": "L/XL", "description": "obwód głowy 58-62 cm" }
             ]
         },
         {
@@ -233,9 +233,9 @@
             "category": "Rowery i akcesoria",
             "description": "Wygodny rower do codziennej jazdy po mieście i ścieżkach rowerowych.",
             "sizes": [
-            { "size": "S", "description": "wzrost 160-170 cm", "available": true },
-            { "size": "M", "description": "wzrost 170-180 cm", "available": true },
-            { "size": "L", "description": "wzrost 180-190 cm", "available": true }
+            { "size": "S", "description": "wzrost 160-170 cm" },
+            { "size": "M", "description": "wzrost 170-180 cm" },
+            { "size": "L", "description": "wzrost 180-190 cm" }
             ]
         },
         {
@@ -248,9 +248,9 @@
             "category": "Rowery i akcesoria",
             "description": "E-rower z wspomaganiem, idealny na dłuższe trasy i codzienne dojazdy.",
             "sizes": [
-            { "size": "S", "description": "wzrost 160-170 cm", "available": false },
-            { "size": "M", "description": "wzrost 170-180 cm", "available": true },
-            { "size": "L", "description": "wzrost 180-190 cm", "available": true }
+            { "size": "S", "description": "wzrost 160-170 cm" },
+            { "size": "M", "description": "wzrost 170-180 cm" },
+            { "size": "L", "description": "wzrost 180-190 cm" }
             ]
         },
         {
@@ -363,14 +363,14 @@
             "category": "Via ferraty i wspinanie",
             "description": "Precyzyjne buty wspinaczkowe zapewniające dobrą przyczepność na ścianie.",
             "sizes": [
-            { "size": "37", "description": "orientacyjna długość stopy 23,5 cm", "available": true },
-            { "size": "38", "description": "orientacyjna długość stopy 24 cm", "available": false },
-            { "size": "39", "description": "orientacyjna długość stopy 24,5 cm", "available": true },
-            { "size": "40", "description": "orientacyjna długość stopy 25 cm", "available": true },
-            { "size": "41", "description": "orientacyjna długość stopy 25,5 cm", "available": true },
-            { "size": "42", "description": "orientacyjna długość stopy 26,5 cm", "available": false },
-            { "size": "43", "description": "orientacyjna długość stopy 27 cm", "available": true },
-            { "size": "44", "description": "orientacyjna długość stopy 28 cm", "available": true }
+            { "size": "37", "description": "orientacyjna długość stopy 23,5 cm" },
+            { "size": "38", "description": "orientacyjna długość stopy 24 cm" },
+            { "size": "39", "description": "orientacyjna długość stopy 24,5 cm" },
+            { "size": "40", "description": "orientacyjna długość stopy 25 cm" },
+            { "size": "41", "description": "orientacyjna długość stopy 25,5 cm" },
+            { "size": "42", "description": "orientacyjna długość stopy 26,5 cm" },
+            { "size": "43", "description": "orientacyjna długość stopy 27 cm" },
+            { "size": "44", "description": "orientacyjna długość stopy 28 cm" }
             ]
         },
         {
