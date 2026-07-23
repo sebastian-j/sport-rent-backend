@@ -1,0 +1,32 @@
+{"addresses": [
+    {
+        "id": 1,
+        "first_name": "Jan",
+        "last_name": "Kowalski",
+        "first_line": "ul. Przykładowa 123",
+        "second_line": "",
+        "city": "Warszawa",
+        "postal_code": "00-001",
+        "country": "Polska"
+    },
+    {
+        "id": 2,
+        "first_name": "Anna",
+        "last_name": "Nowak",
+        "first_line": "ul. Testowa 456",
+        "second_line": "Mieszkanie 12",
+        "city": "Kraków",
+        "postal_code": "30-002",
+        "country": "Polska"
+    },
+    {
+        "id": 3,
+        "first_name": "Piotr",
+        "last_name": "Wisniewski",
+        "first_line": "ul. Przykładowa 789",
+        "second_line": "",
+        "city": "Gdańsk",
+        "postal_code": "80-003",
+        "country": "Polska"
+    }
+]}

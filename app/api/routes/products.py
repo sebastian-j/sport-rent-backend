@@ -1,11 +1,15 @@
 import json
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException
-from fastapi.encoders import jsonable_encoder
+from fastapi import APIRouter, HTTPException, Query
 
-PAGE_SIZE = 10
+from app.schemas.product import (
+    ProductAvailabilityResponse,
+    ProductRequest,
+    ProductResponse,
+)
 
-router = APIRouter(prefix="/product", tags=["products"])
+router = APIRouter(prefix="/product", tags=["product"])
 
 products_file_path = "app/api/mock_products.json"
 
@@ -13,34 +17,55 @@ with open(products_file_path, encoding="utf-8") as f:
     products = json.load(f)["products"]
 
 
-@router.get("/")
-async def get_products(filter: str = None, page: int = 1):
-    if filter:
-        products_list = jsonable_encoder(
-            [
-                product
-                for product in products
-                if filter.lower() in product["name"].lower()
-            ]
-        )
-    if page:
-        start_index = (page - 1) * PAGE_SIZE
-        end_index = start_index + PAGE_SIZE
-        products_list = jsonable_encoder(products[start_index:end_index])
-    return products_list
+@router.get("", response_model=list[ProductResponse])
+async def get_products(request: Annotated[ProductRequest, Query()]):
+    sort = request.filter.sort if request.filter else None
+    order = request.filter.order if request.filter else None
+    min_price = request.filter.minPrice if request.filter else None
+    max_price = request.filter.maxPrice if request.filter else None
+    categories = request.filter.category if request.filter else None
+
+    filtered_products = [
+        product
+        for product in products
+        if (min_price is None or product.get("price", 0) >= min_price)
+        and (max_price is None or product.get("price", 0) <= max_price)
+        and (not categories or product.get("category") in categories)
+    ]
+
+    if sort and order:
+        if sort == "price":
+            filtered_products.sort(
+                key=lambda x: x.get("price", 0), reverse=(order == "desc")
+            )
+        elif sort == "name":
+            filtered_products.sort(
+                key=lambda x: x.get("name", "").lower(), reverse=(order == "desc")
+            )
+
+    page = request.page or 1
+    page_size = request.pageSize or 10
+
+    start_index = (page - 1) * page_size
+    end_index = start_index + page_size
+
+    paginated_products = filtered_products[start_index:end_index]
+
+    return paginated_products
 
 
-@router.get("/{product_slug}")
+@router.get("/{product_slug}", response_model=ProductResponse)
 async def get_product(product_slug: str):
     product = next(
-        (product for product in products if product["slug"] == product_slug), None
+        (product for product in products if product.get("slug") == product_slug), None
     )
+
     if product:
-        return jsonable_encoder(product)
+        return product
+
     raise HTTPException(status_code=404, detail="Product not found")
 
 
-@router.get("/{product_slug}/availability")
+@router.get("/{product_slug}/availability", response_model=ProductAvailabilityResponse)
 async def get_product_availability(product_slug: str, start_date: str, end_date: str):
-    # TODO: Implement logic to check product availability
-    return {"available": True}
+    return ProductAvailabilityResponse(available=True)
