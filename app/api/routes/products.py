@@ -4,8 +4,6 @@ from fastapi import APIRouter, HTTPException
 
 from app.schemas.product import ProductAvailabilityResponse, ProductResponse
 
-PAGE_SIZE = 10
-
 router = APIRouter(prefix="/product", tags=["product"])
 
 products_file_path = "app/api/mock_products.json"
@@ -14,8 +12,8 @@ with open(products_file_path, encoding="utf-8") as f:
     products = json.load(f)["products"]
 
 
-@router.get("/", response_model=list[ProductResponse])
-async def get_products(filter: str = None, page: int = 1):
+@router.get("", response_model=list[ProductResponse])
+async def get_products(filter: str = None, page: int = 1, page_size: int = 10):
     filtered_products = products
 
     if filter:
@@ -25,8 +23,8 @@ async def get_products(filter: str = None, page: int = 1):
             if filter.lower() in product.get("name", "").lower()
         ]
 
-    start_index = (page - 1) * PAGE_SIZE
-    end_index = start_index + PAGE_SIZE
+    start_index = (page - 1) * page_size
+    end_index = start_index + page_size
 
     paginated_products = filtered_products[start_index:end_index]
 

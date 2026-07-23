@@ -19,13 +19,13 @@ class UserHistoryItemResponse(BaseModel):
     id: int
     created_at: datetime
     status: str
-    payment_code: str
+    payment_code: str | None
     total: float
 
 
-class OrderItemDetailResponse(BaseModel):
+class OrderItemDetailsResponse(BaseModel):
     product_id: int
-    product_name: str | None
+    product_name: str
     image: str | None
     size: str | None
     quantity: int
@@ -39,5 +39,5 @@ class OrderDetailResponse(BaseModel):
     created_at: datetime
     status: str
     total: float
-    discount: float
-    items: list[OrderItemDetailResponse]
+    discount: float | None
+    items: list[OrderItemDetailsResponse]
