@@ -14,3 +14,12 @@ class LoginResponse(BaseModel):
 class LogoutRequest(BaseModel):
     access_token: str
     refresh_token: str
+
+
+class ResetPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
