@@ -1,10 +1,24 @@
 import datetime
 import uuid
 from dataclasses import dataclass
+from typing import Literal
 
 import jwt
 
 from app.core.config import settings
+
+TokenType = Literal["access", "refresh"]
+
+_REQUIRED_CLAIMS = [
+    "sub",
+    "sid",
+    "type",
+    "jti",
+    "iat",
+    "exp",
+    "iss",
+    "aud",
+]
 
 
 @dataclass(frozen=True, slots=True)
@@ -13,6 +27,79 @@ class IssuedToken:
     jti: uuid.UUID
     issued_at: datetime.datetime
     expires_at: datetime.datetime
+
+
+@dataclass(frozen=True, slots=True)
+class TokenClaims:
+    user_id: int
+    session_id: uuid.UUID
+    token_id: uuid.UUID
+    token_type: TokenType
+    issued_at: datetime.datetime
+    expires_at: datetime.datetime
+
+
+def _decode_token(
+    token: str,
+    *,
+    secret: str,
+    expected_type: TokenType,
+) -> TokenClaims:
+    payload = jwt.decode(
+        token,
+        secret,
+        algorithms=["HS256"],
+        audience=settings.jwt_audience,
+        issuer=settings.jwt_issuer,
+        options={"require": _REQUIRED_CLAIMS},
+    )
+
+    if payload["type"] != expected_type:
+        raise jwt.InvalidTokenError("Invalid token type")
+
+    try:
+        subject = payload["sub"]
+        session_id = payload["sid"]
+        token_id = payload["jti"]
+        issued_at_timestamp = payload["iat"]
+        expires_at_timestamp = payload["exp"]
+
+        if not all(isinstance(value, str) for value in (subject, session_id, token_id)):
+            raise ValueError
+
+        if (
+            type(issued_at_timestamp) is not int
+            or type(expires_at_timestamp) is not int
+        ):
+            raise ValueError
+
+        user_id = int(subject)
+
+        if user_id <= 0 or str(user_id) != subject:
+            raise ValueError
+
+        issued_at = datetime.datetime.fromtimestamp(
+            issued_at_timestamp,
+            datetime.UTC,
+        )
+        expires_at = datetime.datetime.fromtimestamp(
+            expires_at_timestamp,
+            datetime.UTC,
+        )
+
+        if expires_at <= issued_at:
+            raise ValueError
+
+        return TokenClaims(
+            user_id=user_id,
+            session_id=uuid.UUID(session_id),
+            token_id=uuid.UUID(token_id),
+            token_type=expected_type,
+            issued_at=issued_at,
+            expires_at=expires_at,
+        )
+    except KeyError, OSError, OverflowError, TypeError, ValueError:
+        raise jwt.InvalidTokenError("Invalid token claims") from None
 
 
 def create_access_token(
@@ -48,30 +135,12 @@ def create_access_token(
     )
 
 
-def decode_access_token(token: str) -> dict:
-    payload = jwt.decode(
+def decode_access_token(token: str) -> TokenClaims:
+    return _decode_token(
         token,
-        settings.jwt_access_secret,
-        algorithms=["HS256"],
-        audience=settings.jwt_audience,
-        issuer=settings.jwt_issuer,
-        options={
-            "require": [
-                "sub",
-                "sid",
-                "type",
-                "jti",
-                "iat",
-                "exp",
-                "iss",
-                "aud",
-            ]
-        },
+        secret=settings.jwt_access_secret,
+        expected_type="access",
     )
-    if payload["type"] != "access":
-        raise jwt.InvalidTokenError("Invalid token type")
-
-    return payload
 
 
 def encode_refresh_token(
@@ -122,27 +191,9 @@ def create_refresh_token(
     )
 
 
-def decode_refresh_token(token: str) -> dict:
-    payload = jwt.decode(
+def decode_refresh_token(token: str) -> TokenClaims:
+    return _decode_token(
         token,
-        settings.jwt_refresh_secret,
-        algorithms=["HS256"],
-        audience=settings.jwt_audience,
-        issuer=settings.jwt_issuer,
-        options={
-            "require": [
-                "sub",
-                "sid",
-                "type",
-                "jti",
-                "iat",
-                "exp",
-                "iss",
-                "aud",
-            ]
-        },
+        secret=settings.jwt_refresh_secret,
+        expected_type="refresh",
     )
-    if payload["type"] != "refresh":
-        raise jwt.InvalidTokenError("Invalid token type")
-
-    return payload

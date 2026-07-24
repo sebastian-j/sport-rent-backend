@@ -1,4 +1,3 @@
-import uuid
 from typing import Annotated
 
 import jwt
@@ -22,25 +21,7 @@ def get_current_user_id(
     token = credentials.credentials
 
     try:
-        payload = decode_access_token(token)
-
-        subject = payload["sub"]
-        session_id = payload["sid"]
-        token_id = payload["jti"]
-
-        if not all(isinstance(value, str) for value in (subject, session_id, token_id)):
-            raise ValueError("Invalid access token claims")
-
-        user_id = int(subject)
-
-        if user_id <= 0:
-            raise ValueError("Invalid user id")
-
-        # Checks if Uuids can be created
-        uuid.UUID(session_id)
-        uuid.UUID(token_id)
-
-        return user_id
-
-    except jwt.InvalidTokenError, KeyError, TypeError, ValueError:
+        claims = decode_access_token(token)
+        return claims.user_id
+    except jwt.InvalidTokenError:
         raise unauthorized("Invalid token", bearer_challenge=True) from None

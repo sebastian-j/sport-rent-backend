@@ -95,28 +95,28 @@ async def refresh(
         raise invalid_refresh_token()
 
     try:
-        payload = decode_refresh_token(refresh_token)
-        session_id = uuid.UUID(payload["sid"])
-        token_jti = uuid.UUID(payload["jti"])
-        user_id = int(payload["sub"])
-    except jwt.InvalidTokenError, KeyError, TypeError, ValueError:
+        claims = decode_refresh_token(refresh_token)
+    except jwt.InvalidTokenError:
         raise invalid_refresh_token() from None
 
     auth_session = await session.scalar(
-        select(AuthSession).where(AuthSession.id == session_id).with_for_update()
+        select(AuthSession).where(AuthSession.id == claims.session_id).with_for_update()
     )
     now = datetime.datetime.now(datetime.UTC)
 
     if (
         auth_session is None
-        or auth_session.user_id != user_id
+        or auth_session.user_id != claims.user_id
         or auth_session.revoked_at is not None
         or auth_session.expires_at <= now
     ):
         raise invalid_refresh_token()
 
-    if token_jti == auth_session.current_jti:
-        refresh_token_to_return = create_refresh_token(user_id, auth_session.id)
+    if claims.token_id == auth_session.current_jti:
+        refresh_token_to_return = create_refresh_token(
+            claims.user_id,
+            auth_session.id,
+        )
 
         auth_session.previous_jti = auth_session.current_jti
         auth_session.previous_valid_until = now + settings.refresh_token_grace_period
@@ -124,13 +124,13 @@ async def refresh(
         auth_session.current_issued_at = refresh_token_to_return.issued_at
         auth_session.expires_at = refresh_token_to_return.expires_at
     elif (
-        token_jti == auth_session.previous_jti
+        claims.token_id == auth_session.previous_jti
         and auth_session.previous_valid_until is not None
         and now <= auth_session.previous_valid_until
     ):
         refresh_token_to_return = encode_refresh_token(
-            user_id=user_id,
-            session_id=session_id,
+            user_id=claims.user_id,
+            session_id=claims.session_id,
             jti=auth_session.current_jti,
             issued_at=auth_session.current_issued_at,
             expires_at=auth_session.expires_at,
@@ -141,7 +141,7 @@ async def refresh(
 
         raise invalid_refresh_token()
 
-    access_token = create_access_token(user_id, auth_session.id)
+    access_token = create_access_token(claims.user_id, auth_session.id)
 
     await session.commit()
 
@@ -170,19 +170,17 @@ async def logout(
         return None
 
     try:
-        payload = decode_refresh_token(refresh_token)
-        session_id = uuid.UUID(payload["sid"])
-        user_id = int(payload["sub"])
-    except jwt.InvalidTokenError, KeyError, TypeError, ValueError:
+        claims = decode_refresh_token(refresh_token)
+    except jwt.InvalidTokenError:
         return None
 
     auth_session = await session.scalar(
-        select(AuthSession).where(AuthSession.id == session_id).with_for_update()
+        select(AuthSession).where(AuthSession.id == claims.session_id).with_for_update()
     )
 
     if (
         auth_session is not None
-        and auth_session.user_id == user_id
+        and auth_session.user_id == claims.user_id
         and auth_session.revoked_at is None
     ):
         auth_session.revoked_at = datetime.datetime.now(datetime.UTC)
