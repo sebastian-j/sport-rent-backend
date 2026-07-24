@@ -9,6 +9,8 @@ password_hash = PasswordHash.recommended()
 
 JWT_ACCESS_SECRET = os.environ["JWT_ACCESS_SECRET"]
 JWT_ACCESS_EXPIRATION = int(os.environ["JWT_ACCESS_EXPIRATION"])
+DUMMY_PASSWORD_HASH = password_hash.hash("dummy-password")
+
 
 if len(JWT_ACCESS_SECRET) < 32:
     raise ValueError("JWT_ACCESS_SECRET must be at least 32 characters long")

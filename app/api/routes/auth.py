@@ -4,6 +4,7 @@ from time import sleep
 from fastapi import APIRouter, HTTPException
 
 from app.core.security import (
+    DUMMY_PASSWORD_HASH,
     JWT_ACCESS_EXPIRATION,
     create_access_token,
     verify_password,
@@ -30,7 +31,10 @@ def login(request: LoginRequest):
     email = str(request.email).strip().casefold()
     user = next((user for user in users if user["email"] == email), None)
 
-    if user is None or not verify_password(request.password, user["password"]):
+    password_hash = user["password"] if user is not None else DUMMY_PASSWORD_HASH
+    password_is_valid = verify_password(request.password, password_hash)
+
+    if user is None or not password_is_valid:
         raise HTTPException(status_code=401, detail="Incorrect email or password")
 
     access_token = create_access_token(user["id"])
