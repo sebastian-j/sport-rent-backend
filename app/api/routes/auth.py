@@ -1,7 +1,13 @@
+import json
 from time import sleep
 
 from fastapi import APIRouter, HTTPException
 
+from app.core.security import (
+    JWT_ACCESS_EXPIRATION,
+    create_access_token,
+    verify_password,
+)
 from app.schemas.auth import (
     ChangePasswordRequest,
     LoginRequest,
@@ -12,19 +18,26 @@ from app.schemas.auth import (
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
+users_file_path = "app/api/mock_users.json"
+
+with open(users_file_path, encoding="utf-8") as f:
+    users = json.load(f)["users"]
+
 
 # TODO: MOCK
 @router.post("/login", response_model=LoginResponse)
 def login(request: LoginRequest):
-    if request.email.startswith("error"):
-        raise HTTPException(status_code=401, detail="Email or password is wrong")
+    email = str(request.email).strip().casefold()
+    user = next((user for user in users if user["email"] == email), None)
 
-    user_email = request.email
-    user_password = request.password
-    access_token = f"{user_email}_access_token"
-    refresh_token = f"{user_password}_refresh_token"
+    if user is None or not verify_password(request.password, user["password"]):
+        raise HTTPException(status_code=401, detail="Incorrect email or password")
 
-    return LoginResponse(access_token=access_token, refresh_token=refresh_token)
+    access_token = create_access_token(user["id"])
+
+    return LoginResponse(
+        access_token=access_token, token_type="bearer", expires_in=JWT_ACCESS_EXPIRATION
+    )
 
 
 # TODO: MOCK
