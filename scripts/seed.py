@@ -1,13 +1,11 @@
 import asyncio
-import os
 
 from sqlalchemy import select
 
+from app.core.config import settings
 from app.core.security import hash_password
 from app.db.session import async_session_factory, engine
 from app.models import User
-
-SEED_USER_PASSWORD = os.environ["SEED_USER_PASSWORD"]
 
 SEED_USERS = [
     "jan.kowalski@poczta.pl",
@@ -17,7 +15,7 @@ SEED_USERS = [
 
 
 async def seed_users() -> None:
-    seed_password = SEED_USER_PASSWORD
+    seed_password = settings.require_seed_user_password()
 
     async with async_session_factory.begin() as session:
         result = await session.scalars(
