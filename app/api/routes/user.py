@@ -9,12 +9,13 @@ from app.schemas.user import (
     UserHistoryItemResponse,
     UserResponse,
 )
+from app.services.image import get_image_as_base64
 
 router = APIRouter(prefix="/user", tags=["user"])
 
-users_file_path = "app/api/mock_users.json"
-address_file_path = "app/api/mock_addresses.json"
-history_file_path = "app/api/mock_history.json"
+users_file_path = "app/assets/mock_users.json"
+address_file_path = "app/assets/mock_addresses.json"
+history_file_path = "app/assets/mock_history.json"
 
 with open(users_file_path, encoding="utf-8") as f:
     users = json.load(f)["users"]
@@ -96,13 +97,15 @@ async def get_order_details(order_id: int):
                     (p["name"] for p in products if p["id"] == item["product_id"]),
                     None,
                 ),
-                image=next(
-                    (
-                        p["images"][0]
-                        for p in products
-                        if p["id"] == item["product_id"] and p.get("images")
-                    ),
-                    None,
+                image=get_image_as_base64(
+                    next(
+                        (
+                            p["images"][0]
+                            for p in products
+                            if p["id"] == item["product_id"] and p.get("images")
+                        ),
+                        None,
+                    )
                 ),
                 size=item.get("size"),
                 quantity=sum(
