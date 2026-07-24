@@ -5,7 +5,7 @@ import jwt
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from app.core.security import decode_access_token
+from app.core.tokens import decode_access_token
 
 bearer_scheme = HTTPBearer(auto_error=False)
 

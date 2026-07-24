@@ -10,13 +10,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.concurrency import run_in_threadpool
 
 from app.core.config import settings
-from app.core.security import (
-    DUMMY_PASSWORD_HASH,
+from app.core.passwords import DUMMY_PASSWORD_HASH, verify_password
+from app.core.tokens import (
     create_access_token,
     create_refresh_token,
     decode_refresh_token,
     encode_refresh_token,
-    verify_password,
 )
 from app.db.session import get_db_session
 from app.models import AuthSession, User
