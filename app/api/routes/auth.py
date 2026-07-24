@@ -179,9 +179,12 @@ async def refresh(
     )
 
 
-# TODO: MOCK
 @router.post("/logout", status_code=204)
-def logout(response: Response):
+async def logout(
+    response: Response,
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+    refresh_token: Annotated[str | None, Cookie()] = None,
+):
     response.delete_cookie(
         key="refresh_token",
         path="/auth",
@@ -189,6 +192,30 @@ def logout(response: Response):
         httponly=True,
         samesite="lax",
     )
+
+    if refresh_token is None:
+        return None
+
+    try:
+        payload = decode_refresh_token(refresh_token)
+        session_id = uuid.UUID(payload["sid"])
+        user_id = int(payload["sub"])
+    except jwt.InvalidTokenError, KeyError, TypeError, ValueError:
+        return None
+
+    auth_session = await session.scalar(
+        select(AuthSession).where(AuthSession.id == session_id).with_for_update()
+    )
+
+    if (
+        auth_session is not None
+        and auth_session.user_id == user_id
+        and auth_session.revoked_at is None
+    ):
+        auth_session.revoked_at = datetime.datetime.now(datetime.UTC)
+
+    await session.commit()
+
     return None
 
 
