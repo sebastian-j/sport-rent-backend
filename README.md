@@ -74,6 +74,7 @@ Interactive API documentation:
 │   │   │   ├── loyalty.py
 │   │   │   ├── billing_addresses.py
 │   │   │   └── favourites.py
+│   │   ├── auth_helpers.py
 │   │   └── dependencies.py
 │   ├── core/
 │   │   ├── config.py

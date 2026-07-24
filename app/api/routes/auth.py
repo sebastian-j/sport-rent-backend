@@ -4,11 +4,17 @@ from time import sleep
 from typing import Annotated
 
 import jwt
-from fastapi import APIRouter, Cookie, Depends, HTTPException, Response
+from fastapi import APIRouter, Cookie, Depends, Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.concurrency import run_in_threadpool
 
+from app.api.auth_helpers import (
+    delete_refresh_cookie,
+    invalid_refresh_token,
+    set_refresh_cookie,
+    unauthorized,
+)
 from app.core.config import settings
 from app.core.passwords import DUMMY_PASSWORD_HASH, verify_password
 from app.core.tokens import (
@@ -46,7 +52,7 @@ async def login(
     )
 
     if user is None or not password_is_valid:
-        raise HTTPException(status_code=401, detail="Incorrect email or password")
+        raise unauthorized("Incorrect email or password")
 
     session_id = uuid.uuid4()
     access_token = create_access_token(user.id, session_id)
@@ -66,14 +72,10 @@ async def login(
 
     await session.commit()
 
-    response.set_cookie(
-        key="refresh_token",
-        value=refresh_token.token,
+    set_refresh_cookie(
+        response,
+        token=refresh_token.token,
         max_age=settings.jwt_refresh_expiration,
-        httponly=True,
-        secure=settings.auth_cookie_secure,
-        samesite="lax",
-        path="/auth",
     )
 
     return AccessTokenResponse(
@@ -90,10 +92,7 @@ async def refresh(
     refresh_token: Annotated[str | None, Cookie()] = None,
 ):
     if refresh_token is None:
-        raise HTTPException(
-            status_code=401,
-            detail="Could not validate refresh token",
-        )
+        raise invalid_refresh_token()
 
     try:
         payload = decode_refresh_token(refresh_token)
@@ -101,9 +100,7 @@ async def refresh(
         token_jti = uuid.UUID(payload["jti"])
         user_id = int(payload["sub"])
     except jwt.InvalidTokenError, KeyError, TypeError, ValueError:
-        raise HTTPException(
-            status_code=401, detail="Could not validate refresh token"
-        ) from None
+        raise invalid_refresh_token() from None
 
     auth_session = await session.scalar(
         select(AuthSession).where(AuthSession.id == session_id).with_for_update()
@@ -116,10 +113,7 @@ async def refresh(
         or auth_session.revoked_at is not None
         or auth_session.expires_at <= now
     ):
-        raise HTTPException(
-            status_code=401,
-            detail="Could not validate refresh token",
-        )
+        raise invalid_refresh_token()
 
     if token_jti == auth_session.current_jti:
         refresh_token_to_return = create_refresh_token(user_id, auth_session.id)
@@ -145,23 +139,16 @@ async def refresh(
         auth_session.revoked_at = now
         await session.commit()
 
-        raise HTTPException(
-            status_code=401,
-            detail="Could not validate refresh token",
-        )
+        raise invalid_refresh_token()
 
     access_token = create_access_token(user_id, auth_session.id)
 
     await session.commit()
 
-    response.set_cookie(
-        key="refresh_token",
-        value=refresh_token_to_return.token,
+    set_refresh_cookie(
+        response,
+        token=refresh_token_to_return.token,
         max_age=max(0, int((refresh_token_to_return.expires_at - now).total_seconds())),
-        httponly=True,
-        secure=settings.auth_cookie_secure,
-        samesite="lax",
-        path="/auth",
     )
 
     return AccessTokenResponse(
@@ -177,13 +164,7 @@ async def logout(
     session: Annotated[AsyncSession, Depends(get_db_session)],
     refresh_token: Annotated[str | None, Cookie()] = None,
 ):
-    response.delete_cookie(
-        key="refresh_token",
-        path="/auth",
-        secure=settings.auth_cookie_secure,
-        httponly=True,
-        samesite="lax",
-    )
+    delete_refresh_cookie(response)
 
     if refresh_token is None:
         return None
