@@ -3,7 +3,7 @@ import asyncio
 from sqlalchemy import select
 
 from app.core.config import settings
-from app.core.security import hash_password
+from app.core.passwords import hash_password
 from app.db.session import async_session_factory, engine
 from app.models import User
 

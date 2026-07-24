@@ -3,21 +3,8 @@ import uuid
 from dataclasses import dataclass
 
 import jwt
-from pwdlib import PasswordHash
 
 from app.core.config import settings
-
-password_hash = PasswordHash.recommended()
-
-DUMMY_PASSWORD_HASH = password_hash.hash("dummy-password")
-
-
-def hash_password(password: str) -> str:
-    return password_hash.hash(password)
-
-
-def verify_password(password: str, hashed_password: str) -> bool:
-    return password_hash.verify(password, hashed_password)
 
 
 @dataclass(frozen=True, slots=True)
@@ -68,7 +55,18 @@ def decode_access_token(token: str) -> dict:
         algorithms=["HS256"],
         audience=settings.jwt_audience,
         issuer=settings.jwt_issuer,
-        options={"require": ["sub", "sid", "type", "jti", "iat", "exp", "iss", "aud"]},
+        options={
+            "require": [
+                "sub",
+                "sid",
+                "type",
+                "jti",
+                "iat",
+                "exp",
+                "iss",
+                "aud",
+            ]
+        },
     )
     if payload["type"] != "access":
         raise jwt.InvalidTokenError("Invalid token type")
@@ -131,7 +129,18 @@ def decode_refresh_token(token: str) -> dict:
         algorithms=["HS256"],
         audience=settings.jwt_audience,
         issuer=settings.jwt_issuer,
-        options={"require": ["sub", "sid", "type", "jti", "iat", "exp", "iss", "aud"]},
+        options={
+            "require": [
+                "sub",
+                "sid",
+                "type",
+                "jti",
+                "iat",
+                "exp",
+                "iss",
+                "aud",
+            ]
+        },
     )
     if payload["type"] != "refresh":
         raise jwt.InvalidTokenError("Invalid token type")
