@@ -19,7 +19,6 @@ from app.schemas.auth import (
     AccessTokenResponse,
     ChangePasswordRequest,
     LoginRequest,
-    LogoutRequest,
     ResetPasswordRequest,
 )
 
@@ -100,9 +99,16 @@ def refresh(refresh_token: Annotated[str | None, Cookie()] = None):
 
 
 # TODO: MOCK
-@router.post("/logout")
-def logout(request: LogoutRequest):
-    return
+@router.post("/logout", status_code=204)
+def logout(response: Response):
+    response.delete_cookie(
+        key="refresh_token",
+        path="/auth",
+        secure=AUTH_COOKIE_SECURE,
+        httponly=True,
+        samesite="lax",
+    )
+    return None
 
 
 # TODO: MOCK
