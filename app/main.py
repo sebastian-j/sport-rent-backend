@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from app.api.routes import auth, favorites, health, loyalty, product, user
+from app.api.routes import auth, cart, favorites, health, loyalty, product, user
 
 app = FastAPI()
 
@@ -25,6 +25,7 @@ app.add_middleware(
 app.mount("/assets", StaticFiles(directory="app/assets"), name="assets")
 
 app.include_router(auth.router)
+app.include_router(cart.router)
 app.include_router(favorites.router)
 app.include_router(health.router)
 app.include_router(loyalty.router)
