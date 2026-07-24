@@ -13,6 +13,7 @@ JWT_ACCESS_EXPIRATION = int(os.environ["JWT_ACCESS_EXPIRATION"])
 JWT_REFRESH_SECRET = os.environ["JWT_REFRESH_SECRET"]
 JWT_REFRESH_EXPIRATION = int(os.environ["JWT_REFRESH_EXPIRATION"])
 DUMMY_PASSWORD_HASH = password_hash.hash("dummy-password")
+REFRESH_TOKEN_GRACE_PERIOD = datetime.timedelta(seconds=5)
 
 
 if len(JWT_ACCESS_SECRET) < 32:
@@ -85,14 +86,13 @@ def decode_access_token(token: str) -> dict:
     return payload
 
 
-def create_refresh_token(
+def encode_refresh_token(
     user_id: int,
     session_id: uuid.UUID,
+    jti: uuid.UUID,
+    issued_at: datetime.datetime,
+    expires_at: datetime.datetime,
 ) -> IssuedToken:
-    issued_at = datetime.datetime.now(datetime.UTC).replace(microsecond=0)
-    expires_at = issued_at + datetime.timedelta(seconds=JWT_REFRESH_EXPIRATION)
-    jti = uuid.uuid4()
-
     payload = {
         "sub": str(user_id),
         "sid": str(session_id),
@@ -113,6 +113,22 @@ def create_refresh_token(
     return IssuedToken(
         token=token,
         jti=jti,
+        issued_at=issued_at,
+        expires_at=expires_at,
+    )
+
+
+def create_refresh_token(
+    user_id: int,
+    session_id: uuid.UUID,
+) -> IssuedToken:
+    issued_at = datetime.datetime.now(datetime.UTC).replace(microsecond=0)
+    expires_at = issued_at + datetime.timedelta(seconds=JWT_REFRESH_EXPIRATION)
+
+    return encode_refresh_token(
+        user_id=user_id,
+        session_id=session_id,
+        jti=uuid.uuid4(),
         issued_at=issued_at,
         expires_at=expires_at,
     )

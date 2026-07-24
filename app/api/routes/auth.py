@@ -1,4 +1,4 @@
-import json
+import datetime
 import os
 import uuid
 from time import sleep
@@ -14,9 +14,11 @@ from app.core.security import (
     DUMMY_PASSWORD_HASH,
     JWT_ACCESS_EXPIRATION,
     JWT_REFRESH_EXPIRATION,
+    REFRESH_TOKEN_GRACE_PERIOD,
     create_access_token,
     create_refresh_token,
     decode_refresh_token,
+    encode_refresh_token,
     verify_password,
 )
 from app.db.session import get_db_session
@@ -29,12 +31,6 @@ from app.schemas.auth import (
 )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
-
-users_file_path = "app/api/mock_users.json"
-
-with open(users_file_path, encoding="utf-8") as f:
-    users = json.load(f)["users"]
-
 
 AUTH_COOKIE_SECURE = (
     os.getenv("AUTH_COOKIE_SECURE", "true").strip().casefold() == "true"
@@ -96,7 +92,11 @@ async def login(
 
 
 @router.post("/refresh", response_model=AccessTokenResponse)
-def refresh(refresh_token: Annotated[str | None, Cookie()] = None):
+async def refresh(
+    response: Response,
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+    refresh_token: Annotated[str | None, Cookie()] = None,
+):
     if refresh_token is None:
         raise HTTPException(
             status_code=401,
@@ -105,29 +105,78 @@ def refresh(refresh_token: Annotated[str | None, Cookie()] = None):
 
     try:
         payload = decode_refresh_token(refresh_token)
-
         session_id = uuid.UUID(payload["sid"])
+        token_jti = uuid.UUID(payload["jti"])
         user_id = int(payload["sub"])
-
-        user = next((user for user in users if user["id"] == user_id), None)
-
-        if user is None:
-            raise HTTPException(
-                status_code=401, detail="Could not validate refresh token"
-            ) from None
-
-        access_token = create_access_token(user["id"], session_id)
-
-        return AccessTokenResponse(
-            access_token=access_token.token,
-            token_type="bearer",
-            expires_in=JWT_ACCESS_EXPIRATION,
-        )
-
     except jwt.InvalidTokenError, KeyError, TypeError, ValueError:
         raise HTTPException(
             status_code=401, detail="Could not validate refresh token"
         ) from None
+
+    auth_session = await session.scalar(
+        select(AuthSession).where(AuthSession.id == session_id).with_for_update()
+    )
+    now = datetime.datetime.now(datetime.UTC)
+
+    if (
+        auth_session is None
+        or auth_session.user_id != user_id
+        or auth_session.revoked_at is not None
+        or auth_session.expires_at <= now
+    ):
+        raise HTTPException(
+            status_code=401,
+            detail="Could not validate refresh token",
+        )
+
+    if token_jti == auth_session.current_jti:
+        refresh_token_to_return = create_refresh_token(user_id, auth_session.id)
+
+        auth_session.previous_jti = auth_session.current_jti
+        auth_session.previous_valid_until = now + REFRESH_TOKEN_GRACE_PERIOD
+        auth_session.current_jti = refresh_token_to_return.jti
+        auth_session.current_issued_at = refresh_token_to_return.issued_at
+        auth_session.expires_at = refresh_token_to_return.expires_at
+    elif (
+        token_jti == auth_session.previous_jti
+        and auth_session.previous_valid_until is not None
+        and now <= auth_session.previous_valid_until
+    ):
+        refresh_token_to_return = encode_refresh_token(
+            user_id=user_id,
+            session_id=session_id,
+            jti=auth_session.current_jti,
+            issued_at=auth_session.current_issued_at,
+            expires_at=auth_session.expires_at,
+        )
+    else:
+        auth_session.revoked_at = now
+        await session.commit()
+
+        raise HTTPException(
+            status_code=401,
+            detail="Could not validate refresh token",
+        )
+
+    access_token = create_access_token(user_id, auth_session.id)
+
+    await session.commit()
+
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token_to_return.token,
+        max_age=max(0, int((refresh_token_to_return.expires_at - now).total_seconds())),
+        httponly=True,
+        secure=AUTH_COOKIE_SECURE,
+        samesite="lax",
+        path="/auth",
+    )
+
+    return AccessTokenResponse(
+        access_token=access_token.token,
+        token_type="bearer",
+        expires_in=JWT_ACCESS_EXPIRATION,
+    )
 
 
 # TODO: MOCK
