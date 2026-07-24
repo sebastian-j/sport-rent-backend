@@ -3,6 +3,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 
+from app.api.auth_helpers import unauthorized
 from app.api.dependencies import get_current_user_id
 from app.api.routes.product import products_file_path
 from app.schemas.user import (
@@ -44,10 +45,9 @@ async def get_user(user_id: Annotated[int, Depends(get_current_user_id)]):
     user = next((user for user in users if user["id"] == user_id), None)
 
     if user is None:
-        raise HTTPException(
-            status_code=401,
-            detail="Could not validate credentials",
-            headers={"WWW-Authenticate": "Bearer"},
+        raise unauthorized(
+            "Could not validate credentials",
+            bearer_challenge=True,
         )
 
     user_response = UserResponse(
