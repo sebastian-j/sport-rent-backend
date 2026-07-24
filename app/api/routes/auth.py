@@ -1,12 +1,15 @@
 import json
+import os
 from time import sleep
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Response
 
 from app.core.security import (
     DUMMY_PASSWORD_HASH,
     JWT_ACCESS_EXPIRATION,
+    JWT_REFRESH_EXPIRATION,
     create_access_token,
+    create_refresh_token,
     verify_password,
 )
 from app.schemas.auth import (
@@ -25,9 +28,14 @@ with open(users_file_path, encoding="utf-8") as f:
     users = json.load(f)["users"]
 
 
+AUTH_COOKIE_SECURE = (
+    os.getenv("AUTH_COOKIE_SECURE", "true").strip().casefold() == "true"
+)
+
+
 # TODO: MOCK
 @router.post("/login", response_model=LoginResponse)
-def login(request: LoginRequest):
+def login(request: LoginRequest, response: Response):
     email = str(request.email).strip().casefold()
     user = next((user for user in users if user["email"] == email), None)
 
@@ -38,6 +46,17 @@ def login(request: LoginRequest):
         raise HTTPException(status_code=401, detail="Incorrect email or password")
 
     access_token = create_access_token(user["id"])
+    refresh_token = create_refresh_token(user["id"])
+
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        max_age=JWT_REFRESH_EXPIRATION,
+        httponly=True,
+        secure=AUTH_COOKIE_SECURE,
+        samesite="lax",
+        path="/auth",
+    )
 
     return LoginResponse(
         access_token=access_token, token_type="bearer", expires_in=JWT_ACCESS_EXPIRATION
