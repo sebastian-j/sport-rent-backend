@@ -8,10 +8,11 @@ from app.schemas.product import (
     ProductRequest,
     ProductResponse,
 )
+from app.services.image import convert_images_to_base64
 
 router = APIRouter(prefix="/product", tags=["product"])
 
-products_file_path = "app/api/mock_products.json"
+products_file_path = "app/assets/mock_products.json"
 
 with open(products_file_path, encoding="utf-8") as f:
     products = json.load(f)["products"]
@@ -51,7 +52,13 @@ async def get_products(request: Annotated[ProductRequest, Query()]):
 
     paginated_products = filtered_products[start_index:end_index]
 
-    return paginated_products
+    results = []
+    for p in paginated_products:
+        p_copy = dict(p)
+        p_copy["images"] = convert_images_to_base64(p_copy.get("images"))
+        results.append(p_copy)
+
+    return results
 
 
 @router.get("/{product_slug}", response_model=ProductResponse)
@@ -61,7 +68,9 @@ async def get_product(product_slug: str):
     )
 
     if product:
-        return product
+        p_copy = dict(product)
+        p_copy["images"] = convert_images_to_base64(p_copy.get("images"))
+        return p_copy
 
     raise HTTPException(status_code=404, detail="Product not found")
 

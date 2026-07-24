@@ -1,18 +1,29 @@
-{ "products": 
-    [
+{
+    "products": [
         {
             "id": 1,
             "name": "Rower szosowy",
             "slug": "rower-szosowy",
             "price": 89,
-            "images": ["01-road-bike.jpg"],
+            "images": [
+                "assets/products/pictures/01-road-bike.jpg"
+            ],
             "alt": "Rower szosowy",
             "category": "Rowery i akcesoria",
             "description": "# Rower szosowy\n\n## Szybkość i wygoda\n\nLekki rower stworzony do szybkiej jazdy po asfalcie oraz pokonywania dłuższych tras.\n\n### Najważniejsze cechy\n\nTen model jest **lekki i dynamiczny**, <u>regularnie serwisowany</u> oraz *wygodny nawet podczas wielogodzinnej jazdy*.\n\n- lekka aluminiowa rama\n- precyzyjna zmiana biegów\n- opony o niskich oporach toczenia\n- wygodna, sportowa pozycja\n\n### Jak wypożyczyć?\n\n1. Wybierz odpowiedni rozmiar roweru.\n2. Ustal termin wypożyczenia.\n3. Dodaj produkt do koszyka.\n4. Odbierz przygotowany sprzęt.\n\n## Dla kogo?\n\nŚwietny wybór zarówno na weekendową przejażdżkę, jak i intensywny trening.",
             "sizes": [
-            { "size": "S", "description": "wzrost 160-170 cm" },
-            { "size": "M", "description": "wzrost 170-180 cm" },
-            { "size": "L", "description": "wzrost 180-190 cm" }
+                {
+                    "size": "S",
+                    "description": "wzrost 160-170 cm"
+                },
+                {
+                    "size": "M",
+                    "description": "wzrost 170-180 cm"
+                },
+                {
+                    "size": "L",
+                    "description": "wzrost 180-190 cm"
+                }
             ]
         },
         {
@@ -20,14 +31,25 @@
             "name": "Rower górski MTB",
             "slug": "rower-gorski-mtb",
             "price": 99,
-            "images": ["02-mountain-bike.jpg"],
+            "images": [
+                "assets/products/pictures/02-mountain-bike.jpg"
+            ],
             "alt": "Rower górski MTB",
             "category": "Rowery i akcesoria",
             "description": "## Rower na szlak\n\nSolidny rower terenowy na **szlaki, leśne drogi i nierówne podłoże**.\n\n*Dobry wybór na aktywny dzień poza miastem.*",
             "sizes": [
-            { "size": "S", "description": "wzrost 160-170 cm" },
-            { "size": "M", "description": "wzrost 170-180 cm" },
-            { "size": "L", "description": "wzrost 180-190 cm" }
+                {
+                    "size": "S",
+                    "description": "wzrost 160-170 cm"
+                },
+                {
+                    "size": "M",
+                    "description": "wzrost 170-180 cm"
+                },
+                {
+                    "size": "L",
+                    "description": "wzrost 180-190 cm"
+                }
             ]
         },
         {
@@ -35,13 +57,21 @@
             "name": "Kask rowerowy",
             "slug": "kask-rowerowy",
             "price": 25,
-            "images": ["03-bike-helmet.jpg"],
+            "images": [
+                "assets/products/pictures/03-bike-helmet.jpg"
+            ],
             "alt": "Kask rowerowy",
             "category": "Rowery i akcesoria",
             "description": "Lekki kask zapewniający wygodę i ochronę podczas jazdy rowerem.\n\n> Bezpieczeństwo podczas każdej przejażdżki.",
             "sizes": [
-            { "size": "S/M", "description": "obwód głowy 54-58 cm" },
-            { "size": "L/XL", "description": "obwód głowy 58-62 cm" }
+                {
+                    "size": "S/M",
+                    "description": "obwód głowy 54-58 cm"
+                },
+                {
+                    "size": "L/XL",
+                    "description": "obwód głowy 58-62 cm"
+                }
             ]
         },
         {
@@ -49,7 +79,9 @@
             "name": "Przyczepka rowerowa dla dzieci",
             "slug": "przyczepka-rowerowa-dla-dzieci",
             "price": 65,
-            "images": ["04-child-bike-trailer.jpg"],
+            "images": [
+                "assets/products/pictures/04-child-bike-trailer.jpg"
+            ],
             "alt": "Przyczepka rowerowa dla dzieci",
             "category": "Przyczepki rowerowe",
             "description": "Bezpieczna przyczepka dla najmłodszych pasażerów na rodzinne wyjazdy.\n\n- wygodne siedzisko\n- stabilna konstrukcja"
@@ -59,7 +91,9 @@
             "name": "Przyczepka rowerowa bagażowa",
             "slug": "przyczepka-rowerowa-bagazowa",
             "price": 49,
-            "images": ["05-cargo-bike-trailer.jpg"],
+            "images": [
+                "assets/products/pictures/05-cargo-bike-trailer.jpg"
+            ],
             "alt": "Przyczepka rowerowa bagażowa",
             "category": "Przyczepki rowerowe",
             "description": "### Przyczepka bagażowa\n\nPraktyczna przyczepka do przewozu **bagażu, zakupów i sprzętu**.\n\n1. Załaduj bagaż.\n2. Podepnij przyczepkę.\n3. Ruszaj w drogę."
@@ -69,7 +103,9 @@
             "name": "Przyczepka rowerowa dla psa",
             "slug": "przyczepka-rowerowa-dla-psa",
             "price": 55,
-            "images": ["06-dog-bike-trailer.jpg"],
+            "images": [
+                "assets/products/pictures/06-dog-bike-trailer.jpg"
+            ],
             "alt": "Przyczepka rowerowa dla psa",
             "category": "Przyczepki rowerowe",
             "description": "Wygodna przyczepka dla psa na wspólne przejażdżki i dłuższe trasy. *Twój pupil podróżuje komfortowo.*"
@@ -79,7 +115,9 @@
             "name": "Namiot dwuosobowy",
             "slug": "namiot-dwuosobowy",
             "price": 45,
-            "images": ["07-two-person-tent.jpg"],
+            "images": [
+                "assets/products/pictures/07-two-person-tent.jpg"
+            ],
             "alt": "Namiot dwuosobowy",
             "category": "Namioty osobowe",
             "description": "# Namiot dwuosobowy\n\nLekki namiot dla 2 osób, dobry na weekendowe wypady i biwaki.\n\n<u>Szybki do rozstawienia</u> i łatwy do spakowania."
@@ -89,7 +127,9 @@
             "name": "Namiot trzyosobowy",
             "slug": "namiot-trzyosobowy",
             "price": 59,
-            "images": ["08-three-person-tent.jpg"],
+            "images": [
+                "assets/products/pictures/08-three-person-tent.jpg"
+            ],
             "alt": "Namiot trzyosobowy",
             "category": "Namioty osobowe",
             "description": "Praktyczny namiot dla 3 osób z **szybkim rozstawianiem**.\n\n> Więcej czasu na odpoczynek, mniej na przygotowania."
@@ -99,7 +139,9 @@
             "name": "Namiot czteroosobowy",
             "slug": "namiot-czteroosobowy",
             "price": 75,
-            "images": ["09-four-person-tent.jpg"],
+            "images": [
+                "assets/products/pictures/09-four-person-tent.jpg"
+            ],
             "alt": "Namiot czteroosobowy",
             "category": "Namioty osobowe",
             "description": "## Rodzinny biwak\n\nPrzestronny namiot dla 4 osób na rodzinne wyjazdy.\n\n- miejsce dla całej rodziny\n- wygodny nocleg\n- przestrzeń na bagaż"
@@ -109,7 +151,9 @@
             "name": "Deska SUP",
             "slug": "deska-sup",
             "price": 79,
-            "images": ["10-sup-board.jpg"],
+            "images": [
+                "assets/products/pictures/10-sup-board.jpg"
+            ],
             "alt": "Deska SUP",
             "category": "Sprzęt wodny",
             "description": "Stabilna deska SUP do rekreacyjnego pływania po jeziorach i zatoce. *Idealna na spokojny poranek nad wodą.*"
@@ -119,7 +163,9 @@
             "name": "Kajak dwuosobowy",
             "slug": "kajak-dwuosobowy",
             "price": 119,
-            "images": ["11-two-person-kayak.jpg"],
+            "images": [
+                "assets/products/pictures/11-two-person-kayak.jpg"
+            ],
             "alt": "Kajak dwuosobowy",
             "category": "Sprzęt wodny",
             "description": "### Kajak dla dwojga\n\nWygodny kajak dla dwóch osób na spokojne spływy i wycieczki.\n\n**Wspólna przygoda zaczyna się na wodzie.**"
@@ -129,7 +175,9 @@
             "name": "Kamizelka asekuracyjna",
             "slug": "kamizelka-asekuracyjna",
             "price": 20,
-            "images": ["12-life-jacket.jpg"],
+            "images": [
+                "assets/products/pictures/12-life-jacket.jpg"
+            ],
             "alt": "Kamizelka asekuracyjna",
             "category": "Sprzęt wodny",
             "description": "Kamizelka zwiększająca bezpieczeństwo podczas pływania i sportów wodnych.\n\n<u>Załóż ją przed wejściem do wody.</u>"
@@ -139,7 +187,9 @@
             "name": "Zestaw via ferrata",
             "slug": "zestaw-via-ferrata",
             "price": 49,
-            "images": ["13-via-ferrata-set.jpg"],
+            "images": [
+                "assets/products/pictures/13-via-ferrata-set.jpg"
+            ],
             "alt": "Zestaw via ferrata",
             "category": "Via ferraty i wspinanie",
             "description": "## Via ferrata\n\nKompletny zestaw do bezpiecznego poruszania się po via ferratach.\n\n- lonże asekuracyjne\n- amortyzator\n- wygodne karabinki"
@@ -149,14 +199,25 @@
             "name": "Uprząż wspinaczkowa",
             "slug": "uprzaz-wspinaczkowa",
             "price": 35,
-            "images": ["14-climbing-harness.jpg"],
+            "images": [
+                "assets/products/pictures/14-climbing-harness.jpg"
+            ],
             "alt": "Uprząż wspinaczkowa",
             "category": "Via ferraty i wspinanie",
             "description": "Regulowana uprząż do wspinaczki i przejść po via ferratach.\n\n*Dopasuj ją przed rozpoczęciem trasy.*",
             "sizes": [
-            { "size": "S", "description": "obwód talii 65-75 cm" },
-            { "size": "M", "description": "obwód talii 75-85 cm" },
-            { "size": "L", "description": "obwód talii 85-95 cm" }
+                {
+                    "size": "S",
+                    "description": "obwód talii 65-75 cm"
+                },
+                {
+                    "size": "M",
+                    "description": "obwód talii 75-85 cm"
+                },
+                {
+                    "size": "L",
+                    "description": "obwód talii 85-95 cm"
+                }
             ]
         },
         {
@@ -164,13 +225,21 @@
             "name": "Kask wspinaczkowy",
             "slug": "kask-wspinaczkowy",
             "price": 29,
-            "images": ["15-climbing-helmet.jpg"],
+            "images": [
+                "assets/products/pictures/15-climbing-helmet.jpg"
+            ],
             "alt": "Kask wspinaczkowy",
             "category": "Via ferraty i wspinanie",
             "description": "Wytrzymały kask chroniący głowę podczas wspinaczki i trekkingu.\n\n**Ochrona, której możesz zaufać.**",
             "sizes": [
-            { "size": "S/M", "description": "obwód głowy 54-58 cm" },
-            { "size": "L/XL", "description": "obwód głowy 58-62 cm" }
+                {
+                    "size": "S/M",
+                    "description": "obwód głowy 54-58 cm"
+                },
+                {
+                    "size": "L/XL",
+                    "description": "obwód głowy 58-62 cm"
+                }
             ]
         },
         {
@@ -178,7 +247,9 @@
             "name": "Nosidełko turystyczne dla dziecka",
             "slug": "nosidelko-turystyczne-dla-dziecka",
             "price": 69,
-            "images": ["16-child-carrier.jpg"],
+            "images": [
+                "assets/products/pictures/16-child-carrier.jpg"
+            ],
             "alt": "Nosidełko turystyczne dla dziecka",
             "category": "Nosidełka turystyczne",
             "description": "Stabilne nosidełko dla dziecka na wygodne spacery i górskie trasy.\n\n- regulowane pasy\n- miękkie podparcie\n- kieszeń na drobiazgi"
@@ -188,7 +259,9 @@
             "name": "Lekkie nosidełko turystyczne",
             "slug": "lekkie-nosidelko-turystyczne",
             "price": 55,
-            "images": ["17-light-child-carrier.jpg"],
+            "images": [
+                "assets/products/pictures/17-light-child-carrier.jpg"
+            ],
             "alt": "Lekkie nosidełko turystyczne",
             "category": "Nosidełka turystyczne",
             "description": "Lżejsza wersja nosidełka na krótsze wycieczki i codzienne spacery.\n\n*Komfort dla rodzica i dziecka.*"
@@ -198,7 +271,9 @@
             "name": "Namiot rodzinny",
             "slug": "namiot-rodzinny",
             "price": 109,
-            "images": ["18-family-tent.jpg"],
+            "images": [
+                "assets/products/pictures/18-family-tent.jpg"
+            ],
             "alt": "Namiot rodzinny",
             "category": "Namioty",
             "description": "### Namiot rodzinny\n\nDuży namiot dla rodziny z miejscem na bagaż i wygodny nocleg.\n\n<u>Przestrzeń na wspólne wieczory.</u>"
@@ -208,7 +283,9 @@
             "name": "Namiot kempingowy",
             "slug": "namiot-kempingowy",
             "price": 85,
-            "images": ["19-camping-tent.jpg"],
+            "images": [
+                "assets/products/pictures/19-camping-tent.jpg"
+            ],
             "alt": "Namiot kempingowy",
             "category": "Namioty",
             "description": "Uniwersalny namiot na biwak, kemping i krótsze wypady.\n\nSprawdzi się podczas:\n\n- biwaku\n- kempingu\n- weekendowej wycieczki"
@@ -218,7 +295,9 @@
             "name": "Namiot dachowy",
             "slug": "namiot-dachowy",
             "price": 179,
-            "images": ["20-rooftop-tent.jpg"],
+            "images": [
+                "assets/products/pictures/20-rooftop-tent.jpg"
+            ],
             "alt": "Namiot dachowy",
             "category": "Namioty",
             "description": "## Nocleg w podróży\n\nNamiot dachowy montowany na aucie, wygodny w podróży.\n\n*Rozbij obóz niemal wszędzie.*"
@@ -228,14 +307,25 @@
             "name": "Rower miejski",
             "slug": "rower-miejski",
             "price": 69,
-            "images": ["21-city-bike.jpg"],
+            "images": [
+                "assets/products/pictures/21-city-bike.jpg"
+            ],
             "alt": "Rower miejski",
             "category": "Rowery i akcesoria",
             "description": "Wygodny rower do codziennej jazdy po mieście i ścieżkach rowerowych.\n\n**Praktyczny towarzysz miejskich przejazdów.**",
             "sizes": [
-            { "size": "S", "description": "wzrost 160-170 cm" },
-            { "size": "M", "description": "wzrost 170-180 cm" },
-            { "size": "L", "description": "wzrost 180-190 cm" }
+                {
+                    "size": "S",
+                    "description": "wzrost 160-170 cm"
+                },
+                {
+                    "size": "M",
+                    "description": "wzrost 170-180 cm"
+                },
+                {
+                    "size": "L",
+                    "description": "wzrost 180-190 cm"
+                }
             ]
         },
         {
@@ -243,14 +333,25 @@
             "name": "Rower elektryczny",
             "slug": "rower-elektryczny",
             "price": 149,
-            "images": ["22-electric-bike.jpg"],
+            "images": [
+                "assets/products/pictures/22-electric-bike.jpg"
+            ],
             "alt": "Rower elektryczny",
             "category": "Rowery i akcesoria",
             "description": "E-rower ze wspomaganiem, idealny na dłuższe trasy i codzienne dojazdy.\n\n<u>Jedź dalej bez nadmiernego wysiłku.</u>",
             "sizes": [
-            { "size": "S", "description": "wzrost 160-170 cm" },
-            { "size": "M", "description": "wzrost 170-180 cm" },
-            { "size": "L", "description": "wzrost 180-190 cm" }
+                {
+                    "size": "S",
+                    "description": "wzrost 160-170 cm"
+                },
+                {
+                    "size": "M",
+                    "description": "wzrost 170-180 cm"
+                },
+                {
+                    "size": "L",
+                    "description": "wzrost 180-190 cm"
+                }
             ]
         },
         {
@@ -258,7 +359,9 @@
             "name": "Sakwy rowerowe",
             "slug": "sakwy-rowerowe",
             "price": 29,
-            "images": ["23-bike-panniers.jpg"],
+            "images": [
+                "assets/products/pictures/23-bike-panniers.jpg"
+            ],
             "alt": "Sakwy rowerowe",
             "category": "Rowery i akcesoria",
             "description": "Pojemne sakwy na rower na bagaż, zakupy i rzeczy na wyjazd.\n\n- zakupy\n- ubrania\n- sprzęt turystyczny"
@@ -268,7 +371,9 @@
             "name": "Jednokołowa przyczepka rowerowa",
             "slug": "jednokolowa-przyczepka-rowerowa",
             "price": 59,
-            "images": ["24-single-wheel-trailer.jpg"],
+            "images": [
+                "assets/products/pictures/24-single-wheel-trailer.jpg"
+            ],
             "alt": "Jednokołowa przyczepka rowerowa",
             "category": "Przyczepki rowerowe",
             "description": "Zwrotna przyczepka z jednym kołem do jazdy w terenie i po trasach. *Lekka i łatwa do prowadzenia.*"
@@ -278,7 +383,9 @@
             "name": "Składana przyczepka rowerowa",
             "slug": "skladana-przyczepka-rowerowa",
             "price": 54,
-            "images": ["25-folding-bike-trailer.jpg"],
+            "images": [
+                "assets/products/pictures/25-folding-bike-trailer.jpg"
+            ],
             "alt": "Składana przyczepka rowerowa",
             "category": "Przyczepki rowerowe",
             "description": "### Łatwe przechowywanie\n\nSkładana przyczepka, którą łatwo przewieziesz i przechowasz.\n\n**Złóż ją po zakończonej trasie.**"
@@ -288,7 +395,9 @@
             "name": "Namiot trekkingowy",
             "slug": "namiot-trekkingowy",
             "price": 64,
-            "images": ["26-touring-tent.jpg"],
+            "images": [
+                "assets/products/pictures/26-touring-tent.jpg"
+            ],
             "alt": "Namiot trekkingowy",
             "category": "Namioty osobowe",
             "description": "Lekki namiot trekkingowy do plecaka i pieszych wypraw.\n\n<u>Minimalny ciężar, maksimum swobody.</u>"
@@ -298,7 +407,9 @@
             "name": "Namiot zimowy",
             "slug": "namiot-zimowy",
             "price": 99,
-            "images": ["27-winter-tent.jpg"],
+            "images": [
+                "assets/products/pictures/27-winter-tent.jpg"
+            ],
             "alt": "Namiot zimowy",
             "category": "Namioty osobowe",
             "description": "## Na chłodniejsze noce\n\nNamiot przygotowany na niższe temperatury i trudniejsze warunki.\n\n- wzmocniona konstrukcja\n- lepsza izolacja"
@@ -308,7 +419,9 @@
             "name": "Kajak dmuchany",
             "slug": "kajak-dmuchany",
             "price": 89,
-            "images": ["28-inflatable-kayak.jpg"],
+            "images": [
+                "assets/products/pictures/28-inflatable-kayak.jpg"
+            ],
             "alt": "Kajak dmuchany",
             "category": "Sprzęt wodny",
             "description": "Lekki kajak dmuchany, który łatwo transportować i rozłożyć.\n\n*Spakuj go do bagażnika i ruszaj nad wodę.*"
@@ -318,7 +431,9 @@
             "name": "Kanadyjka dwuosobowa",
             "slug": "kanadyjka-dwuosobowa",
             "price": 109,
-            "images": ["29-canoe.jpg"],
+            "images": [
+                "assets/products/pictures/29-canoe.jpg"
+            ],
             "alt": "Kanadyjka dwuosobowa",
             "category": "Sprzęt wodny",
             "description": "Stabilna kanadyjka dla dwóch osób na spokojne spływy.\n\n**Płynna i wygodna podczas wspólnej wyprawy.**"
@@ -328,7 +443,9 @@
             "name": "Wiosło kajakowe",
             "slug": "wioslo-kajakowe",
             "price": 19,
-            "images": ["30-kayak-paddle.jpg"],
+            "images": [
+                "assets/products/pictures/30-kayak-paddle.jpg"
+            ],
             "alt": "Wiosło kajakowe",
             "category": "Sprzęt wodny",
             "description": "Lekkie wiosło do kajaka na rekreacyjne pływanie.\n\n<u>Dobry chwyt i wygodne manewrowanie.</u>"
@@ -338,7 +455,9 @@
             "name": "Lina wspinaczkowa 60 m",
             "slug": "lina-wspinaczkowa-60-m",
             "price": 39,
-            "images": ["31-climbing-rope.jpg"],
+            "images": [
+                "assets/products/pictures/31-climbing-rope.jpg"
+            ],
             "alt": "Lina wspinaczkowa",
             "category": "Via ferraty i wspinanie",
             "description": "### Lina wspinaczkowa\n\n60-metrowa lina do wspinaczki sportowej i asekuracji.\n\n*Przed użyciem sprawdź jej stan.*"
@@ -348,7 +467,9 @@
             "name": "Zestaw karabinków wspinaczkowych",
             "slug": "zestaw-karabinkow-wspinaczkowych",
             "price": 24,
-            "images": ["32-carabiner-set.jpg"],
+            "images": [
+                "assets/products/pictures/32-carabiner-set.jpg"
+            ],
             "alt": "Zestaw karabinków wspinaczkowych",
             "category": "Via ferraty i wspinanie",
             "description": "Zestaw karabinków do asekuracji i pracy z liną.\n\n- szybkie wpinanie\n- solidne zamki\n- poręczny komplet"
@@ -358,19 +479,45 @@
             "name": "Buty wspinaczkowe",
             "slug": "buty-wspinaczkowe",
             "price": 34,
-            "images": ["33-climbing-shoes.jpg"],
+            "images": [
+                "assets/products/pictures/33-climbing-shoes.jpg"
+            ],
             "alt": "Buty wspinaczkowe",
             "category": "Via ferraty i wspinanie",
             "description": "Precyzyjne buty wspinaczkowe zapewniające dobrą przyczepność na ścianie.\n\n**Pewny krok na każdym stopniu.**",
             "sizes": [
-            { "size": "37", "description": "orientacyjna długość stopy 23,5 cm" },
-            { "size": "38", "description": "orientacyjna długość stopy 24 cm" },
-            { "size": "39", "description": "orientacyjna długość stopy 24,5 cm" },
-            { "size": "40", "description": "orientacyjna długość stopy 25 cm" },
-            { "size": "41", "description": "orientacyjna długość stopy 25,5 cm" },
-            { "size": "42", "description": "orientacyjna długość stopy 26,5 cm" },
-            { "size": "43", "description": "orientacyjna długość stopy 27 cm" },
-            { "size": "44", "description": "orientacyjna długość stopy 28 cm" }
+                {
+                    "size": "37",
+                    "description": "orientacyjna długość stopy 23,5 cm"
+                },
+                {
+                    "size": "38",
+                    "description": "orientacyjna długość stopy 24 cm"
+                },
+                {
+                    "size": "39",
+                    "description": "orientacyjna długość stopy 24,5 cm"
+                },
+                {
+                    "size": "40",
+                    "description": "orientacyjna długość stopy 25 cm"
+                },
+                {
+                    "size": "41",
+                    "description": "orientacyjna długość stopy 25,5 cm"
+                },
+                {
+                    "size": "42",
+                    "description": "orientacyjna długość stopy 26,5 cm"
+                },
+                {
+                    "size": "43",
+                    "description": "orientacyjna długość stopy 27 cm"
+                },
+                {
+                    "size": "44",
+                    "description": "orientacyjna długość stopy 28 cm"
+                }
             ]
         },
         {
@@ -378,7 +525,9 @@
             "name": "Nosidełko turystyczne premium",
             "slug": "nosidelko-turystyczne-premium",
             "price": 79,
-            "images": ["34-hiking-carrier.jpg"],
+            "images": [
+                "assets/products/pictures/34-hiking-carrier.jpg"
+            ],
             "alt": "Nosidełko turystyczne premium",
             "category": "Nosidełka turystyczne",
             "description": "Wygodne nosidełko premium z lepszym wsparciem na dłuższe wycieczki.\n\n## Komfort premium\n\n<u>Dla wymagających rodzin.</u>"
@@ -388,7 +537,9 @@
             "name": "Nosidełko z osłoną przeciwdeszczową",
             "slug": "nosidelko-z-oslona-przeciwdeszczowa",
             "price": 74,
-            "images": ["35-rain-cover-carrier.jpg"],
+            "images": [
+                "assets/products/pictures/35-rain-cover-carrier.jpg"
+            ],
             "alt": "Nosidełko z osłoną przeciwdeszczową",
             "category": "Nosidełka turystyczne",
             "description": "Nosidełko z osłoną chroniącą dziecko przed deszczem i wiatrem.\n\n*Pogoda nie musi kończyć spaceru.*"
@@ -398,7 +549,9 @@
             "name": "Namiot tunelowy",
             "slug": "namiot-tunelowy",
             "price": 119,
-            "images": ["36-tunnel-tent.jpg"],
+            "images": [
+                "assets/products/pictures/36-tunnel-tent.jpg"
+            ],
             "alt": "Namiot tunelowy",
             "category": "Namioty",
             "description": "Przestronny namiot tunelowy z dobrym wykorzystaniem miejsca.\n\n- duża sypialnia\n- funkcjonalny przedsionek"
@@ -408,7 +561,9 @@
             "name": "Namiot samorozkładający",
             "slug": "namiot-samorozkladajacy",
             "price": 49,
-            "images": ["37-pop-up-tent.jpg"],
+            "images": [
+                "assets/products/pictures/37-pop-up-tent.jpg"
+            ],
             "alt": "Namiot samorozkładający",
             "category": "Namioty",
             "description": "Szybkorozkładany namiot na spontaniczne wyjazdy i krótkie biwaki.\n\n**Rozstawienie zajmuje tylko chwilę.**"
@@ -418,7 +573,9 @@
             "name": "Namiot ekspedycyjny",
             "slug": "namiot-ekspedycyjny",
             "price": 139,
-            "images": ["38-expedition-tent.jpg"],
+            "images": [
+                "assets/products/pictures/38-expedition-tent.jpg"
+            ],
             "alt": "Namiot ekspedycyjny",
             "category": "Namioty",
             "description": "## Namiot ekspedycyjny\n\nWytrzymały namiot ekspedycyjny na wymagające warunki i dłuższe wyprawy.\n\n<u>Gotowy na trudniejsze wyzwania.</u>"
@@ -428,7 +585,9 @@
             "name": "Zestaw naprawczy do roweru",
             "slug": "zestaw-naprawczy-do-roweru",
             "price": 18,
-            "images": ["39-bike-repair-kit.jpg"],
+            "images": [
+                "assets/products/pictures/39-bike-repair-kit.jpg"
+            ],
             "alt": "Zestaw naprawczy do roweru",
             "category": "Rowery i akcesoria",
             "description": "Poręczny zestaw do drobnych napraw i regulacji roweru w trasie.\n\n1. Zlokalizuj usterkę.\n2. Wybierz właściwe narzędzie.\n3. Wróć na trasę."
@@ -438,7 +597,9 @@
             "name": "Wodoodporny worek transportowy",
             "slug": "wodoodporny-worek-transportowy",
             "price": 22,
-            "images": ["40-waterproof-bag.jpg"],
+            "images": [
+                "assets/products/pictures/40-waterproof-bag.jpg"
+            ],
             "alt": "Wodoodporny worek transportowy",
             "category": "Sprzęt wodny",
             "description": "Worek chroniący rzeczy przed wodą, deszczem i zabrudzeniem.\n\n**Suchy bagaż podczas każdej wyprawy.**"
