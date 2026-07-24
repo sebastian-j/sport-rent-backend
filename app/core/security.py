@@ -1,6 +1,7 @@
 import datetime
 import os
 import uuid
+from dataclasses import dataclass
 
 import jwt
 from pwdlib import PasswordHash
@@ -28,19 +29,45 @@ def verify_password(password: str, hashed_password: str) -> bool:
     return password_hash.verify(password, hashed_password)
 
 
-def create_access_token(user_id: int) -> str:
-    iat = datetime.datetime.now(datetime.UTC)
-    exp = iat + datetime.timedelta(seconds=JWT_ACCESS_EXPIRATION)
-    data = {
+@dataclass(frozen=True, slots=True)
+class IssuedToken:
+    token: str
+    jti: uuid.UUID
+    issued_at: datetime.datetime
+    expires_at: datetime.datetime
+
+
+def create_access_token(
+    user_id: int,
+    session_id: uuid.UUID,
+) -> IssuedToken:
+    issued_at = datetime.datetime.now(datetime.UTC).replace(microsecond=0)
+    expires_at = issued_at + datetime.timedelta(seconds=JWT_ACCESS_EXPIRATION)
+    jti = uuid.uuid4()
+
+    payload = {
         "sub": str(user_id),
+        "sid": str(session_id),
         "type": "access",
-        "jti": str(uuid.uuid4()),
-        "iat": iat,
-        "exp": exp,
+        "jti": str(jti),
+        "iat": issued_at,
+        "exp": expires_at,
         "iss": "sport-rent-backend",
         "aud": "sport-rent-backend",
     }
-    return jwt.encode(data, JWT_ACCESS_SECRET, algorithm="HS256")
+
+    token = jwt.encode(
+        payload,
+        JWT_ACCESS_SECRET,
+        algorithm="HS256",
+    )
+
+    return IssuedToken(
+        token=token,
+        jti=jti,
+        issued_at=issued_at,
+        expires_at=expires_at,
+    )
 
 
 def decode_access_token(token: str) -> dict:
@@ -50,7 +77,7 @@ def decode_access_token(token: str) -> dict:
         algorithms=["HS256"],
         audience="sport-rent-backend",
         issuer="sport-rent-backend",
-        options={"require": ["sub", "type", "jti", "iat", "exp", "iss", "aud"]},
+        options={"require": ["sub", "sid", "type", "jti", "iat", "exp", "iss", "aud"]},
     )
     if payload["type"] != "access":
         raise jwt.InvalidTokenError("Invalid token type")
@@ -58,19 +85,37 @@ def decode_access_token(token: str) -> dict:
     return payload
 
 
-def create_refresh_token(user_id: int) -> str:
-    iat = datetime.datetime.now(datetime.UTC)
-    exp = iat + datetime.timedelta(seconds=JWT_REFRESH_EXPIRATION)
-    data = {
+def create_refresh_token(
+    user_id: int,
+    session_id: uuid.UUID,
+) -> IssuedToken:
+    issued_at = datetime.datetime.now(datetime.UTC).replace(microsecond=0)
+    expires_at = issued_at + datetime.timedelta(seconds=JWT_REFRESH_EXPIRATION)
+    jti = uuid.uuid4()
+
+    payload = {
         "sub": str(user_id),
+        "sid": str(session_id),
         "type": "refresh",
-        "jti": str(uuid.uuid4()),
-        "iat": iat,
-        "exp": exp,
+        "jti": str(jti),
+        "iat": issued_at,
+        "exp": expires_at,
         "iss": "sport-rent-backend",
         "aud": "sport-rent-backend",
     }
-    return jwt.encode(data, JWT_REFRESH_SECRET, algorithm="HS256")
+
+    token = jwt.encode(
+        payload,
+        JWT_REFRESH_SECRET,
+        algorithm="HS256",
+    )
+
+    return IssuedToken(
+        token=token,
+        jti=jti,
+        issued_at=issued_at,
+        expires_at=expires_at,
+    )
 
 
 def decode_refresh_token(token: str) -> dict:
@@ -80,7 +125,7 @@ def decode_refresh_token(token: str) -> dict:
         algorithms=["HS256"],
         audience="sport-rent-backend",
         issuer="sport-rent-backend",
-        options={"require": ["sub", "type", "jti", "iat", "exp", "iss", "aud"]},
+        options={"require": ["sub", "sid", "type", "jti", "iat", "exp", "iss", "aud"]},
     )
     if payload["type"] != "refresh":
         raise jwt.InvalidTokenError("Invalid token type")
