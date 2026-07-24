@@ -61,6 +61,19 @@ Interactive API documentation:
 - Swagger UI: `http://127.0.0.1:8000/docs`
 - ReDoc: `http://127.0.0.1:8000/redoc`
 
+## Running the Tests
+
+Start PostgreSQL and run the integration tests:
+
+```bash
+docker compose up -d db
+uv run --env-file .env pytest
+```
+
+The tests use `TEST_DATABASE_URL` when it is set, otherwise they fall back to
+`DATABASE_URL`. They create a unique PostgreSQL schema for the test run and
+remove it afterwards, so application data in the public schema is not modified.
+
 ## Suggested project structure
 
 ```
