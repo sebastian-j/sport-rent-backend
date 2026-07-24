@@ -22,7 +22,14 @@ def unauthorized(
 
 
 def invalid_refresh_token() -> HTTPException:
-    return unauthorized("Could not validate refresh token")
+    response = Response()
+    delete_refresh_cookie(response)
+
+    return HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate refresh token",
+        headers={"Set-Cookie": response.headers["set-cookie"]},
+    )
 
 
 def set_refresh_cookie(
