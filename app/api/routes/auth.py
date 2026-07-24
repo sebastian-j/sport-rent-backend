@@ -1,5 +1,4 @@
 import datetime
-import os
 import uuid
 from time import sleep
 from typing import Annotated
@@ -10,11 +9,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.concurrency import run_in_threadpool
 
+from app.core.config import settings
 from app.core.security import (
     DUMMY_PASSWORD_HASH,
-    JWT_ACCESS_EXPIRATION,
-    JWT_REFRESH_EXPIRATION,
-    REFRESH_TOKEN_GRACE_PERIOD,
     create_access_token,
     create_refresh_token,
     decode_refresh_token,
@@ -31,10 +28,6 @@ from app.schemas.auth import (
 )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
-
-AUTH_COOKIE_SECURE = (
-    os.getenv("AUTH_COOKIE_SECURE", "true").strip().casefold() == "true"
-)
 
 
 @router.post("/login", response_model=AccessTokenResponse)
@@ -77,9 +70,9 @@ async def login(
     response.set_cookie(
         key="refresh_token",
         value=refresh_token.token,
-        max_age=JWT_REFRESH_EXPIRATION,
+        max_age=settings.jwt_refresh_expiration,
         httponly=True,
-        secure=AUTH_COOKIE_SECURE,
+        secure=settings.auth_cookie_secure,
         samesite="lax",
         path="/auth",
     )
@@ -87,7 +80,7 @@ async def login(
     return AccessTokenResponse(
         access_token=access_token.token,
         token_type="bearer",
-        expires_in=JWT_ACCESS_EXPIRATION,
+        expires_in=settings.jwt_access_expiration,
     )
 
 
@@ -133,7 +126,7 @@ async def refresh(
         refresh_token_to_return = create_refresh_token(user_id, auth_session.id)
 
         auth_session.previous_jti = auth_session.current_jti
-        auth_session.previous_valid_until = now + REFRESH_TOKEN_GRACE_PERIOD
+        auth_session.previous_valid_until = now + settings.refresh_token_grace_period
         auth_session.current_jti = refresh_token_to_return.jti
         auth_session.current_issued_at = refresh_token_to_return.issued_at
         auth_session.expires_at = refresh_token_to_return.expires_at
@@ -167,7 +160,7 @@ async def refresh(
         value=refresh_token_to_return.token,
         max_age=max(0, int((refresh_token_to_return.expires_at - now).total_seconds())),
         httponly=True,
-        secure=AUTH_COOKIE_SECURE,
+        secure=settings.auth_cookie_secure,
         samesite="lax",
         path="/auth",
     )
@@ -175,7 +168,7 @@ async def refresh(
     return AccessTokenResponse(
         access_token=access_token.token,
         token_type="bearer",
-        expires_in=JWT_ACCESS_EXPIRATION,
+        expires_in=settings.jwt_access_expiration,
     )
 
 
@@ -188,7 +181,7 @@ async def logout(
     response.delete_cookie(
         key="refresh_token",
         path="/auth",
-        secure=AUTH_COOKIE_SECURE,
+        secure=settings.auth_cookie_secure,
         httponly=True,
         samesite="lax",
     )

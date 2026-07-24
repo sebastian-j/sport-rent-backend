@@ -1,25 +1,15 @@
 import datetime
-import os
 import uuid
 from dataclasses import dataclass
 
 import jwt
 from pwdlib import PasswordHash
 
+from app.core.config import settings
+
 password_hash = PasswordHash.recommended()
 
-JWT_ACCESS_SECRET = os.environ["JWT_ACCESS_SECRET"]
-JWT_ACCESS_EXPIRATION = int(os.environ["JWT_ACCESS_EXPIRATION"])
-JWT_REFRESH_SECRET = os.environ["JWT_REFRESH_SECRET"]
-JWT_REFRESH_EXPIRATION = int(os.environ["JWT_REFRESH_EXPIRATION"])
 DUMMY_PASSWORD_HASH = password_hash.hash("dummy-password")
-REFRESH_TOKEN_GRACE_PERIOD = datetime.timedelta(seconds=5)
-
-
-if len(JWT_ACCESS_SECRET) < 32:
-    raise ValueError("JWT_ACCESS_SECRET must be at least 32 characters long")
-if len(JWT_REFRESH_SECRET) < 32:
-    raise ValueError("JWT_REFRESH_SECRET must be at least 32 characters long")
 
 
 def hash_password(password: str) -> str:
@@ -43,7 +33,7 @@ def create_access_token(
     session_id: uuid.UUID,
 ) -> IssuedToken:
     issued_at = datetime.datetime.now(datetime.UTC).replace(microsecond=0)
-    expires_at = issued_at + datetime.timedelta(seconds=JWT_ACCESS_EXPIRATION)
+    expires_at = issued_at + datetime.timedelta(seconds=settings.jwt_access_expiration)
     jti = uuid.uuid4()
 
     payload = {
@@ -53,13 +43,13 @@ def create_access_token(
         "jti": str(jti),
         "iat": issued_at,
         "exp": expires_at,
-        "iss": "sport-rent-backend",
-        "aud": "sport-rent-backend",
+        "iss": settings.jwt_issuer,
+        "aud": settings.jwt_audience,
     }
 
     token = jwt.encode(
         payload,
-        JWT_ACCESS_SECRET,
+        settings.jwt_access_secret,
         algorithm="HS256",
     )
 
@@ -74,10 +64,10 @@ def create_access_token(
 def decode_access_token(token: str) -> dict:
     payload = jwt.decode(
         token,
-        JWT_ACCESS_SECRET,
+        settings.jwt_access_secret,
         algorithms=["HS256"],
-        audience="sport-rent-backend",
-        issuer="sport-rent-backend",
+        audience=settings.jwt_audience,
+        issuer=settings.jwt_issuer,
         options={"require": ["sub", "sid", "type", "jti", "iat", "exp", "iss", "aud"]},
     )
     if payload["type"] != "access":
@@ -100,13 +90,13 @@ def encode_refresh_token(
         "jti": str(jti),
         "iat": issued_at,
         "exp": expires_at,
-        "iss": "sport-rent-backend",
-        "aud": "sport-rent-backend",
+        "iss": settings.jwt_issuer,
+        "aud": settings.jwt_audience,
     }
 
     token = jwt.encode(
         payload,
-        JWT_REFRESH_SECRET,
+        settings.jwt_refresh_secret,
         algorithm="HS256",
     )
 
@@ -123,7 +113,7 @@ def create_refresh_token(
     session_id: uuid.UUID,
 ) -> IssuedToken:
     issued_at = datetime.datetime.now(datetime.UTC).replace(microsecond=0)
-    expires_at = issued_at + datetime.timedelta(seconds=JWT_REFRESH_EXPIRATION)
+    expires_at = issued_at + datetime.timedelta(seconds=settings.jwt_refresh_expiration)
 
     return encode_refresh_token(
         user_id=user_id,
@@ -137,10 +127,10 @@ def create_refresh_token(
 def decode_refresh_token(token: str) -> dict:
     payload = jwt.decode(
         token,
-        JWT_REFRESH_SECRET,
+        settings.jwt_refresh_secret,
         algorithms=["HS256"],
-        audience="sport-rent-backend",
-        issuer="sport-rent-backend",
+        audience=settings.jwt_audience,
+        issuer=settings.jwt_issuer,
         options={"require": ["sub", "sid", "type", "jti", "iat", "exp", "iss", "aud"]},
     )
     if payload["type"] != "refresh":

@@ -1,21 +1,14 @@
-import os
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import auth, health, loyalty, product, user
+from app.core.config import settings
 
 app = FastAPI()
 
-origins = [
-    origin.strip()
-    for origin in os.getenv("ALLOWED_ORIGINS", "").split(",")
-    if origin.strip()
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=settings.allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

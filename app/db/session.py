@@ -1,12 +1,11 @@
-import os
 from collections.abc import AsyncIterator
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-DATABASE_URL = os.environ["DATABASE_URL"]
+from app.core.config import settings
 
 engine = create_async_engine(
-    DATABASE_URL,
+    settings.database_url,
     pool_pre_ping=True,
 )
 
