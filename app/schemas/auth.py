@@ -12,11 +12,6 @@ class AccessTokenResponse(BaseModel):
     expires_in: int
 
 
-class LogoutRequest(BaseModel):
-    access_token: str
-    refresh_token: str
-
-
 class ResetPasswordRequest(BaseModel):
     email: EmailStr
 
