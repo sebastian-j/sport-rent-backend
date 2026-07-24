@@ -1,7 +1,9 @@
 import json
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
+from app.api.dependencies import get_current_user_id
 from app.api.routes.product import products_file_path
 from app.schemas.user import (
     OrderDetailResponse,
@@ -38,8 +40,16 @@ for user in users:
 
 
 @router.get("", response_model=UserResponse)
-async def get_user():
-    user = next((user for user in users if user["id"] == 1), None)
+async def get_user(user_id: Annotated[int, Depends(get_current_user_id)]):
+    user = next((user for user in users if user["id"] == user_id), None)
+
+    if user is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
     user_response = UserResponse(
         email=user["email"],
         first_name=user["address"]["first_name"],
