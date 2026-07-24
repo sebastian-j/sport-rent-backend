@@ -7,7 +7,7 @@ from app.schemas.favorites import FavoritesResponse
 
 router = APIRouter(prefix="/favorites", tags=["favorites"])
 
-products_file_path = "app/api/mock_products.json"
+products_file_path = "app/assets/mock_products.json"
 with open(products_file_path, encoding="utf-8") as f:
     products = json.load(f)["products"]
 
