@@ -1,5 +1,23 @@
 from app.db.base import Base
 from app.models.auth_session import AuthSession
+from app.models.product import (
+    Category,
+    Favorite,
+    Instance,
+    Product,
+    ProductImage,
+    ProductSize,
+)
 from app.models.user import User
 
-__all__ = ["AuthSession", "Base", "User"]
+__all__ = [
+    "AuthSession",
+    "Base",
+    "User",
+    "Category",
+    "Product",
+    "ProductImage",
+    "ProductSize",
+    "Instance",
+    "Favorite",
+]
