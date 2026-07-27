@@ -61,6 +61,49 @@ Interactive API documentation:
 - Swagger UI: `http://127.0.0.1:8000/docs`
 - ReDoc: `http://127.0.0.1:8000/redoc`
 
+## Database Migrations
+
+Database migrations are managed with Alembic. After starting a new PostgreSQL
+container with an empty database, apply all migrations to create the required
+tables.
+
+Run the following commands from the project root:
+
+```bash
+docker compose up -d
+uv run --env-file .env alembic upgrade head
+```
+
+Before running the migrations, make sure that:
+
+- the PostgreSQL container is ready to accept connections;
+- the `.env` file exists and contains a valid `DATABASE_URL` pointing to the
+  running database;
+- the project dependencies are installed (run `uv sync` if necessary).
+
+The `alembic upgrade head` command applies all pending migrations up to the
+latest revision. It can be run both for an empty database and after new
+migrations have been added.
+
+To check the currently applied migration revision, run:
+
+```bash
+uv run --env-file .env alembic current
+```
+
+## Running the Tests
+
+Start PostgreSQL and run the integration tests:
+
+```bash
+docker compose up -d db
+uv run --env-file .env pytest
+```
+
+The tests use `TEST_DATABASE_URL` when it is set, otherwise they fall back to
+`DATABASE_URL`. They create a unique PostgreSQL schema for the test run and
+remove it afterwards, so application data in the public schema is not modified.
+
 ## Suggested project structure
 
 ```
@@ -74,10 +117,12 @@ Interactive API documentation:
 │   │   │   ├── loyalty.py
 │   │   │   ├── billing_addresses.py
 │   │   │   └── favourites.py
+│   │   ├── auth_helpers.py
 │   │   └── dependencies.py
 │   ├── core/
 │   │   ├── config.py
-│   │   └── security.py
+│   │   ├── passwords.py
+│   │   └── tokens.py
 │   ├── db/
 │   │   ├── base.py
 │   │   └── session.py

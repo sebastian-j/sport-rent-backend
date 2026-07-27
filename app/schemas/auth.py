@@ -6,14 +6,10 @@ class LoginRequest(BaseModel):
     password: str
 
 
-class LoginResponse(BaseModel):
+class AccessTokenResponse(BaseModel):
     access_token: str
-    refresh_token: str
-
-
-class LogoutRequest(BaseModel):
-    access_token: str
-    refresh_token: str
+    token_type: str
+    expires_in: int
 
 
 class ResetPasswordRequest(BaseModel):
