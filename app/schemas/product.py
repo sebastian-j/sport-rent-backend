@@ -1,3 +1,4 @@
+from fastapi import Query
 from pydantic import BaseModel
 
 MIN_PRICE = 0
@@ -27,15 +28,17 @@ class ProductAvailabilityResponse(BaseModel):
     available: bool
 
 
-class ProductFilter(BaseModel):
+class ProductQueryParams(BaseModel):
     sort: str | None = None
     order: str | None = None
     minPrice: int | None = MIN_PRICE
     maxPrice: int | None = MAX_PRICE
-    category: list[str] | None = []
-
-
-class ProductRequest(BaseModel):
-    filter: ProductFilter | None = None
+    category: list[str] | None = Query(default=[])
+    query: str | None = None
     page: int | None = DEFAULT_PAGE
     pageSize: int | None = DEFAULT_PAGE_SIZE
+
+
+class CategoryResponse(BaseModel):
+    name: str
+    count: int
