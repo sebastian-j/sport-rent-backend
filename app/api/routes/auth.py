@@ -2,12 +2,16 @@ import datetime
 from time import sleep
 from typing import Annotated
 
-from fastapi import APIRouter, Cookie, Depends, Response
+from fastapi import APIRouter, Cookie, Depends, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.auth_helpers import (
+    delete_csrf_cookie,
     delete_refresh_cookie,
+    generate_csrf_token,
     invalid_refresh_token,
+    require_csrf,
+    set_csrf_cookie,
     set_refresh_cookie,
     unauthorized,
 )
@@ -50,6 +54,11 @@ async def login(
         token=tokens.refresh_token.token,
         max_age=settings.jwt_refresh_expiration,
     )
+    set_csrf_cookie(
+        response,
+        token=generate_csrf_token(),
+        max_age=settings.csrf_expiration,
+    )
 
     return AccessTokenResponse(
         access_token=tokens.access_token.token,
@@ -60,10 +69,13 @@ async def login(
 
 @router.post("/refresh", response_model=AccessTokenResponse)
 async def refresh(
+    request: Request,
     response: Response,
     session: Annotated[AsyncSession, Depends(get_db_session)],
     refresh_token: Annotated[str | None, Cookie()] = None,
 ):
+    require_csrf(request)
+
     if refresh_token is None:
         raise invalid_refresh_token()
 
@@ -92,11 +104,15 @@ async def refresh(
 
 @router.post("/logout", status_code=204)
 async def logout(
+    request: Request,
     response: Response,
     session: Annotated[AsyncSession, Depends(get_db_session)],
     refresh_token: Annotated[str | None, Cookie()] = None,
 ):
+    require_csrf(request)
+
     delete_refresh_cookie(response)
+    delete_csrf_cookie(response)
 
     if refresh_token is None:
         return None

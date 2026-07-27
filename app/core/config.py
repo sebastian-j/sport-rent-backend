@@ -69,6 +69,7 @@ class Settings:
     jwt_issuer: str
     jwt_audience: str
     refresh_token_grace_period: datetime.timedelta
+    csrf_expiration: int
     auth_cookie_secure: bool
     seed_user_password: str | None
 
@@ -83,6 +84,8 @@ class Settings:
         if len(refresh_secret) < 32:
             raise ValueError("JWT_REFRESH_SECRET must be at least 32 characters long")
 
+        refresh_expiration = _positive_integer("JWT_REFRESH_EXPIRATION")
+
         allowed_origins = tuple(
             origin.strip()
             for origin in os.getenv("ALLOWED_ORIGINS", "").split(",")
@@ -95,7 +98,7 @@ class Settings:
             jwt_access_secret=access_secret,
             jwt_access_expiration=_positive_integer("JWT_ACCESS_EXPIRATION"),
             jwt_refresh_secret=refresh_secret,
-            jwt_refresh_expiration=_positive_integer("JWT_REFRESH_EXPIRATION"),
+            jwt_refresh_expiration=refresh_expiration,
             jwt_issuer=_non_empty_string(
                 "JWT_ISSUER",
                 "sport-rent-backend",
@@ -106,6 +109,10 @@ class Settings:
             ),
             refresh_token_grace_period=datetime.timedelta(
                 seconds=_positive_integer("JWT_REFRESH_GRACE_PERIOD", default=5)
+            ),
+            csrf_expiration=_positive_integer(
+                "CSRF_EXPIRATION",
+                default=refresh_expiration,
             ),
             auth_cookie_secure=_boolean("AUTH_COOKIE_SECURE", default=True),
             seed_user_password=os.getenv("SEED_USER_PASSWORD"),
