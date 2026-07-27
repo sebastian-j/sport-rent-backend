@@ -86,10 +86,10 @@ async def get_categories_count(params: Annotated[ProductQueryParams, Depends()])
         if category:
             category_count[category] = category_count.get(category, 0) + 1
 
-    return [
+    return (
         [{"name": cat, "count": count} for cat, count in category_count.items()],
         len(filtered_products),
-    ]
+    )
 
 
 @router.get("/{product_slug}", response_model=ProductResponse)
