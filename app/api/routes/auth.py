@@ -72,15 +72,18 @@ async def refresh(
     request: Request,
     response: Response,
     session: Annotated[AsyncSession, Depends(get_db_session)],
-    refresh_token: Annotated[str | None, Cookie()] = None,
+    refresh_token_cookie: Annotated[
+        str | None,
+        Cookie(alias="refresh_token"),
+    ] = None,
 ):
     require_csrf(request)
 
-    if refresh_token is None:
+    if refresh_token_cookie is None:
         raise invalid_refresh_token()
 
     try:
-        tokens = await rotate_refresh_token(session, refresh_token)
+        tokens = await rotate_refresh_token(session, refresh_token_cookie)
     except InvalidRefreshTokenError:
         raise invalid_refresh_token() from None
 
@@ -107,17 +110,20 @@ async def logout(
     request: Request,
     response: Response,
     session: Annotated[AsyncSession, Depends(get_db_session)],
-    refresh_token: Annotated[str | None, Cookie()] = None,
+    refresh_token_cookie: Annotated[
+        str | None,
+        Cookie(alias="refresh_token"),
+    ] = None,
 ):
     require_csrf(request)
 
     delete_refresh_cookie(response)
     delete_csrf_cookie(response)
 
-    if refresh_token is None:
+    if refresh_token_cookie is None:
         return None
 
-    await revoke_auth_session(session, refresh_token)
+    await revoke_auth_session(session, refresh_token_cookie)
 
     return None
 
