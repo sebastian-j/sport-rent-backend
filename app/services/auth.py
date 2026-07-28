@@ -5,10 +5,12 @@ from dataclasses import dataclass
 
 import jwt
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.core.passwords import DUMMY_PASSWORD_HASH, verify_password
+from app.core.email import normalize_email
+from app.core.passwords import DUMMY_PASSWORD_HASH, hash_password, verify_password
 from app.core.tokens import (
     IssuedToken,
     TokenClaims,
@@ -17,7 +19,7 @@ from app.core.tokens import (
     decode_refresh_token,
     encode_refresh_token,
 )
-from app.models import AuthSession, User
+from app.models import Address, AuthSession, User
 
 
 class InvalidCredentialsError(Exception):
@@ -28,10 +30,70 @@ class InvalidRefreshTokenError(Exception):
     pass
 
 
+class EmailAlreadyRegisteredError(Exception):
+    pass
+
+
+@dataclass(frozen=True, slots=True)
+class RegistrationAddress:
+    first_line: str
+    second_line: str | None
+    postal_code: str
+    city: str
+    country: str
+
+
 @dataclass(frozen=True, slots=True)
 class AuthTokens:
     access_token: IssuedToken
     refresh_token: IssuedToken
+
+
+async def register_user(
+    session: AsyncSession,
+    *,
+    email: str,
+    password: str,
+    first_name: str,
+    last_name: str,
+    address: RegistrationAddress,
+) -> User:
+    normalized_email = normalize_email(email)
+    existing_user_id = await session.scalar(
+        select(User.id).where(User.email == normalized_email)
+    )
+
+    if existing_user_id is not None:
+        raise EmailAlreadyRegisteredError
+
+    password_hash = await asyncio.to_thread(hash_password, password)
+    user = User(
+        email=normalized_email,
+        password_hash=password_hash,
+        first_name=first_name,
+        last_name=last_name,
+        default_address=Address(
+            first_line=address.first_line,
+            second_line=address.second_line or None,
+            postal_code=address.postal_code,
+            city=address.city,
+            country=address.country,
+        ),
+    )
+    session.add(user)
+
+    try:
+        await session.commit()
+    except IntegrityError:
+        await session.rollback()
+        existing_user_id = await session.scalar(
+            select(User.id).where(User.email == normalized_email)
+        )
+        if existing_user_id is not None:
+            raise EmailAlreadyRegisteredError from None
+        raise
+
+    return user
 
 
 async def authenticate_user(
@@ -40,7 +102,7 @@ async def authenticate_user(
     email: str,
     password: str,
 ) -> AuthTokens:
-    normalized_email = email.strip().casefold()
+    normalized_email = normalize_email(email)
     user = await session.scalar(select(User).where(User.email == normalized_email))
 
     password_hash = user.password_hash if user is not None else DUMMY_PASSWORD_HASH

@@ -10,8 +10,9 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.core.config import settings
+from app.core.passwords import verify_password
 from app.core.tokens import decode_access_token, decode_refresh_token
-from app.models import AuthSession, User
+from app.models import Address, AuthSession, User
 from tests.support import SeededUser
 
 REFRESH_COOKIE_NAME = "refresh_token"
@@ -86,6 +87,134 @@ async def login(client: AsyncClient, user: SeededUser) -> Response:
         "/auth/login",
         json={"email": user.email, "password": user.password},
     )
+
+
+def registration_payload(
+    *,
+    email: str = "new.user@example.com",
+    password: str = "Secure-password-123!",
+) -> dict[str, object]:
+    return {
+        "email": email,
+        "password": password,
+        "first_name": "Jan",
+        "last_name": "Nowak",
+        "address": {
+            "first_line": "ul. Testowa 10",
+            "second_line": "lok. 2",
+            "postal_code": "00-001",
+            "city": "Warszawa",
+            "country": "Polska",
+        },
+    }
+
+
+async def test_register_creates_user_with_normalized_email_and_hashed_password(
+    client: AsyncClient,
+    empty_auth_database: None,
+    test_session_factory: async_sessionmaker[AsyncSession],
+) -> None:
+    response = await client.post(
+        "/auth/register",
+        json=registration_payload(email="  NEW.User@Example.COM  "),
+    )
+
+    assert response.status_code == 201
+    assert response.json()["email"] == "new.user@example.com"
+    assert set(response.json()) == {"id", "email"}
+
+    async with test_session_factory() as session:
+        result = await session.execute(
+            select(User, Address)
+            .join(Address, User.default_address_id == Address.id)
+            .where(User.email == "new.user@example.com")
+        )
+        row = result.one_or_none()
+
+    assert row is not None
+    user, address = row
+    assert user.id == response.json()["id"]
+    assert user.password_hash != "Secure-password-123!"
+    assert verify_password("Secure-password-123!", user.password_hash)
+    assert user.first_name == "Jan"
+    assert user.last_name == "Nowak"
+    assert address.first_name is None
+    assert address.last_name is None
+    assert address.first_line == "ul. Testowa 10"
+    assert address.second_line == "lok. 2"
+    assert address.postal_code == "00-001"
+    assert address.city == "Warszawa"
+    assert address.country == "Polska"
+    assert address.company is None
+    assert address.nip is None
+
+
+async def test_register_rejects_existing_normalized_email(
+    client: AsyncClient,
+    empty_auth_database: None,
+    test_session_factory: async_sessionmaker[AsyncSession],
+) -> None:
+    email = "existing.user@example.com"
+    first_response = await client.post(
+        "/auth/register",
+        json=registration_payload(email=email),
+    )
+    assert first_response.status_code == 201
+
+    response = await client.post(
+        "/auth/register",
+        json=registration_payload(email=f"  {email.upper()}  "),
+    )
+
+    assert response.status_code == 409
+    assert response.json() == {"detail": "Email is already registered"}
+
+    async with test_session_factory() as session:
+        user_count = await session.scalar(select(func.count()).select_from(User))
+
+    assert user_count == 1
+
+
+async def test_register_rejects_too_short_password(
+    client: AsyncClient,
+    empty_auth_database: None,
+) -> None:
+    response = await client.post(
+        "/auth/register",
+        json=registration_payload(password="short"),
+    )
+
+    assert response.status_code == 422
+
+
+@pytest.mark.parametrize("field", ["first_name", "last_name"])
+async def test_register_requires_first_and_last_name(
+    client: AsyncClient,
+    empty_auth_database: None,
+    field: str,
+) -> None:
+    payload = registration_payload()
+    del payload[field]
+
+    response = await client.post("/auth/register", json=payload)
+
+    assert response.status_code == 422
+
+
+@pytest.mark.parametrize("field", ["company", "nip"])
+async def test_register_rejects_company_and_nip(
+    client: AsyncClient,
+    empty_auth_database: None,
+    field: str,
+) -> None:
+    payload = registration_payload()
+    address = payload["address"]
+    assert isinstance(address, dict)
+    address[field] = "not-allowed"
+
+    response = await client.post("/auth/register", json=payload)
+
+    assert response.status_code == 422
 
 
 async def test_login_returns_access_token_and_creates_session(
