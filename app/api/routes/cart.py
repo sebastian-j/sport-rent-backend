@@ -10,8 +10,6 @@ from app.schemas.cart import (
     CartItemResponse,
     PromoCodeValidationRequest,
     PromoCodeValidationResponse,
-    SubmitCartRequest,
-    SubmitCartResponse,
     UpdateCartItemRequest,
 )
 
@@ -32,6 +30,7 @@ async def get_cart():
             product_id=product["id"],
             product_name=product["name"],
             image=product["images"][0] if product.get("images") else "",
+            alt=product.get("alt"),
             price=product["price"],
             dates=[
                 CartItemDate(
@@ -39,7 +38,7 @@ async def get_cart():
                     start_date="2026-08-01",
                     end_date="2026-08-05",
                     quantity=1,
-                    size="L" if product.get("sizes") else None,
+                    size=product["sizes"][0] if product.get("sizes") else None,
                 )
             ],
         )
@@ -96,14 +95,6 @@ async def update_cart_item(
         raise HTTPException(status_code=404, detail="Product not found")
 
     return
-
-
-@router.post(
-    "/submit", response_model=SubmitCartResponse, summary="Potwierdzenie rezerwacji"
-)
-async def submit_cart(request: SubmitCartRequest):
-    sleep(0.5)
-    return SubmitCartResponse(order_id=101, status="confirmed")
 
 
 # TODO: MOCK

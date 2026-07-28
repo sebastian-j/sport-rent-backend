@@ -15,6 +15,7 @@ class CartItemResponse(BaseModel):
     product_id: int
     product_name: str
     image: str
+    alt: str | None = None
     price: float
     dates: list[CartItemDate]
 
@@ -32,15 +33,6 @@ class UpdateCartItemRequest(BaseModel):
     size: str | None = None
     start_date: date | None = None
     end_date: date | None = None
-
-
-class SubmitCartRequest(BaseModel):
-    promo_code: str | None = None
-
-
-class SubmitCartResponse(BaseModel):
-    order_id: int
-    status: str = "confirmed"
 
 
 class PromoCodeValidationRequest(BaseModel):
