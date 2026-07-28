@@ -1,7 +1,7 @@
 import json
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 
 from app.schemas.product import (
     CategoryResponse,
@@ -20,7 +20,7 @@ with open(products_file_path, encoding="utf-8") as f:
 
 
 @router.get("", response_model=list[ProductResponse])
-async def get_products(params: Annotated[ProductQueryParams, Depends()]):
+async def get_products(params: Annotated[ProductQueryParams, Query()]):
     sort = params.sort
     order = params.order
     min_price = params.minPrice
@@ -65,7 +65,7 @@ async def get_products(params: Annotated[ProductQueryParams, Depends()]):
 
 
 @router.get("/count", response_model=tuple[list[CategoryResponse], int])
-async def get_categories_count(params: Annotated[ProductQueryParams, Depends()]):
+async def get_categories_count(params: Annotated[ProductQueryParams, Query()]):
     min_price = params.minPrice
     max_price = params.maxPrice
     search_query = params.query
