@@ -3,7 +3,6 @@ from datetime import date
 from pydantic import BaseModel, Field
 
 
-# konkretny termin wypożyczenia dla produktu (RentalDate)
 class CartItemDate(BaseModel):
     id: int
     quantity: int = Field(ge=1)
@@ -12,7 +11,6 @@ class CartItemDate(BaseModel):
     end_date: date
 
 
-# zgrupowany produkt w koszyku - CartProduct
 class CartItemResponse(BaseModel):
     product_id: int
     product_name: str
