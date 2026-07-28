@@ -125,7 +125,7 @@ class Settings:
             auth_cookie_secure=_boolean("AUTH_COOKIE_SECURE", default=True),
             frontend_url=_non_empty_string(
                 "FRONTEND_URL",
-                "http://localhost:5173",
+                "http://127.0.0.1:5173",
             ).rstrip("/"),
             password_reset_expiration=_positive_integer(
                 "PASSWORD_RESET_EXPIRATION",
