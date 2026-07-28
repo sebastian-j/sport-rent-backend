@@ -154,9 +154,12 @@ async def request_password_reset(
     reset_token = generate_password_reset_token()
     token_hash = hash_password_reset_token(reset_token)
     normalized_email = email.strip().casefold()
-    user = await session.scalar(select(User).where(User.email == normalized_email))
+    user = await session.scalar(
+        select(User).where(User.email == normalized_email).with_for_update()
+    )
 
     if user is None:
+        await session.rollback()
         return None
 
     await session.execute(
@@ -206,25 +209,30 @@ async def confirm_password_reset(
     token: str,
     new_password: str,
 ) -> None:
+    token_hash = hash_password_reset_token(token)
+    user_id = await session.scalar(
+        select(PasswordResetToken.user_id).where(
+            PasswordResetToken.token_hash == token_hash
+        )
+    )
+
+    if user_id is None:
+        raise InvalidPasswordResetTokenError
+
+    user = await session.get(User, user_id, with_for_update=True)
     reset_token = await session.scalar(
         select(PasswordResetToken)
-        .where(
-            PasswordResetToken.token_hash == hash_password_reset_token(token)
-        )
+        .where(PasswordResetToken.token_hash == token_hash)
         .with_for_update()
     )
     now = datetime.datetime.now(datetime.UTC)
 
     if (
-        reset_token is None
+        user is None
+        or reset_token is None
         or reset_token.used_at is not None
         or reset_token.expires_at <= now
     ):
-        raise InvalidPasswordResetTokenError
-
-    user = await session.get(User, reset_token.user_id, with_for_update=True)
-
-    if user is None:
         raise InvalidPasswordResetTokenError
 
     user.password_hash = await asyncio.to_thread(hash_password, new_password)

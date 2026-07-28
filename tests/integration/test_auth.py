@@ -1,5 +1,6 @@
 import asyncio
 import datetime
+import time
 from http.cookies import SimpleCookie
 from urllib.parse import parse_qs, urlsplit
 
@@ -334,6 +335,7 @@ async def test_password_reset_link_changes_password_and_revokes_sessions(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     login_response = await login(client, test_user)
+    access_token = login_response.json()["access_token"]
     refresh_claims = decode_refresh_token(refresh_token_from(login_response))
 
     response = await client.post(
@@ -392,6 +394,13 @@ async def test_password_reset_link_changes_password_and_revokes_sessions(
     assert stored_token.used_at is not None
     assert auth_session is not None
     assert auth_session.revoked_at is not None
+
+    revoked_access_token_response = await client.get(
+        "/user",
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
+    assert revoked_access_token_response.status_code == 401
+    assert revoked_access_token_response.json() == {"detail": "Invalid token"}
 
     reused_token_response = await client.post(
         "/auth/reset-password/confirm",
@@ -476,6 +485,107 @@ async def test_new_password_reset_link_invalidates_previous_link(
 
     assert first_validation.status_code == 400
     assert second_validation.status_code == 200
+
+
+async def test_concurrent_password_reset_requests_leave_only_one_valid_link(
+    application: FastAPI,
+    test_user: SeededUser,
+    test_session_factory: async_sessionmaker[AsyncSession],
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    transport = ASGITransport(app=application)
+
+    async with (
+        AsyncClient(
+            transport=transport,
+            base_url="https://testserver",
+        ) as first_client,
+        AsyncClient(
+            transport=transport,
+            base_url="https://testserver",
+        ) as second_client,
+    ):
+        responses = await asyncio.gather(
+            first_client.post(
+                "/auth/reset-password",
+                json={"email": test_user.email},
+            ),
+            second_client.post(
+                "/auth/reset-password",
+                json={"email": test_user.email},
+            ),
+        )
+
+        assert [response.status_code for response in responses] == [204, 204]
+
+        output_lines = capsys.readouterr().out.strip().splitlines()
+        assert len(output_lines) == 2
+        reset_tokens = [
+            password_reset_token_from_output(line, email=test_user.email)
+            for line in output_lines
+        ]
+
+        async with test_session_factory() as session:
+            stored_tokens = list(await session.scalars(select(PasswordResetToken)))
+
+        assert len(stored_tokens) == 1
+        assert stored_tokens[0].token_hash in {
+            hash_password_reset_token(token) for token in reset_tokens
+        }
+
+        validation_responses = await asyncio.gather(
+            *(
+                first_client.post(
+                    "/auth/reset-password/validate",
+                    json={"token": token},
+                )
+                for token in reset_tokens
+            )
+        )
+
+    assert sorted(response.status_code for response in validation_responses) == [
+        200,
+        400,
+    ]
+
+
+async def test_password_reset_is_rate_limited(
+    client: AsyncClient,
+    test_user: SeededUser,
+) -> None:
+    for _ in range(settings.password_reset_email_rate_limit):
+        response = await client.post(
+            "/auth/reset-password",
+            json={"email": test_user.email},
+        )
+        assert response.status_code == 204
+
+    blocked_response = await client.post(
+        "/auth/reset-password",
+        json={"email": test_user.email},
+    )
+
+    assert blocked_response.status_code == 429
+    assert blocked_response.json() == {"detail": "Too many password reset requests"}
+    assert int(blocked_response.headers["retry-after"]) >= 1
+
+
+async def test_password_reset_has_minimum_response_time_for_known_and_unknown_email(
+    client: AsyncClient,
+    test_user: SeededUser,
+) -> None:
+    minimum_duration = settings.password_reset_min_response_time_ms / 1000
+
+    for email in (test_user.email, "unknown@example.com"):
+        started_at = time.monotonic()
+        response = await client.post(
+            "/auth/reset-password",
+            json={"email": email},
+        )
+        duration = time.monotonic() - started_at
+
+        assert response.status_code == 204
+        assert duration >= minimum_duration - 0.02
 
 
 async def test_expired_password_reset_link_is_rejected(

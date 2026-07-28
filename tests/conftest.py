@@ -1,6 +1,6 @@
 import os
 import uuid
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Iterator
 
 import pytest
 import pytest_asyncio
@@ -16,6 +16,7 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy.pool import NullPool
 from sqlalchemy.schema import CreateSchema, DropSchema
 
+from app.api.routes.auth import password_reset_rate_limiter
 from app.core.config import settings
 from app.core.passwords import hash_password
 from app.db.base import Base
@@ -96,6 +97,13 @@ async def client(application: FastAPI) -> AsyncIterator[AsyncClient]:
         base_url="https://testserver",
     ) as test_client:
         yield test_client
+
+
+@pytest.fixture(autouse=True)
+def clear_password_reset_rate_limiter() -> Iterator[None]:
+    password_reset_rate_limiter.clear()
+    yield
+    password_reset_rate_limiter.clear()
 
 
 @pytest.fixture(scope="session")

@@ -1,4 +1,7 @@
+import asyncio
 import datetime
+import hashlib
+import time
 from time import sleep
 from typing import Annotated
 from urllib.parse import urlencode
@@ -17,6 +20,7 @@ from app.api.auth_helpers import (
     unauthorized,
 )
 from app.core.config import settings
+from app.core.rate_limit import SlidingWindowRateLimiter
 from app.db.session import get_db_session
 from app.schemas.auth import (
     AccessTokenResponse,
@@ -45,6 +49,9 @@ from app.services.auth import (
 )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+password_reset_rate_limiter = SlidingWindowRateLimiter(
+    settings.password_reset_rate_limit_window
+)
 
 
 @router.post(
@@ -176,23 +183,53 @@ async def logout(
 
 @router.post("/reset-password", status_code=204)
 async def reset_password(
-    request: ResetPasswordRequest,
+    payload: ResetPasswordRequest,
+    request: Request,
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
-    reset_token = await request_password_reset(
-        session,
-        email=str(request.email),
-    )
+    started_at = time.monotonic()
 
-    if reset_token is not None:
-        fragment = urlencode({"token": reset_token})
-        print(
-            f"Password reset link for {request.email}: "
-            f"{settings.frontend_url}/reset-password/confirm#{fragment}",
-            flush=True,
+    try:
+        normalized_email = str(payload.email).strip().casefold()
+        email_key = hashlib.sha256(normalized_email.encode()).hexdigest()
+        client_host = request.client.host if request.client is not None else "unknown"
+        rate_limit = password_reset_rate_limiter.check(
+            {
+                f"password-reset:email:{email_key}": (
+                    settings.password_reset_email_rate_limit
+                ),
+                f"password-reset:ip:{client_host}": (
+                    settings.password_reset_ip_rate_limit
+                ),
+            }
         )
 
-    return None
+        if not rate_limit.allowed:
+            raise HTTPException(
+                status_code=429,
+                detail="Too many password reset requests",
+                headers={"Retry-After": str(rate_limit.retry_after or 1)},
+            )
+
+        reset_token = await request_password_reset(
+            session,
+            email=normalized_email,
+        )
+
+        if reset_token is not None:
+            fragment = urlencode({"token": reset_token})
+            print(
+                f"Password reset link for {payload.email}: "
+                f"{settings.frontend_url}/reset-password/confirm#{fragment}",
+                flush=True,
+            )
+
+        return None
+    finally:
+        minimum_duration = settings.password_reset_min_response_time_ms / 1000
+        remaining_time = minimum_duration - (time.monotonic() - started_at)
+        if remaining_time > 0:
+            await asyncio.sleep(remaining_time)
 
 
 @router.post(
