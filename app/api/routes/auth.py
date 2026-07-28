@@ -4,7 +4,6 @@ import hashlib
 import time
 from time import sleep
 from typing import Annotated
-from urllib.parse import urlencode
 
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,6 +18,7 @@ from app.api.auth_helpers import (
     set_refresh_cookie,
     unauthorized,
 )
+from app.api.dependencies import get_password_reset_notifier
 from app.core.config import settings
 from app.core.rate_limit import SlidingWindowRateLimiter
 from app.db.session import get_db_session
@@ -47,6 +47,7 @@ from app.services.auth import (
     rotate_refresh_token,
     validate_password_reset_token,
 )
+from app.services.password_reset_notifier import PasswordResetNotifier
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 password_reset_rate_limiter = SlidingWindowRateLimiter(
@@ -186,6 +187,10 @@ async def reset_password(
     payload: ResetPasswordRequest,
     request: Request,
     session: Annotated[AsyncSession, Depends(get_db_session)],
+    notifier: Annotated[
+        PasswordResetNotifier,
+        Depends(get_password_reset_notifier),
+    ],
 ):
     started_at = time.monotonic()
 
@@ -217,11 +222,9 @@ async def reset_password(
         )
 
         if reset_token is not None:
-            fragment = urlencode({"token": reset_token})
-            print(
-                f"Password reset link for {payload.email}: "
-                f"{settings.frontend_url}/reset-password/confirm#{fragment}",
-                flush=True,
+            await notifier.send_password_reset_link(
+                email=str(payload.email),
+                token=reset_token,
             )
 
         return None

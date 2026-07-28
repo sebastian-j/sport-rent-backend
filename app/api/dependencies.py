@@ -8,11 +8,21 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.auth_helpers import unauthorized
+from app.core.config import settings
 from app.core.tokens import decode_access_token
 from app.db.session import get_db_session
 from app.models import AuthSession
+from app.services.password_reset_notifier import (
+    ConsolePasswordResetNotifier,
+    PasswordResetNotifier,
+)
 
 bearer_scheme = HTTPBearer(auto_error=False)
+password_reset_notifier = ConsolePasswordResetNotifier(settings.frontend_url)
+
+
+def get_password_reset_notifier() -> PasswordResetNotifier:
+    return password_reset_notifier
 
 
 async def get_current_user_id(
