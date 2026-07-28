@@ -53,9 +53,9 @@ async def register(
             session,
             email=str(request.email),
             password=request.password,
+            first_name=request.first_name,
+            last_name=request.last_name,
             address=RegistrationAddress(
-                first_name=request.first_name,
-                last_name=request.last_name,
                 first_line=request.address.first_line,
                 second_line=request.address.second_line,
                 postal_code=request.address.postal_code,

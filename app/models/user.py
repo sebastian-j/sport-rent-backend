@@ -24,7 +24,15 @@ class User(Base):
         String(255),
         nullable=False,
     )
-    address_id: Mapped[int | None] = mapped_column(
+    first_name: Mapped[str | None] = mapped_column(
+        String(100),
+        nullable=True,
+    )
+    last_name: Mapped[str | None] = mapped_column(
+        String(100),
+        nullable=True,
+    )
+    default_address_id: Mapped[int | None] = mapped_column(
         ForeignKey("addresses.id", ondelete="SET NULL"),
         unique=True,
         nullable=True,
@@ -43,8 +51,12 @@ class User(Base):
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
-    address: Mapped[Address | None] = relationship(
+    orders: Mapped[list[Order]] = relationship(
         back_populates="user",
+        passive_deletes=True,
+    )
+    default_address: Mapped[Address | None] = relationship(
+        back_populates="default_for_user",
         cascade="all, delete-orphan",
         single_parent=True,
         uselist=False,
@@ -54,3 +66,4 @@ class User(Base):
 if TYPE_CHECKING:
     from app.models.address import Address
     from app.models.auth_session import AuthSession
+    from app.models.order import Order

@@ -2,17 +2,17 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Integer, String
+from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 
 
-class Address(Base):
-    __tablename__ = "addresses"
+class OrderAddress(Base):
+    __tablename__ = "order_addresses"
 
-    id: Mapped[int] = mapped_column(
-        Integer,
+    order_id: Mapped[int] = mapped_column(
+        ForeignKey("orders.id", ondelete="CASCADE"),
         primary_key=True,
         nullable=False,
     )
@@ -52,11 +52,10 @@ class Address(Base):
         String(32),
         nullable=True,
     )
-    default_for_user: Mapped[User | None] = relationship(
-        back_populates="default_address",
-        uselist=False,
+    order: Mapped[Order] = relationship(
+        back_populates="address",
     )
 
 
 if TYPE_CHECKING:
-    from app.models.user import User
+    from app.models.order import Order

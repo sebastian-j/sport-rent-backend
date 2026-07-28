@@ -36,8 +36,6 @@ class EmailAlreadyRegisteredError(Exception):
 
 @dataclass(frozen=True, slots=True)
 class RegistrationAddress:
-    first_name: str
-    last_name: str
     first_line: str
     second_line: str | None
     postal_code: str
@@ -56,6 +54,8 @@ async def register_user(
     *,
     email: str,
     password: str,
+    first_name: str,
+    last_name: str,
     address: RegistrationAddress,
 ) -> User:
     normalized_email = normalize_email(email)
@@ -70,9 +70,9 @@ async def register_user(
     user = User(
         email=normalized_email,
         password_hash=password_hash,
-        address=Address(
-            first_name=address.first_name,
-            last_name=address.last_name,
+        first_name=first_name,
+        last_name=last_name,
+        default_address=Address(
             first_line=address.first_line,
             second_line=address.second_line or None,
             postal_code=address.postal_code,
