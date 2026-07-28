@@ -137,7 +137,7 @@ async def test_register_creates_user_with_normalized_email_and_hashed_password(
     assert user.password_hash != "Secure-password-123!"
     assert verify_password("Secure-password-123!", user.password_hash)
     assert address.first_name == "Jan"
-    assert address.second_name == "Nowak"
+    assert address.last_name == "Nowak"
     assert address.first_line == "ul. Testowa 10"
     assert address.second_line == "lok. 2"
     assert address.postal_code == "00-001"

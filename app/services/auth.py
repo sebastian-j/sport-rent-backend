@@ -71,7 +71,7 @@ async def register_user(
         password_hash=password_hash,
         address=Address(
             first_name=address.first_name,
-            second_name=address.last_name,
+            last_name=address.last_name,
             first_line=address.first_line,
             second_line=address.second_line or None,
             postal_code=address.postal_code,

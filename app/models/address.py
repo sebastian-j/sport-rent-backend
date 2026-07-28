@@ -20,7 +20,7 @@ class Address(Base):
         String(100),
         nullable=True,
     )
-    second_name: Mapped[str | None] = mapped_column(
+    last_name: Mapped[str | None] = mapped_column(
         String(100),
         nullable=True,
     )

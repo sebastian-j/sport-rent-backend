@@ -24,7 +24,7 @@ table categories {
 table addresses {
   id integer [primary key]
   first_name varchar
-  second_name varchar
+  last_name varchar
   first_line varchar [not null]
   second_line varchar
   postal_code varchar [not null]

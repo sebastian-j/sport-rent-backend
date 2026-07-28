@@ -33,7 +33,7 @@ async def test_seed_users_adds_addresses_and_is_idempotent(
 
         assert user.address is not None
         assert user.address.first_name == seed_user.address.first_name
-        assert user.address.second_name == seed_user.address.last_name
+        assert user.address.last_name == seed_user.address.last_name
         assert user.address.first_line == seed_user.address.first_line
         assert user.address.second_line == seed_user.address.second_line
         assert user.address.postal_code == seed_user.address.postal_code

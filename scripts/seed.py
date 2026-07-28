@@ -98,7 +98,7 @@ async def seed_users(
             if user.address is None:
                 user.address = Address(
                     first_name=seed_user.address.first_name,
-                    second_name=seed_user.address.last_name,
+                    last_name=seed_user.address.last_name,
                     first_line=seed_user.address.first_line,
                     second_line=seed_user.address.second_line,
                     postal_code=seed_user.address.postal_code,
