@@ -1,6 +1,7 @@
 import datetime
 from time import sleep
 from typing import Annotated
+from urllib.parse import urlencode
 
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -20,20 +21,27 @@ from app.db.session import get_db_session
 from app.schemas.auth import (
     AccessTokenResponse,
     ChangePasswordRequest,
+    ConfirmPasswordResetRequest,
     LoginRequest,
     RegisterRequest,
     RegisterResponse,
     ResetPasswordRequest,
+    ValidatePasswordResetRequest,
+    ValidatePasswordResetResponse,
 )
 from app.services.auth import (
     EmailAlreadyRegisteredError,
     InvalidCredentialsError,
+    InvalidPasswordResetTokenError,
     InvalidRefreshTokenError,
     RegistrationAddress,
     authenticate_user,
+    confirm_password_reset,
+    request_password_reset,
     register_user,
     revoke_auth_session,
     rotate_refresh_token,
+    validate_password_reset_token,
 )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -166,10 +174,73 @@ async def logout(
     return None
 
 
-# TODO: MOCK
 @router.post("/reset-password", status_code=204)
-def reset_password(request: ResetPasswordRequest):
-    sleep(1)
+async def reset_password(
+    request: ResetPasswordRequest,
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    reset_token = await request_password_reset(
+        session,
+        email=str(request.email),
+    )
+
+    if reset_token is not None:
+        fragment = urlencode({"token": reset_token})
+        print(
+            "Password reset link: "
+            f"{settings.frontend_url}/reset-password/confirm#{fragment}",
+            flush=True,
+        )
+
+    return None
+
+
+@router.post(
+    "/reset-password/validate",
+    response_model=ValidatePasswordResetResponse,
+)
+async def validate_password_reset(
+    request: ValidatePasswordResetRequest,
+    response: Response,
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    try:
+        email = await validate_password_reset_token(
+            session,
+            token=request.token,
+        )
+    except InvalidPasswordResetTokenError:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid or expired password reset link",
+        ) from None
+
+    response.headers["Cache-Control"] = "no-store"
+    return ValidatePasswordResetResponse(email=email)
+
+
+@router.post("/reset-password/confirm", status_code=204)
+async def confirm_reset_password(
+    request: ConfirmPasswordResetRequest,
+    response: Response,
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    try:
+        await confirm_password_reset(
+            session,
+            token=request.token,
+            new_password=request.new_password,
+        )
+    except InvalidPasswordResetTokenError:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid or expired password reset link",
+        ) from None
+
+    delete_refresh_cookie(response)
+    delete_csrf_cookie(response)
+    response.headers["Cache-Control"] = "no-store"
+
     return None
 
 

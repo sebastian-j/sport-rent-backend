@@ -53,6 +53,11 @@ class User(Base):
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
+    password_reset_tokens: Mapped[list[PasswordResetToken]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
     orders: Mapped[list[Order]] = relationship(
         back_populates="user",
         passive_deletes=True,
@@ -78,6 +83,7 @@ class User(Base):
 if TYPE_CHECKING:
     from app.models.address import Address
     from app.models.auth_session import AuthSession
+    from app.models.password_reset_token import PasswordResetToken
     from app.models.cart import CartItem
     from app.models.order import Order
     from app.models.product import Favorite

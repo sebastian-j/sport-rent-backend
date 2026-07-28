@@ -21,7 +21,7 @@ from app.core.passwords import hash_password
 from app.db.base import Base
 from app.db.session import get_db_session
 from app.main import app as fastapi_app
-from app.models import Address, Order, User
+from app.models import Address, AuthSession, Order, PasswordResetToken, User
 from tests.support import SeededUser
 
 TEST_EMAIL = "jan.kowalski@poczta.pl"
@@ -131,6 +131,9 @@ async def test_user(
     test_password_hash: str,
 ) -> SeededUser:
     async with test_session_factory.begin() as session:
+        await session.execute(delete(AuthSession))
+        await session.execute(delete(PasswordResetToken))
+        await session.execute(delete(User))
         session.add(
             User(
                 id=1,
@@ -139,8 +142,14 @@ async def test_user(
             )
         )
 
-    return SeededUser(
-        id=1,
-        email=TEST_EMAIL,
-        password=TEST_PASSWORD,
-    )
+    try:
+        yield SeededUser(
+            id=1,
+            email=TEST_EMAIL,
+            password=TEST_PASSWORD,
+        )
+    finally:
+        async with test_session_factory.begin() as session:
+            await session.execute(delete(AuthSession))
+            await session.execute(delete(PasswordResetToken))
+            await session.execute(delete(User))

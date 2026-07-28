@@ -1,6 +1,7 @@
 import asyncio
 import datetime
 from http.cookies import SimpleCookie
+from urllib.parse import parse_qs, urlsplit
 
 import jwt
 import pytest
@@ -10,9 +11,10 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.core.config import settings
+from app.core.password_reset import hash_password_reset_token
 from app.core.passwords import verify_password
 from app.core.tokens import decode_access_token, decode_refresh_token
-from app.models import Address, AuthSession, User
+from app.models import Address, AuthSession, PasswordResetToken, User
 from tests.support import SeededUser
 
 REFRESH_COOKIE_NAME = "refresh_token"
@@ -56,6 +58,24 @@ def csrf_headers(
         "Cookie": "; ".join(cookies),
         CSRF_HEADER_NAME: csrf_token,
     }
+
+
+def password_reset_token_from_output(output: str) -> str:
+    prefix = "Password reset link: "
+    assert output.startswith(prefix)
+
+    reset_url = output.removeprefix(prefix)
+    parsed_url = urlsplit(reset_url)
+
+    assert f"{parsed_url.scheme}://{parsed_url.netloc}" == settings.frontend_url
+    assert parsed_url.path == "/reset-password/confirm"
+    assert parsed_url.query == ""
+
+    token = parse_qs(parsed_url.fragment).get("token")
+    assert token is not None
+    assert len(token) == 1
+
+    return token[0]
 
 
 def assert_refresh_cookie_deleted(response: Response) -> None:
@@ -305,6 +325,183 @@ async def test_login_rejects_invalid_credentials_without_creating_session(
     assert session_count == 0
     assert user is not None
     assert user.last_login_at is None
+
+
+async def test_password_reset_link_changes_password_and_revokes_sessions(
+    client: AsyncClient,
+    test_user: SeededUser,
+    test_session_factory: async_sessionmaker[AsyncSession],
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    login_response = await login(client, test_user)
+    refresh_claims = decode_refresh_token(refresh_token_from(login_response))
+
+    response = await client.post(
+        "/auth/reset-password",
+        json={"email": test_user.email},
+    )
+
+    assert response.status_code == 204
+    assert response.content == b""
+
+    output = capsys.readouterr().out.strip()
+    reset_token = password_reset_token_from_output(output)
+
+    async with test_session_factory() as session:
+        user = await session.get(User, test_user.id)
+        stored_token = await session.scalar(select(PasswordResetToken))
+
+    assert user is not None
+    assert verify_password(test_user.password, user.password_hash)
+    assert stored_token is not None
+    assert stored_token.token_hash == hash_password_reset_token(reset_token)
+    assert stored_token.token_hash != reset_token
+    assert stored_token.used_at is None
+    assert stored_token.expires_at > datetime.datetime.now(datetime.UTC)
+
+    validation_response = await client.post(
+        "/auth/reset-password/validate",
+        json={"token": reset_token},
+    )
+
+    assert validation_response.status_code == 200
+    assert validation_response.json() == {"email": test_user.email}
+    assert validation_response.headers["cache-control"] == "no-store"
+
+    new_password = "New-test-password-456!"
+    confirmation_response = await client.post(
+        "/auth/reset-password/confirm",
+        json={"token": reset_token, "new_password": new_password},
+    )
+
+    assert confirmation_response.status_code == 204
+    assert confirmation_response.content == b""
+    assert confirmation_response.headers["cache-control"] == "no-store"
+    assert_refresh_cookie_deleted(confirmation_response)
+    assert_csrf_cookie_deleted(confirmation_response)
+
+    async with test_session_factory() as session:
+        user = await session.get(User, test_user.id)
+        stored_token = await session.scalar(select(PasswordResetToken))
+        auth_session = await session.get(AuthSession, refresh_claims.session_id)
+
+    assert user is not None
+    assert verify_password(new_password, user.password_hash)
+    assert not verify_password(test_user.password, user.password_hash)
+    assert stored_token is not None
+    assert stored_token.used_at is not None
+    assert auth_session is not None
+    assert auth_session.revoked_at is not None
+
+    reused_token_response = await client.post(
+        "/auth/reset-password/confirm",
+        json={"token": reset_token, "new_password": "Another-password-789!"},
+    )
+    assert reused_token_response.status_code == 400
+    assert reused_token_response.json() == {
+        "detail": "Invalid or expired password reset link"
+    }
+
+    old_password_response = await client.post(
+        "/auth/login",
+        json={"email": test_user.email, "password": test_user.password},
+    )
+    new_password_response = await client.post(
+        "/auth/login",
+        json={"email": test_user.email, "password": new_password},
+    )
+    assert old_password_response.status_code == 401
+    assert new_password_response.status_code == 200
+
+
+async def test_password_reset_for_unknown_email_is_neutral(
+    client: AsyncClient,
+    test_user: SeededUser,
+    test_session_factory: async_sessionmaker[AsyncSession],
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    response = await client.post(
+        "/auth/reset-password",
+        json={"email": "unknown@example.com"},
+    )
+
+    assert response.status_code == 204
+    assert response.content == b""
+    assert capsys.readouterr().out == ""
+
+    async with test_session_factory() as session:
+        user = await session.get(User, test_user.id)
+        token_count = await session.scalar(
+            select(func.count()).select_from(PasswordResetToken)
+        )
+
+    assert user is not None
+    assert verify_password(test_user.password, user.password_hash)
+    assert token_count == 0
+
+
+async def test_new_password_reset_link_invalidates_previous_link(
+    client: AsyncClient,
+    test_user: SeededUser,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    await client.post(
+        "/auth/reset-password",
+        json={"email": test_user.email},
+    )
+    first_token = password_reset_token_from_output(capsys.readouterr().out.strip())
+
+    await client.post(
+        "/auth/reset-password",
+        json={"email": test_user.email},
+    )
+    second_token = password_reset_token_from_output(capsys.readouterr().out.strip())
+
+    assert first_token != second_token
+
+    first_validation = await client.post(
+        "/auth/reset-password/validate",
+        json={"token": first_token},
+    )
+    second_validation = await client.post(
+        "/auth/reset-password/validate",
+        json={"token": second_token},
+    )
+
+    assert first_validation.status_code == 400
+    assert second_validation.status_code == 200
+
+
+async def test_expired_password_reset_link_is_rejected(
+    client: AsyncClient,
+    test_user: SeededUser,
+    test_session_factory: async_sessionmaker[AsyncSession],
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    await client.post(
+        "/auth/reset-password",
+        json={"email": test_user.email},
+    )
+    reset_token = password_reset_token_from_output(capsys.readouterr().out.strip())
+
+    async with test_session_factory.begin() as session:
+        stored_token = await session.scalar(select(PasswordResetToken))
+        assert stored_token is not None
+        stored_token.expires_at = datetime.datetime.now(
+            datetime.UTC
+        ) - datetime.timedelta(seconds=1)
+
+    validation_response = await client.post(
+        "/auth/reset-password/validate",
+        json={"token": reset_token},
+    )
+    confirmation_response = await client.post(
+        "/auth/reset-password/confirm",
+        json={"token": reset_token, "new_password": "New-test-password-456!"},
+    )
+
+    assert validation_response.status_code == 400
+    assert confirmation_response.status_code == 400
 
 
 async def test_access_token_protects_endpoint_and_expired_token_is_rejected(

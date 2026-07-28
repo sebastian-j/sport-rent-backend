@@ -73,6 +73,8 @@ class Settings:
     refresh_token_grace_period: datetime.timedelta
     csrf_expiration: int
     auth_cookie_secure: bool
+    frontend_url: str
+    password_reset_expiration: int
     seed_user_password: str | None
 
     @classmethod
@@ -117,6 +119,14 @@ class Settings:
                 default=refresh_expiration,
             ),
             auth_cookie_secure=_boolean("AUTH_COOKIE_SECURE", default=True),
+            frontend_url=_non_empty_string(
+                "FRONTEND_URL",
+                "http://localhost:5173",
+            ).rstrip("/"),
+            password_reset_expiration=_positive_integer(
+                "PASSWORD_RESET_EXPIRATION",
+                default=1800,
+            ),
             seed_user_password=os.getenv("SEED_USER_PASSWORD"),
         )
 
