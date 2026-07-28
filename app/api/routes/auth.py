@@ -2,7 +2,7 @@ import datetime
 from time import sleep
 from typing import Annotated
 
-from fastapi import APIRouter, Cookie, Depends, Request, Response
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.auth_helpers import (
@@ -21,17 +21,55 @@ from app.schemas.auth import (
     AccessTokenResponse,
     ChangePasswordRequest,
     LoginRequest,
+    RegisterRequest,
+    RegisterResponse,
     ResetPasswordRequest,
 )
 from app.services.auth import (
+    EmailAlreadyRegisteredError,
     InvalidCredentialsError,
     InvalidRefreshTokenError,
+    RegistrationAddress,
     authenticate_user,
+    register_user,
     revoke_auth_session,
     rotate_refresh_token,
 )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+
+@router.post(
+    "/register",
+    response_model=RegisterResponse,
+    status_code=201,
+)
+async def register(
+    request: RegisterRequest,
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    try:
+        user = await register_user(
+            session,
+            email=str(request.email),
+            password=request.password,
+            first_name=request.first_name,
+            last_name=request.last_name,
+            address=RegistrationAddress(
+                first_line=request.address.first_line,
+                second_line=request.address.second_line,
+                postal_code=request.address.postal_code,
+                city=request.address.city,
+                country=request.address.country,
+            ),
+        )
+    except EmailAlreadyRegisteredError:
+        raise HTTPException(
+            status_code=409,
+            detail="Email is already registered",
+        ) from None
+
+    return RegisterResponse(id=user.id, email=user.email)
 
 
 @router.post("/login", response_model=AccessTokenResponse)

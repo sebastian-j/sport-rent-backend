@@ -6,7 +6,9 @@ table users {
   id integer [primary key]
   email varchar [unique, not null]
   password varchar [not null]
-  address_id integer
+  first_name varchar
+  last_name varchar
+  default_address_id integer
   points integer // cache
   created_at datetime
   last_login_at datetime
@@ -23,13 +25,28 @@ table categories {
 
 table addresses {
   id integer [primary key]
+  first_name varchar
   last_name varchar
-  second_name varchar
-  first_line varchar
+  first_line varchar [not null]
   second_line varchar
-  postal_code varchar
-  city varchar
-  country varchar
+  postal_code varchar [not null]
+  city varchar [not null]
+  country varchar [not null]
+  company varchar
+  nip varchar
+}
+
+table order_addresses {
+  order_id integer [primary key]
+  first_name varchar
+  last_name varchar
+  first_line varchar [not null]
+  second_line varchar
+  postal_code varchar [not null]
+  city varchar [not null]
+  country varchar [not null]
+  company varchar
+  nip varchar
 }
 
 table orders {
@@ -157,12 +174,13 @@ table calendar_blocks {
 }
 
 ref: users.id < orders.user_id
+ref: orders.id - order_addresses.order_id
 ref: orders.id < order_instances.order_id
 ref: instances.id < order_instances.instance_id
 ref: products.id < instances.product_id
 ref: users.id < favorites.user_id
 ref: products.id < favorites.product_id
-ref: addresses.id - users.address_id
+ref: addresses.id - users.default_address_id
 ref: products.id < product_images.product_id
 ref: orders.id < points_history.order_id
 ref: users.id < cart_items.user_id

@@ -1,11 +1,12 @@
 import json
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
 
 from app.schemas.product import (
+    CategoryResponse,
     ProductAvailabilityResponse,
-    ProductRequest,
+    ProductQueryParams,
     ProductResponse,
 )
 from app.services.image import convert_images_to_base64
@@ -19,12 +20,13 @@ with open(products_file_path, encoding="utf-8") as f:
 
 
 @router.get("", response_model=list[ProductResponse])
-async def get_products(request: Annotated[ProductRequest, Query()]):
-    sort = request.filter.sort if request.filter else None
-    order = request.filter.order if request.filter else None
-    min_price = request.filter.minPrice if request.filter else None
-    max_price = request.filter.maxPrice if request.filter else None
-    categories = request.filter.category if request.filter else None
+async def get_products(params: Annotated[ProductQueryParams, Depends()]):
+    sort = params.sort
+    order = params.order
+    min_price = params.minPrice
+    max_price = params.maxPrice
+    categories = params.category
+    query = params.query
 
     filtered_products = [
         product
@@ -32,6 +34,7 @@ async def get_products(request: Annotated[ProductRequest, Query()]):
         if (min_price is None or product.get("price", 0) >= min_price)
         and (max_price is None or product.get("price", 0) <= max_price)
         and (not categories or product.get("category") in categories)
+        and (not query or query.lower() in product.get("name", "").lower())
     ]
 
     if sort and order:
@@ -44,8 +47,8 @@ async def get_products(request: Annotated[ProductRequest, Query()]):
                 key=lambda x: x.get("name", "").lower(), reverse=(order == "desc")
             )
 
-    page = request.page or 1
-    page_size = request.pageSize or 10
+    page = params.page or 1
+    page_size = params.pageSize or 10
 
     start_index = (page - 1) * page_size
     end_index = start_index + page_size
@@ -59,6 +62,34 @@ async def get_products(request: Annotated[ProductRequest, Query()]):
         results.append(p_copy)
 
     return results
+
+
+@router.get("/count", response_model=tuple[list[CategoryResponse], int])
+async def get_categories_count(params: Annotated[ProductQueryParams, Depends()]):
+    min_price = params.minPrice
+    max_price = params.maxPrice
+    search_query = params.query
+
+    filtered_products = [
+        product
+        for product in products
+        if (min_price is None or product.get("price", 0) >= min_price)
+        and (max_price is None or product.get("price", 0) <= max_price)
+        and (
+            not search_query or search_query.lower() in product.get("name", "").lower()
+        )
+    ]
+
+    category_count = {}
+    for product in filtered_products:
+        category = product.get("category")
+        if category:
+            category_count[category] = category_count.get(category, 0) + 1
+
+    return (
+        [{"name": cat, "count": count} for cat, count in category_count.items()],
+        len(filtered_products),
+    )
 
 
 @router.get("/{product_slug}", response_model=ProductResponse)
