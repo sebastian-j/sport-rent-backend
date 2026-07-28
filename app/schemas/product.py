@@ -22,6 +22,7 @@ class ProductResponse(BaseModel):
     alt: str | None = None
     category: str | None = None
     sizes: list[ProductSize] | None = None
+    isFavorite: bool = False
 
 
 class ProductAvailabilityResponse(BaseModel):

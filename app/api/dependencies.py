@@ -25,3 +25,16 @@ def get_current_user_id(
         return claims.user_id
     except jwt.InvalidTokenError:
         raise unauthorized("Invalid token", bearer_challenge=True) from None
+
+
+def get_optional_current_user_id(
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)],
+) -> int | None:
+    if credentials is None:
+        return None
+    token = credentials.credentials
+    try:
+        claims = decode_access_token(token)
+        return claims.user_id
+    except jwt.InvalidTokenError:
+        return None
