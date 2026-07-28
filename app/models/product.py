@@ -27,8 +27,8 @@ class Category(Base):
     __tablename__ = "categories"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    name: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    slug: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    name: Mapped[str | None] = mapped_column(String(255), nullable=False)
+    slug: Mapped[str | None] = mapped_column(String(255), nullable=False)
 
     products: Mapped[list[Product]] = relationship(
         back_populates="category", cascade="all, delete-orphan", passive_deletes=True
@@ -65,7 +65,7 @@ class Instance(Base):
         Integer, ForeignKey("products.id", ondelete="CASCADE"), nullable=False
     )
     status: Mapped[InstanceStatus | None] = mapped_column(
-        Enum(InstanceStatus), server_default="AVAILABLE", nullable=True
+        Enum(InstanceStatus), server_default="AVAILABLE", nullable=False
     )
     size: Mapped[str | None] = mapped_column(String(50), nullable=True)
 
@@ -78,12 +78,12 @@ class Product(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    price: Mapped[float | None] = mapped_column(Float, nullable=True)
+    price: Mapped[float] = mapped_column(Float, nullable=False)
     slug: Mapped[str | None] = mapped_column(
-        String(255), unique=True, index=True, nullable=True
+        String(255), unique=True, index=True, nullable=False
     )
     meta_description: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    visibility_status: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    visibility_status: Mapped[bool | None] = mapped_column(Boolean, nullable=False)
     category_id: Mapped[int | None] = mapped_column(
         Integer, ForeignKey("categories.id", ondelete="SET NULL"), nullable=True
     )
@@ -112,9 +112,9 @@ class ProductImage(Base):
     product_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("products.id", ondelete="CASCADE"), nullable=False
     )
-    image: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    alt_text: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    display_order: Mapped[int | None] = mapped_column(SmallInteger, nullable=True)
+    image: Mapped[str | None] = mapped_column(String(255), nullable=False)
+    alt_text: Mapped[str | None] = mapped_column(String(255), nullable=False)
+    display_order: Mapped[int | None] = mapped_column(SmallInteger, nullable=False)
 
     __table_args__ = (
         UniqueConstraint(
@@ -130,9 +130,9 @@ class ProductSize(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     product_id: Mapped[int | None] = mapped_column(
-        Integer, ForeignKey("products.id", ondelete="CASCADE"), nullable=True
+        Integer, ForeignKey("products.id", ondelete="CASCADE"), nullable=False
     )
-    size: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    size: Mapped[str | None] = mapped_column(String(50), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     __table_args__ = (UniqueConstraint("product_id", "size", name="uix_product_size"),)
