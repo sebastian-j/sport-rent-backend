@@ -126,7 +126,7 @@ async def test_register_creates_user_with_normalized_email_and_hashed_password(
     async with test_session_factory() as session:
         result = await session.execute(
             select(User, Address)
-            .join(Address, User.address_id == Address.id)
+            .join(Address, User.default_address_id == Address.id)
             .where(User.email == "new.user@example.com")
         )
         row = result.one_or_none()
@@ -136,8 +136,10 @@ async def test_register_creates_user_with_normalized_email_and_hashed_password(
     assert user.id == response.json()["id"]
     assert user.password_hash != "Secure-password-123!"
     assert verify_password("Secure-password-123!", user.password_hash)
-    assert address.first_name == "Jan"
-    assert address.last_name == "Nowak"
+    assert user.first_name == "Jan"
+    assert user.last_name == "Nowak"
+    assert address.first_name is None
+    assert address.last_name is None
     assert address.first_line == "ul. Testowa 10"
     assert address.second_line == "lok. 2"
     assert address.postal_code == "00-001"

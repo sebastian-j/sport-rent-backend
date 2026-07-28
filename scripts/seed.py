@@ -13,8 +13,6 @@ from app.models import Address, User
 
 @dataclass(frozen=True, slots=True)
 class SeedAddress:
-    first_name: str
-    last_name: str
     first_line: str
     second_line: str | None
     postal_code: str
@@ -25,15 +23,17 @@ class SeedAddress:
 @dataclass(frozen=True, slots=True)
 class SeedUser:
     email: str
+    first_name: str
+    last_name: str
     address: SeedAddress
 
 
 SEED_USERS = (
     SeedUser(
         email="jan.kowalski@poczta.pl",
+        first_name="Jan",
+        last_name="Kowalski",
         address=SeedAddress(
-            first_name="Jan",
-            last_name="Kowalski",
             first_line="ul. Przykładowa 123",
             second_line=None,
             postal_code="00-001",
@@ -43,9 +43,9 @@ SEED_USERS = (
     ),
     SeedUser(
         email="anna.nowak@poczta.pl",
+        first_name="Anna",
+        last_name="Nowak",
         address=SeedAddress(
-            first_name="Anna",
-            last_name="Nowak",
             first_line="ul. Testowa 456",
             second_line="Mieszkanie 12",
             postal_code="30-002",
@@ -55,9 +55,9 @@ SEED_USERS = (
     ),
     SeedUser(
         email="piotr.wisniewski@poczta.pl",
+        first_name="Piotr",
+        last_name="Wiśniewski",
         address=SeedAddress(
-            first_name="Piotr",
-            last_name="Wiśniewski",
             first_line="ul. Przykładowa 789",
             second_line=None,
             postal_code="80-003",
@@ -77,7 +77,7 @@ async def seed_users(
     async with session_factory.begin() as session:
         existing_users = await session.scalars(
             select(User)
-            .options(selectinload(User.address))
+            .options(selectinload(User.default_address))
             .where(User.email.in_(seed_emails))
         )
         users_by_email = {user.email: user for user in existing_users}
@@ -91,14 +91,19 @@ async def seed_users(
                 user = User(
                     email=seed_user.email,
                     password_hash=hash_password(seed_password),
+                    first_name=seed_user.first_name,
+                    last_name=seed_user.last_name,
                 )
                 session.add(user)
                 added_users += 1
+            else:
+                if user.first_name is None:
+                    user.first_name = seed_user.first_name
+                if user.last_name is None:
+                    user.last_name = seed_user.last_name
 
-            if user.address is None:
-                user.address = Address(
-                    first_name=seed_user.address.first_name,
-                    last_name=seed_user.address.last_name,
+            if user.default_address is None:
+                user.default_address = Address(
                     first_line=seed_user.address.first_line,
                     second_line=seed_user.address.second_line,
                     postal_code=seed_user.address.postal_code,

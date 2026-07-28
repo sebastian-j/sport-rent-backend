@@ -10,16 +10,26 @@ async def test_seed_users_adds_addresses_and_is_idempotent(
     empty_auth_database: None,
     test_session_factory: async_sessionmaker[AsyncSession],
 ) -> None:
+    async with test_session_factory.begin() as session:
+        session.add(
+            User(
+                email=SEED_USERS[0].email,
+                password_hash="existing-password-hash",
+            )
+        )
+
     first_result = await seed_users(test_session_factory)
     second_result = await seed_users(test_session_factory)
 
-    assert first_result == (len(SEED_USERS), len(SEED_USERS))
+    assert first_result == (len(SEED_USERS) - 1, len(SEED_USERS))
     assert second_result == (0, 0)
 
     async with test_session_factory() as session:
         users = list(
             await session.scalars(
-                select(User).options(selectinload(User.address)).order_by(User.email)
+                select(User)
+                .options(selectinload(User.default_address))
+                .order_by(User.email)
             )
         )
         address_count = await session.scalar(select(func.count()).select_from(Address))
@@ -31,13 +41,15 @@ async def test_seed_users_adds_addresses_and_is_idempotent(
     for user in users:
         seed_user = seed_users_by_email[user.email]
 
-        assert user.address is not None
-        assert user.address.first_name == seed_user.address.first_name
-        assert user.address.last_name == seed_user.address.last_name
-        assert user.address.first_line == seed_user.address.first_line
-        assert user.address.second_line == seed_user.address.second_line
-        assert user.address.postal_code == seed_user.address.postal_code
-        assert user.address.city == seed_user.address.city
-        assert user.address.country == seed_user.address.country
-        assert user.address.company is None
-        assert user.address.nip is None
+        assert user.first_name == seed_user.first_name
+        assert user.last_name == seed_user.last_name
+        assert user.default_address is not None
+        assert user.default_address.first_name is None
+        assert user.default_address.last_name is None
+        assert user.default_address.first_line == seed_user.address.first_line
+        assert user.default_address.second_line == seed_user.address.second_line
+        assert user.default_address.postal_code == seed_user.address.postal_code
+        assert user.default_address.city == seed_user.address.city
+        assert user.default_address.country == seed_user.address.country
+        assert user.default_address.company is None
+        assert user.default_address.nip is None

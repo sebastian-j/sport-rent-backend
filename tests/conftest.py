@@ -21,7 +21,7 @@ from app.core.passwords import hash_password
 from app.db.base import Base
 from app.db.session import get_db_session
 from app.main import app as fastapi_app
-from app.models import Address, User
+from app.models import Address, Order, User
 from tests.support import SeededUser
 
 TEST_EMAIL = "jan.kowalski@poczta.pl"
@@ -107,6 +107,7 @@ async def clear_auth_database(
     session_factory: async_sessionmaker[AsyncSession],
 ) -> None:
     async with session_factory.begin() as session:
+        await session.execute(delete(Order))
         await session.execute(delete(User))
         await session.execute(delete(Address))
 
