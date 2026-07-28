@@ -60,8 +60,8 @@ def csrf_headers(
     }
 
 
-def password_reset_token_from_output(output: str) -> str:
-    prefix = "Password reset link: "
+def password_reset_token_from_output(output: str, *, email: str) -> str:
+    prefix = f"Password reset link for {email}: "
     assert output.startswith(prefix)
 
     reset_url = output.removeprefix(prefix)
@@ -345,7 +345,7 @@ async def test_password_reset_link_changes_password_and_revokes_sessions(
     assert response.content == b""
 
     output = capsys.readouterr().out.strip()
-    reset_token = password_reset_token_from_output(output)
+    reset_token = password_reset_token_from_output(output, email=test_user.email)
 
     async with test_session_factory() as session:
         user = await session.get(User, test_user.id)
@@ -449,13 +449,19 @@ async def test_new_password_reset_link_invalidates_previous_link(
         "/auth/reset-password",
         json={"email": test_user.email},
     )
-    first_token = password_reset_token_from_output(capsys.readouterr().out.strip())
+    first_token = password_reset_token_from_output(
+        capsys.readouterr().out.strip(),
+        email=test_user.email,
+    )
 
     await client.post(
         "/auth/reset-password",
         json={"email": test_user.email},
     )
-    second_token = password_reset_token_from_output(capsys.readouterr().out.strip())
+    second_token = password_reset_token_from_output(
+        capsys.readouterr().out.strip(),
+        email=test_user.email,
+    )
 
     assert first_token != second_token
 
@@ -482,7 +488,10 @@ async def test_expired_password_reset_link_is_rejected(
         "/auth/reset-password",
         json={"email": test_user.email},
     )
-    reset_token = password_reset_token_from_output(capsys.readouterr().out.strip())
+    reset_token = password_reset_token_from_output(
+        capsys.readouterr().out.strip(),
+        email=test_user.email,
+    )
 
     async with test_session_factory.begin() as session:
         stored_token = await session.scalar(select(PasswordResetToken))

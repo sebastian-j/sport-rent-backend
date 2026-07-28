@@ -187,7 +187,7 @@ async def reset_password(
     if reset_token is not None:
         fragment = urlencode({"token": reset_token})
         print(
-            "Password reset link: "
+            f"Password reset link for {request.email}: "
             f"{settings.frontend_url}/reset-password/confirm#{fragment}",
             flush=True,
         )
