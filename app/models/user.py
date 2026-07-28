@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -61,9 +63,15 @@ class User(Base):
         single_parent=True,
         uselist=False,
     )
+    favorites: Mapped[list[Favorite]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
 
 
 if TYPE_CHECKING:
     from app.models.address import Address
     from app.models.auth_session import AuthSession
     from app.models.order import Order
+    from app.models.product import Favorite

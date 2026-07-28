@@ -9,6 +9,8 @@ from app.core.config import settings
 from app.core.passwords import hash_password
 from app.db.session import async_session_factory, engine
 from app.models import Address, User
+from scripts.seed_favorites import seed_favorites
+from scripts.seed_products import seed_products
 
 
 @dataclass(frozen=True, slots=True)
@@ -120,6 +122,8 @@ async def seed_users(
 async def main() -> None:
     try:
         await seed_users()
+        await seed_products()
+        await seed_favorites()
     finally:
         await engine.dispose()
 
