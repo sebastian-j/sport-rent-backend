@@ -91,6 +91,12 @@ To check the currently applied migration revision, run:
 uv run --env-file .env alembic current
 ```
 
+In case of errors with multiple heads during migrations, you can merge them with:
+
+```bash
+uv run alembic merge heads -m "Merge multiple heads"
+```
+
 ## Running the Tests
 
 Start PostgreSQL and run the integration tests:
