@@ -21,7 +21,7 @@ from app.core.passwords import hash_password
 from app.db.base import Base
 from app.db.session import get_db_session
 from app.main import app as fastapi_app
-from app.models import Address, AuthSession, User
+from app.models import Address, User
 from tests.support import SeededUser
 
 TEST_EMAIL = "jan.kowalski@poczta.pl"
@@ -103,33 +103,33 @@ def test_password_hash() -> str:
     return hash_password(TEST_PASSWORD)
 
 
+async def clear_auth_database(
+    session_factory: async_sessionmaker[AsyncSession],
+) -> None:
+    async with session_factory.begin() as session:
+        await session.execute(delete(User))
+        await session.execute(delete(Address))
+
+
 @pytest_asyncio.fixture
 async def empty_auth_database(
     test_session_factory: async_sessionmaker[AsyncSession],
 ) -> AsyncIterator[None]:
-    async with test_session_factory.begin() as session:
-        await session.execute(delete(AuthSession))
-        await session.execute(delete(User))
-        await session.execute(delete(Address))
+    await clear_auth_database(test_session_factory)
 
     try:
         yield
     finally:
-        async with test_session_factory.begin() as session:
-            await session.execute(delete(AuthSession))
-            await session.execute(delete(User))
-            await session.execute(delete(Address))
+        await clear_auth_database(test_session_factory)
 
 
 @pytest_asyncio.fixture
 async def test_user(
+    empty_auth_database: None,
     test_session_factory: async_sessionmaker[AsyncSession],
     test_password_hash: str,
-) -> AsyncIterator[SeededUser]:
+) -> SeededUser:
     async with test_session_factory.begin() as session:
-        await session.execute(delete(AuthSession))
-        await session.execute(delete(User))
-        await session.execute(delete(Address))
         session.add(
             User(
                 id=1,
@@ -138,14 +138,8 @@ async def test_user(
             )
         )
 
-    try:
-        yield SeededUser(
-            id=1,
-            email=TEST_EMAIL,
-            password=TEST_PASSWORD,
-        )
-    finally:
-        async with test_session_factory.begin() as session:
-            await session.execute(delete(AuthSession))
-            await session.execute(delete(User))
-            await session.execute(delete(Address))
+    return SeededUser(
+        id=1,
+        email=TEST_EMAIL,
+        password=TEST_PASSWORD,
+    )
