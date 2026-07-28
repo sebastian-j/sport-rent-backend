@@ -9,6 +9,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
+from app.core.email import normalize_email
 from app.core.passwords import DUMMY_PASSWORD_HASH, hash_password, verify_password
 from app.core.tokens import (
     IssuedToken,
@@ -57,7 +58,7 @@ async def register_user(
     password: str,
     address: RegistrationAddress,
 ) -> User:
-    normalized_email = email.strip().casefold()
+    normalized_email = normalize_email(email)
     existing_user_id = await session.scalar(
         select(User.id).where(User.email == normalized_email)
     )
@@ -101,7 +102,7 @@ async def authenticate_user(
     email: str,
     password: str,
 ) -> AuthTokens:
-    normalized_email = email.strip().casefold()
+    normalized_email = normalize_email(email)
     user = await session.scalar(select(User).where(User.email == normalized_email))
 
     password_hash = user.password_hash if user is not None else DUMMY_PASSWORD_HASH
