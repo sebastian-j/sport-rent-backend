@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, Integer, String, func
+from sqlalchemy import DateTime, ForeignKey, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -24,6 +24,11 @@ class User(Base):
         String(255),
         nullable=False,
     )
+    address_id: Mapped[int | None] = mapped_column(
+        ForeignKey("addresses.id", ondelete="SET NULL"),
+        unique=True,
+        nullable=True,
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -38,7 +43,14 @@ class User(Base):
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
+    address: Mapped[Address | None] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+        single_parent=True,
+        uselist=False,
+    )
 
 
 if TYPE_CHECKING:
+    from app.models.address import Address
     from app.models.auth_session import AuthSession

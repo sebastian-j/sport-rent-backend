@@ -23,13 +23,15 @@ table categories {
 
 table addresses {
   id integer [primary key]
-  last_name varchar
+  first_name varchar
   second_name varchar
-  first_line varchar
+  first_line varchar [not null]
   second_line varchar
-  postal_code varchar
-  city varchar
-  country varchar
+  postal_code varchar [not null]
+  city varchar [not null]
+  country varchar [not null]
+  company varchar
+  nip varchar
 }
 
 table orders {
