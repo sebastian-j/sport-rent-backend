@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 MIN_PRICE = 0
 MAX_PRICE = 200
@@ -33,7 +33,7 @@ class ProductQueryParams(BaseModel):
     order: str | None = None
     minPrice: int | None = MIN_PRICE
     maxPrice: int | None = MAX_PRICE
-    category: list[str] = Field(default_factory=list)
+    category: list[str] | None = None
     query: str | None = None
     page: int | None = DEFAULT_PAGE
     pageSize: int | None = DEFAULT_PAGE_SIZE
