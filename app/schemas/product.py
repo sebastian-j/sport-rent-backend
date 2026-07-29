@@ -1,5 +1,4 @@
-from fastapi import Query
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 MIN_PRICE = 0
 MAX_PRICE = 200
@@ -34,7 +33,7 @@ class ProductQueryParams(BaseModel):
     order: str | None = None
     minPrice: int | None = MIN_PRICE
     maxPrice: int | None = MAX_PRICE
-    category: list[str] | None = Query(default=[])
+    category: list[str] = Field(default_factory=list)
     query: str | None = None
     page: int | None = DEFAULT_PAGE
     pageSize: int | None = DEFAULT_PAGE_SIZE

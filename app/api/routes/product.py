@@ -83,7 +83,7 @@ async def get_products(
 
 
 @router.get("/count", response_model=tuple[list[CategoryResponse], int])
-async def get_categories_count(params: Annotated[ProductQueryParams, Depends()]):
+async def get_categories_count(params: Annotated[ProductQueryParams, Query()]):
     min_price = params.minPrice
     max_price = params.maxPrice
     search_query = params.query
