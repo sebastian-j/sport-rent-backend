@@ -20,19 +20,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 
 if TYPE_CHECKING:
+    from app.models.category import Category
     from app.models.user import User
-
-
-class Category(Base):
-    __tablename__ = "categories"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    name: Mapped[str | None] = mapped_column(String(255), nullable=False)
-    slug: Mapped[str | None] = mapped_column(String(255), nullable=False)
-
-    products: Mapped[list[Product]] = relationship(
-        back_populates="category", cascade="all, delete-orphan", passive_deletes=True
-    )
 
 
 class Favorite(Base):

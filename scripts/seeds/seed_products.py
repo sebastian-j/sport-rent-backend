@@ -2,40 +2,75 @@ import asyncio
 import json
 import re
 import unicodedata
+from pathlib import Path
 
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.db.session import async_session_factory
-from app.models.product import Category, Product, ProductImage, ProductSize
+from app.models.category import Category
+from app.models.product import Product, ProductImage, ProductSize
+
+PRODUCTS_FILE_PATH = Path("app/assets/mock_products.json")
+CATEGORY_IMAGES_DIRECTORY = Path("app/assets/categories/pictures")
+CATEGORY_IMAGES_STORAGE_PATH = Path("assets/categories/pictures")
 
 
 def slugify(text: str) -> str:
+    text = text.translate(str.maketrans({"ł": "l", "Ł": "L"}))
     text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("utf-8")
     text = re.sub(r"[^\w\s-]", "", text).strip().lower()
     return re.sub(r"[-\s]+", "-", text)
 
 
-async def seed_products():
-    with open("../../app/assets/mock_products.json", encoding="utf-8") as f:
+def find_category_image(category_name: str) -> str | None:
+    if not CATEGORY_IMAGES_DIRECTORY.is_dir():
+        return None
+
+    category_slug = slugify(category_name)
+    matching_images = sorted(
+        path
+        for path in CATEGORY_IMAGES_DIRECTORY.iterdir()
+        if path.is_file() and slugify(path.stem) == category_slug
+    )
+
+    if not matching_images:
+        return None
+
+    return (CATEGORY_IMAGES_STORAGE_PATH / matching_images[0].name).as_posix()
+
+
+async def seed_products(
+    session_factory: async_sessionmaker[AsyncSession] = async_session_factory,
+) -> None:
+    with PRODUCTS_FILE_PATH.open(encoding="utf-8") as f:
         data = json.load(f)
 
     products_data = data.get("products", [])
 
-    async with async_session_factory() as session:
-        category_names = list(
-            set(p.get("category") for p in products_data if p.get("category"))
+    async with session_factory() as session:
+        category_names = sorted(
+            {p.get("category") for p in products_data if p.get("category")}
         )
         category_map = {}
 
         for c_name in category_names:
-            result = await session.execute(
+            category = await session.scalar(
                 select(Category).where(Category.name == c_name)
             )
-            category = result.scalars().first()
-            if not category:
-                category = Category(name=c_name, slug=slugify(c_name))
+            category_image = find_category_image(c_name)
+
+            if category is None:
+                category = Category(
+                    name=c_name,
+                    slug=slugify(c_name),
+                    image=category_image,
+                )
                 session.add(category)
                 await session.flush()  # to get id
+            elif category_image is not None:
+                category.image = category_image
+
             category_map[c_name] = category
 
         for p_data in products_data:
