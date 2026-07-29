@@ -2,7 +2,12 @@ import json
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.dependencies import get_optional_current_user_id
+from app.db.session import get_db_session
+from app.models.product import Favorite
 from app.schemas.product import (
     CategoryResponse,
     ProductAvailabilityResponse,
@@ -10,11 +15,6 @@ from app.schemas.product import (
     ProductResponse,
 )
 from app.services.image import convert_images_to_base64
-from app.api.dependencies import get_optional_current_user_id
-from app.db.session import get_db_session
-from app.models.product import Favorite
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 
 router = APIRouter(prefix="/product", tags=["product"])
 
@@ -66,10 +66,11 @@ async def get_products(
 
     favorites_set = set()
     if user_id is not None:
-        fav_result = await session.execute(
-            select(Favorite.product_slug).where(Favorite.user_id == user_id)
+        favorites_set = set(
+            await session.scalars(
+                select(Favorite.product_slug).where(Favorite.user_id == user_id)
+            )
         )
-        favorites_set = set(fav_result.scalars().all())
 
     results = []
     for p in paginated_products:
@@ -122,18 +123,20 @@ async def get_product(
     if product:
         p_copy = dict(product)
         p_copy["images"] = convert_images_to_base64(p_copy.get("images"))
-        
-        is_favourite = False
+
+        is_favorite = False
         if user_id is not None:
-            fav_result = await session.execute(
-                select(Favorite).where(
-                    Favorite.user_id == user_id,
-                    Favorite.product_slug == product_slug
+            is_favorite = (
+                await session.scalar(
+                    select(Favorite).where(
+                        Favorite.user_id == user_id,
+                        Favorite.product_slug == product_slug,
+                    )
                 )
+                is not None
             )
-            is_favourite = fav_result.scalars().first() is not None
-            
-        p_copy["isFavourite"] = is_favourite
+
+        p_copy["isFavorite"] = is_favorite
         return p_copy
 
     raise HTTPException(status_code=404, detail="Product not found")

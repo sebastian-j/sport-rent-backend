@@ -18,12 +18,13 @@ async def get_favorites(
     user_id: Annotated[int, Depends(get_current_user_id)],
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
-    result = await session.execute(
-        select(Favorite)
-        .options(selectinload(Favorite.product).selectinload(Product.images))
-        .where(Favorite.user_id == user_id)
-    )
-    favorites = result.scalars().all()
+    favorites = (
+        await session.scalars(
+            select(Favorite)
+            .options(selectinload(Favorite.product).selectinload(Product.images))
+            .where(Favorite.user_id == user_id)
+        )
+    ).all()
 
     response = []
     for fav in favorites:
@@ -52,17 +53,15 @@ async def add_to_favorites(
     user_id: Annotated[int, Depends(get_current_user_id)],
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
-    result = await session.execute(select(Product).where(Product.slug == product_slug))
-    product = result.scalars().first()
+    product = await session.scalar(select(Product).where(Product.slug == product_slug))
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
 
-    fav_result = await session.execute(
+    if await session.scalar(
         select(Favorite).where(
             Favorite.user_id == user_id, Favorite.product_slug == product.slug
         )
-    )
-    if fav_result.scalars().first():
+    ):
         return
 
     favorite = Favorite(user_id=user_id, product_slug=product.slug)
@@ -76,17 +75,15 @@ async def remove_from_favorites(
     user_id: Annotated[int, Depends(get_current_user_id)],
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
-    result = await session.execute(select(Product).where(Product.slug == product_slug))
-    product = result.scalars().first()
+    product = await session.scalar(select(Product).where(Product.slug == product_slug))
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
 
-    fav_result = await session.execute(
+    favorite = await session.scalar(
         select(Favorite).where(
             Favorite.user_id == user_id, Favorite.product_slug == product.slug
         )
     )
-    favorite = fav_result.scalars().first()
     if not favorite:
         raise HTTPException(status_code=404, detail="Favorite not found")
 
