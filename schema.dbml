@@ -21,6 +21,7 @@ table categories {
   id integer [primary key]
   name string
   slug string
+  image varchar
 }
 
 table addresses {
@@ -150,10 +151,14 @@ table cart_items {
   user_id integer [not null]
   product_id integer [not null]
   product_size_id integer
-  quantity integer
-  start_date date
-  end_date date
-  created_at date
+  quantity integer [not null]
+  start_date date [not null]
+  end_date date [not null]
+  created_at datetime [not null]
+
+  indexes {
+    (user_id, product_id, product_size_id, start_date, end_date) [unique, note: 'NULLS NOT DISTINCT']
+  }
 
   checks {
     `start_date <= end_date`
@@ -184,5 +189,7 @@ ref: addresses.id - users.default_address_id
 ref: products.id < product_images.product_id
 ref: orders.id < points_history.order_id
 ref: users.id < cart_items.user_id
+ref: products.id < cart_items.product_id
+ref: product_sizes.id < cart_items.product_size_id
 ref: instances.id < calendar_blocks.instance_id
 ref: products.id < product_sizes.product_id
