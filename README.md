@@ -85,6 +85,20 @@ The `alembic upgrade head` command applies all pending migrations up to the
 latest revision. It can be run both for an empty database and after new
 migrations have been added.
 
+To remove all data, recreate the `public` schema, apply migrations and run the
+main `scripts/seed.py` seed orchestrator:
+
+```bash
+uv run --env-file .env python -m scripts.reset_database
+```
+
+The command requires typing the target database name. For non-interactive local
+usage, the confirmation can be skipped explicitly:
+
+```bash
+uv run --env-file .env python -m scripts.reset_database --yes
+```
+
 To check the currently applied migration revision, run:
 
 ```bash

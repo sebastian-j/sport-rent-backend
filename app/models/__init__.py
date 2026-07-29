@@ -1,10 +1,10 @@
 from app.db.base import Base
 from app.models.address import Address
 from app.models.auth_session import AuthSession
+from app.models.category import Category
 from app.models.order import Order, OrderStatus
 from app.models.order_address import OrderAddress
 from app.models.product import (
-    Category,
     Favorite,
     Instance,
     Product,
