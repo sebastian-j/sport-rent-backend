@@ -41,7 +41,7 @@ def find_category_image(category_name: str) -> str | None:
 
 
 async def seed_products(
-session_factory: async_sessionmaker[AsyncSession] = async_session_factory,
+    session_factory: async_sessionmaker[AsyncSession] = async_session_factory,
 ) -> None:
     with PRODUCTS_FILE_PATH.open(encoding="utf-8") as f:
         data = json.load(f)

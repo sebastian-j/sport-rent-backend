@@ -1,8 +1,8 @@
+from seed_products import seed_products
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.models import Category, Product
-from seed_products import seed_products
 
 
 async def test_seed_products_assigns_images_matching_category_names(
