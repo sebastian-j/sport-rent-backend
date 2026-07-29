@@ -42,12 +42,14 @@ class Favorite(Base):
     user_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
-    product_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("products.id", ondelete="CASCADE"), nullable=False
+    product_slug: Mapped[str] = mapped_column(
+        String(255),
+        ForeignKey("products.slug", ondelete="CASCADE", onupdate="CASCADE"),
+        nullable=False,
     )
 
     product: Mapped[Product] = relationship(back_populates="favorites")
-    user: Mapped[User] = relationship()
+    user: Mapped[User] = relationship(back_populates="favorites")
 
 
 class InstanceStatus(enum.Enum):

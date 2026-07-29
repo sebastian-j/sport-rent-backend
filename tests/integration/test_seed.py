@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.orm import selectinload
 
 from app.models import Address, User
-from scripts.seed import SEED_USERS, seed_users
+from scripts.seeds.seed_users import SEED_USERS, seed_users
 
 
 async def test_seed_users_adds_addresses_and_is_idempotent(

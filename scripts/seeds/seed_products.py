@@ -16,7 +16,7 @@ def slugify(text: str) -> str:
 
 
 async def seed_products():
-    with open("app/assets/mock_products.json", encoding="utf-8") as f:
+    with open("../../app/assets/mock_products.json", encoding="utf-8") as f:
         data = json.load(f)
 
     products_data = data.get("products", [])

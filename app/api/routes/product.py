@@ -1,8 +1,13 @@
 import json
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.dependencies import get_optional_current_user_id
+from app.db.session import get_db_session
+from app.models.product import Favorite
 from app.schemas.product import (
     CategoryResponse,
     ProductAvailabilityResponse,
@@ -20,7 +25,11 @@ with open(products_file_path, encoding="utf-8") as f:
 
 
 @router.get("", response_model=list[ProductResponse])
-async def get_products(params: Annotated[ProductQueryParams, Query()]):
+async def get_products(
+    params: Annotated[ProductQueryParams, Depends()],
+    user_id: Annotated[int | None, Depends(get_optional_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
     sort = params.sort
     order = params.order
     min_price = params.minPrice
@@ -55,10 +64,19 @@ async def get_products(params: Annotated[ProductQueryParams, Query()]):
 
     paginated_products = filtered_products[start_index:end_index]
 
+    favorites_set = set()
+    if user_id is not None:
+        favorites_set = set(
+            await session.scalars(
+                select(Favorite.product_slug).where(Favorite.user_id == user_id)
+            )
+        )
+
     results = []
     for p in paginated_products:
         p_copy = dict(p)
         p_copy["images"] = convert_images_to_base64(p_copy.get("images"))
+        p_copy["isFavorite"] = p_copy.get("slug") in favorites_set
         results.append(p_copy)
 
     return results
@@ -93,7 +111,11 @@ async def get_categories_count(params: Annotated[ProductQueryParams, Query()]):
 
 
 @router.get("/{product_slug}", response_model=ProductResponse)
-async def get_product(product_slug: str):
+async def get_product(
+    product_slug: str,
+    user_id: Annotated[int | None, Depends(get_optional_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
     product = next(
         (product for product in products if product.get("slug") == product_slug), None
     )
@@ -101,6 +123,20 @@ async def get_product(product_slug: str):
     if product:
         p_copy = dict(product)
         p_copy["images"] = convert_images_to_base64(p_copy.get("images"))
+
+        is_favorite = False
+        if user_id is not None:
+            is_favorite = (
+                await session.scalar(
+                    select(Favorite).where(
+                        Favorite.user_id == user_id,
+                        Favorite.product_slug == product_slug,
+                    )
+                )
+                is not None
+            )
+
+        p_copy["isFavorite"] = is_favorite
         return p_copy
 
     raise HTTPException(status_code=404, detail="Product not found")
