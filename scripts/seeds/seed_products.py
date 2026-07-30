@@ -95,10 +95,17 @@ async def seed_products(
             )
 
             images = p_data.get("images", [])
-            alt = p_data.get("alt")
+            image_alts = p_data.get("imageAlts", [])
+            if len(images) != len(image_alts):
+                raise ValueError(
+                    f"Product {p_data['slug']} must define one alt per image"
+                )
+
             for i, img_path in enumerate(images):
                 product_img = ProductImage(
-                    image=img_path, alt_text=alt, display_order=i
+                    image=img_path,
+                    alt_text=image_alts[i],
+                    display_order=i,
                 )
                 product.images.append(product_img)
 

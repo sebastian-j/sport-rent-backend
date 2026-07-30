@@ -30,7 +30,7 @@ async def get_cart():
             product_id=product["id"],
             product_name=product["name"],
             image=product["images"][0] if product.get("images") else "",
-            alt=product.get("alt"),
+            alt=product["imageAlts"][0],
             price=product["price"],
             dates=[
                 CartItemDate(

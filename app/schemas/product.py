@@ -18,7 +18,7 @@ class ProductResponse(BaseModel):
     price: float | None = None
     description: str | None = None
     images: list[str] | None = None
-    alt: str | None = None
+    imageAlts: list[str]
     category: str | None = None
     sizes: list[ProductSize] | None = None
     isFavorite: bool = False
