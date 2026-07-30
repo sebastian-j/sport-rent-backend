@@ -3,6 +3,16 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
+class UpdateUserRequest(BaseModel):
+    first_name: str
+    last_name: str
+    city: str
+    first_line: str
+    second_line: str | None
+    postal_code: str
+    country: str
+
+
 class UserResponse(BaseModel):
     email: str
     first_name: str
