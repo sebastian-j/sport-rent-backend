@@ -10,6 +10,7 @@ from app.api.auth_helpers import unauthorized
 from app.api.dependencies import get_current_user_id
 from app.api.routes.product import products_file_path
 from app.db.session import get_db_session
+from app.models.address import Address
 from app.models.user import User
 from app.schemas.user import (
     OrderDetailResponse,
@@ -68,13 +69,13 @@ async def get_user(
 
     user_response = UserResponse(
         email=user.email,
-        first_name=user.first_name,
-        last_name=user.last_name,
-        city=addr.city,
-        first_line=addr.first_line,
-        second_line=addr.second_line,
-        postal_code=addr.postal_code,
-        country=addr.country,
+        first_name=user.first_name or "",
+        last_name=user.last_name or "",
+        city=addr.city if addr else "",
+        first_line=addr.first_line if addr else "",
+        second_line=addr.second_line if addr else "",
+        postal_code=addr.postal_code if addr else "",
+        country=addr.country if addr else "",
         privacy_policy_accepted=True,
     )
     return user_response
@@ -99,7 +100,14 @@ async def update_address(
         user.last_name = request.last_name
 
     addr = user.default_address
-
+    if not addr:
+        addr = Address(
+            first_line="",
+            postal_code="",
+            city="",
+            country="",
+        )
+        user.default_address = addr
     if request.first_line is not None:
         addr.first_line = request.first_line
     if request.second_line is not None:
