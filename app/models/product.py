@@ -20,6 +20,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 
 if TYPE_CHECKING:
+    from app.models.cart import CartItem
     from app.models.category import Category
     from app.models.user import User
 
@@ -94,6 +95,9 @@ class Product(Base):
     favorites: Mapped[list[Favorite]] = relationship(
         back_populates="product", cascade="all, delete-orphan", passive_deletes=True
     )
+    cart_items: Mapped[list[CartItem]] = relationship(
+        back_populates="product", cascade="all, delete-orphan", passive_deletes=True
+    )
 
 
 class ProductImage(Base):
@@ -129,3 +133,6 @@ class ProductSize(Base):
     __table_args__ = (UniqueConstraint("product_id", "size", name="uix_product_size"),)
 
     product: Mapped[Product | None] = relationship(back_populates="sizes")
+    cart_items: Mapped[list[CartItem]] = relationship(
+        back_populates="product_size", passive_deletes=True
+    )
