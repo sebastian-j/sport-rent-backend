@@ -23,42 +23,6 @@ CurrentUser = Annotated[int, Depends(get_current_user_id)]
 DatabaseSession = Annotated[AsyncSession, Depends(get_db_session)]
 
 
-@router.get("", response_model=list[CartItemResponse], summary="Szczegóły koszyka")
-async def get_cart():
-    if not products:
-        return []
-
-    product = products[0]
-    return [
-        CartItemResponse(
-            product_id=product["id"],
-            product_name=product["name"],
-            image=product["images"][0] if product.get("images") else "",
-            alt=product["imageAlts"][0],
-            price=product["price"],
-            dates=[
-                CartItemDate(
-                    id=101,
-                    start_date="2026-08-01",
-                    end_date="2026-08-05",
-                    quantity=1,
-                    size=product["sizes"][0] if product.get("sizes") else None,
-                )
-            ],
-        )
-    ]
-
-
-@router.post("", status_code=204, summary="Dodanie produktu do koszyka")
-async def add_to_cart(request: AddToCartRequest):
-    sleep(0.2)
-    product = next((p for p in products if p["id"] == request.product_id), None)
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
-
-    return
-  
-  
 def not_found(error: cart_service.CartItemNotFoundError) -> HTTPException:
     return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error))
 
