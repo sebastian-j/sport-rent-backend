@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, EmailStr, StringConstraints
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, StringConstraints
 
 Password = Annotated[str, StringConstraints(min_length=8, max_length=128)]
 ShortText = Annotated[
@@ -59,6 +59,19 @@ class AccessTokenResponse(BaseModel):
 
 class ResetPasswordRequest(BaseModel):
     email: EmailStr
+
+
+class ValidatePasswordResetRequest(BaseModel):
+    token: str = Field(min_length=32, max_length=256)
+
+
+class ValidatePasswordResetResponse(BaseModel):
+    email: EmailStr
+
+
+class ConfirmPasswordResetRequest(BaseModel):
+    token: str = Field(min_length=32, max_length=256)
+    new_password: str = Field(min_length=8, max_length=128)
 
 
 class ChangePasswordRequest(BaseModel):

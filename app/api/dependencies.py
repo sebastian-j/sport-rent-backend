@@ -1,17 +1,33 @@
+import datetime
 from typing import Annotated
 
 import jwt
 from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.auth_helpers import unauthorized
+from app.core.config import settings
 from app.core.tokens import decode_access_token
+from app.db.session import get_db_session
+from app.models import AuthSession
+from app.services.password_reset_notifier import (
+    ConsolePasswordResetNotifier,
+    PasswordResetNotifier,
+)
 
 bearer_scheme = HTTPBearer(auto_error=False)
+password_reset_notifier = ConsolePasswordResetNotifier(settings.frontend_url)
 
 
-def get_current_user_id(
+def get_password_reset_notifier() -> PasswordResetNotifier:
+    return password_reset_notifier
+
+
+async def get_current_user_id(
     credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> int:
     if credentials is None:
         raise unauthorized(
@@ -22,9 +38,23 @@ def get_current_user_id(
 
     try:
         claims = decode_access_token(token)
-        return claims.user_id
     except jwt.InvalidTokenError:
         raise unauthorized("Invalid token", bearer_challenge=True) from None
+
+    now = datetime.datetime.now(datetime.UTC)
+    auth_session = await session.scalar(
+        select(AuthSession).where(
+            AuthSession.id == claims.session_id,
+            AuthSession.user_id == claims.user_id,
+            AuthSession.revoked_at.is_(None),
+            AuthSession.expires_at > now,
+        )
+    )
+
+    if auth_session is None:
+        raise unauthorized("Invalid token", bearer_challenge=True)
+
+    return claims.user_id
 
 
 def get_optional_current_user_id(

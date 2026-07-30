@@ -73,6 +73,12 @@ class Settings:
     refresh_token_grace_period: datetime.timedelta
     csrf_expiration: int
     auth_cookie_secure: bool
+    frontend_url: str
+    password_reset_expiration: int
+    password_reset_email_rate_limit: int
+    password_reset_ip_rate_limit: int
+    password_reset_rate_limit_window: int
+    password_reset_min_response_time_ms: int
     seed_user_password: str | None
 
     @classmethod
@@ -117,6 +123,30 @@ class Settings:
                 default=refresh_expiration,
             ),
             auth_cookie_secure=_boolean("AUTH_COOKIE_SECURE", default=True),
+            frontend_url=_non_empty_string(
+                "FRONTEND_URL",
+                "http://127.0.0.1:5173",
+            ).rstrip("/"),
+            password_reset_expiration=_positive_integer(
+                "PASSWORD_RESET_EXPIRATION",
+                default=1800,
+            ),
+            password_reset_email_rate_limit=_positive_integer(
+                "PASSWORD_RESET_EMAIL_RATE_LIMIT",
+                default=5,
+            ),
+            password_reset_ip_rate_limit=_positive_integer(
+                "PASSWORD_RESET_IP_RATE_LIMIT",
+                default=20,
+            ),
+            password_reset_rate_limit_window=_positive_integer(
+                "PASSWORD_RESET_RATE_LIMIT_WINDOW",
+                default=900,
+            ),
+            password_reset_min_response_time_ms=_positive_integer(
+                "PASSWORD_RESET_MIN_RESPONSE_TIME_MS",
+                default=300,
+            ),
             seed_user_password=os.getenv("SEED_USER_PASSWORD"),
         )
 

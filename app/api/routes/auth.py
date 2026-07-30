@@ -1,4 +1,7 @@
+import asyncio
 import datetime
+import hashlib
+import time
 from time import sleep
 from typing import Annotated
 
@@ -15,28 +18,41 @@ from app.api.auth_helpers import (
     set_refresh_cookie,
     unauthorized,
 )
+from app.api.dependencies import get_password_reset_notifier
 from app.core.config import settings
+from app.core.rate_limit import SlidingWindowRateLimiter
 from app.db.session import get_db_session
 from app.schemas.auth import (
     AccessTokenResponse,
     ChangePasswordRequest,
+    ConfirmPasswordResetRequest,
     LoginRequest,
     RegisterRequest,
     RegisterResponse,
     ResetPasswordRequest,
+    ValidatePasswordResetRequest,
+    ValidatePasswordResetResponse,
 )
 from app.services.auth import (
     EmailAlreadyRegisteredError,
     InvalidCredentialsError,
+    InvalidPasswordResetTokenError,
     InvalidRefreshTokenError,
     RegistrationAddress,
     authenticate_user,
+    confirm_password_reset,
     register_user,
+    request_password_reset,
     revoke_auth_session,
     rotate_refresh_token,
+    validate_password_reset_token,
 )
+from app.services.password_reset_notifier import PasswordResetNotifier
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+password_reset_rate_limiter = SlidingWindowRateLimiter(
+    settings.password_reset_rate_limit_window
+)
 
 
 @router.post(
@@ -166,10 +182,105 @@ async def logout(
     return None
 
 
-# TODO: MOCK
 @router.post("/reset-password", status_code=204)
-def reset_password(request: ResetPasswordRequest):
-    sleep(1)
+async def reset_password(
+    payload: ResetPasswordRequest,
+    request: Request,
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+    notifier: Annotated[
+        PasswordResetNotifier,
+        Depends(get_password_reset_notifier),
+    ],
+):
+    started_at = time.monotonic()
+
+    try:
+        normalized_email = str(payload.email).strip().casefold()
+        email_key = hashlib.sha256(normalized_email.encode()).hexdigest()
+        client_host = request.client.host if request.client is not None else "unknown"
+        rate_limit = password_reset_rate_limiter.check(
+            {
+                f"password-reset:email:{email_key}": (
+                    settings.password_reset_email_rate_limit
+                ),
+                f"password-reset:ip:{client_host}": (
+                    settings.password_reset_ip_rate_limit
+                ),
+            }
+        )
+
+        if not rate_limit.allowed:
+            raise HTTPException(
+                status_code=429,
+                detail="Too many password reset requests",
+                headers={"Retry-After": str(rate_limit.retry_after or 1)},
+            )
+
+        reset_token = await request_password_reset(
+            session,
+            email=normalized_email,
+        )
+
+        if reset_token is not None:
+            await notifier.send_password_reset_link(
+                email=str(payload.email),
+                token=reset_token,
+            )
+
+        return None
+    finally:
+        minimum_duration = settings.password_reset_min_response_time_ms / 1000
+        remaining_time = minimum_duration - (time.monotonic() - started_at)
+        if remaining_time > 0:
+            await asyncio.sleep(remaining_time)
+
+
+@router.post(
+    "/reset-password/validate",
+    response_model=ValidatePasswordResetResponse,
+)
+async def validate_password_reset(
+    request: ValidatePasswordResetRequest,
+    response: Response,
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    try:
+        email = await validate_password_reset_token(
+            session,
+            token=request.token,
+        )
+    except InvalidPasswordResetTokenError:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid or expired password reset link",
+        ) from None
+
+    response.headers["Cache-Control"] = "no-store"
+    return ValidatePasswordResetResponse(email=email)
+
+
+@router.post("/reset-password/confirm", status_code=204)
+async def confirm_reset_password(
+    request: ConfirmPasswordResetRequest,
+    response: Response,
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    try:
+        await confirm_password_reset(
+            session,
+            token=request.token,
+            new_password=request.new_password,
+        )
+    except InvalidPasswordResetTokenError:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid or expired password reset link",
+        ) from None
+
+    delete_refresh_cookie(response)
+    delete_csrf_cookie(response)
+    response.headers["Cache-Control"] = "no-store"
+
     return None
 
 
