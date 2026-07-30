@@ -4,7 +4,7 @@ import uuid
 from dataclasses import dataclass
 
 import jwt
-from sqlalchemy import select, delete, update
+from sqlalchemy import delete, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 

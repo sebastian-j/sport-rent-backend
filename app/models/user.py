@@ -83,7 +83,7 @@ class User(Base):
 if TYPE_CHECKING:
     from app.models.address import Address
     from app.models.auth_session import AuthSession
-    from app.models.password_reset_token import PasswordResetToken
     from app.models.cart import CartItem
     from app.models.order import Order
+    from app.models.password_reset_token import PasswordResetToken
     from app.models.product import Favorite
