@@ -661,6 +661,101 @@ async def test_access_token_protects_endpoint_and_expired_token_is_rejected(
     assert expired_response.json() == {"detail": "Invalid token"}
 
 
+async def test_change_password_updates_password_hash(
+    client: AsyncClient,
+    test_user: SeededUser,
+    test_session_factory: async_sessionmaker[AsyncSession],
+) -> None:
+    login_response = await login(client, test_user)
+    access_token = login_response.json()["access_token"]
+    new_password = "New-secure-password-456!"
+
+    response = await client.post(
+        "/auth/change-password",
+        headers={"Authorization": f"Bearer {access_token}"},
+        json={
+            "current_password": test_user.password,
+            "new_password": new_password,
+        },
+    )
+
+    assert response.status_code == 204
+    assert response.content == b""
+
+    async with test_session_factory() as session:
+        user = await session.get(User, test_user.id)
+
+    assert user is not None
+    assert user.password_hash != test_user.password
+    assert user.password_hash != new_password
+    assert not verify_password(test_user.password, user.password_hash)
+    assert verify_password(new_password, user.password_hash)
+
+
+async def test_change_password_rejects_incorrect_current_password(
+    client: AsyncClient,
+    test_user: SeededUser,
+    test_session_factory: async_sessionmaker[AsyncSession],
+) -> None:
+    login_response = await login(client, test_user)
+    access_token = login_response.json()["access_token"]
+
+    response = await client.post(
+        "/auth/change-password",
+        headers={"Authorization": f"Bearer {access_token}"},
+        json={
+            "current_password": "Incorrect-password-123!",
+            "new_password": "New-secure-password-456!",
+        },
+    )
+
+    assert response.status_code == 401
+    assert response.json() == {"detail": "Current password is incorrect"}
+
+    async with test_session_factory() as session:
+        user = await session.get(User, test_user.id)
+
+    assert user is not None
+    assert verify_password(test_user.password, user.password_hash)
+
+
+@pytest.mark.parametrize("new_password", ["short", "x" * 129])
+async def test_change_password_rejects_invalid_new_password_format(
+    client: AsyncClient,
+    test_user: SeededUser,
+    new_password: str,
+) -> None:
+    login_response = await login(client, test_user)
+    access_token = login_response.json()["access_token"]
+
+    response = await client.post(
+        "/auth/change-password",
+        headers={"Authorization": f"Bearer {access_token}"},
+        json={
+            "current_password": test_user.password,
+            "new_password": new_password,
+        },
+    )
+
+    assert response.status_code == 422
+
+
+async def test_change_password_requires_authentication(
+    client: AsyncClient,
+    test_user: SeededUser,
+) -> None:
+    response = await client.post(
+        "/auth/change-password",
+        json={
+            "current_password": test_user.password,
+            "new_password": "New-secure-password-456!",
+        },
+    )
+
+    assert response.status_code == 401
+    assert response.headers["www-authenticate"] == "Bearer"
+
+
 @pytest.mark.parametrize("refresh_token", [None, "not-a-jwt"])
 async def test_refresh_rejects_invalid_cookie_and_deletes_it(
     client: AsyncClient,
