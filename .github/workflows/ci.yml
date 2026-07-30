@@ -75,6 +75,9 @@ jobs:
       - name: Run tests
         run: uv run --no-sync pytest
 
+      - name: Check migration downgrade
+        run: uv run --no-sync alembic downgrade base
+
       - name: Minimize uv cache
         if: always()
         run: uv cache prune --ci
