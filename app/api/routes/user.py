@@ -66,8 +66,7 @@ async def get_user(user_id: Annotated[int, Depends(get_current_user_id)]):
 
 
 @router.get("/history", response_model=list[UserHistoryItemResponse])
-async def get_user_history():
-    MOCK_USER_ID = 1
+async def get_user_history(user_id: Annotated[int, Depends(get_current_user_id)]):
     user_history = [
         UserHistoryItemResponse(
             id=order["id"],
@@ -77,19 +76,21 @@ async def get_user_history():
             total=sum(item["price"] for item in order["items"]),
         )
         for order in history
-        if order["user_id"] == MOCK_USER_ID
+        if order["user_id"] == user_id
     ]
     return user_history
 
 
 @router.get("/history/{order_id}", response_model=OrderDetailResponse)
-async def get_order_details(order_id: int):
+async def get_order_details(
+    order_id: int, user_id: Annotated[int, Depends(get_current_user_id)]
+):
     order = next(
         (order for order in history if order["id"] == order_id),
         None,
     )
 
-    if not order:
+    if not order or order["user_id"] != user_id:
         raise HTTPException(status_code=404, detail="Order not found")
 
     order_total = sum(i["price"] for i in order["items"])
@@ -105,7 +106,7 @@ async def get_order_details(order_id: int):
                 product_id=item["product_id"],
                 product_name=next(
                     (p["name"] for p in products if p["id"] == item["product_id"]),
-                    None,
+                    "Nieznany produkt",
                 ),
                 image=get_image_as_base64(
                     next(
@@ -118,9 +119,7 @@ async def get_order_details(order_id: int):
                     )
                 ),
                 size=item.get("size"),
-                quantity=sum(
-                    1 for x in order["items"] if x["product_id"] == item["product_id"]
-                ),
+                quantity=item.get("quantity", 1),
                 start_date=item["startDate"],
                 end_date=item["endDate"],
                 unit_price=item["price"],
