@@ -26,7 +26,7 @@ with open(products_file_path, encoding="utf-8") as f:
 
 @router.get("", response_model=list[ProductResponse])
 async def get_products(
-    params: Annotated[ProductQueryParams, Depends()],
+    params: Annotated[ProductQueryParams, Query()],
     user_id: Annotated[int | None, Depends(get_optional_current_user_id)],
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
