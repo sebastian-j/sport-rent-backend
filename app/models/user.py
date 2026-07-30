@@ -68,10 +68,16 @@ class User(Base):
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
+    cart_items: Mapped[list[CartItem]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
 
 
 if TYPE_CHECKING:
     from app.models.address import Address
     from app.models.auth_session import AuthSession
+    from app.models.cart import CartItem
     from app.models.order import Order
     from app.models.product import Favorite
