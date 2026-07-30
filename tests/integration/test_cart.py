@@ -1,7 +1,7 @@
 import asyncio
 import datetime
 import uuid
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Awaitable, Callable
 
 import pytest
 import pytest_asyncio
@@ -9,8 +9,8 @@ from httpx import AsyncClient
 from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from app.core.tokens import create_access_token
-from app.models import Product, ProductImage, ProductSize, User
+from app.core.tokens import create_access_token, create_refresh_token
+from app.models import AuthSession, Product, ProductImage, ProductSize, User
 from tests.conftest import TEST_PASSWORD
 from tests.support import SeededUser
 
@@ -18,14 +18,36 @@ SIZED_PRODUCT_ID = 9101
 PLAIN_PRODUCT_ID = 9102
 HIDDEN_PRODUCT_ID = 9103
 
+AuthorizationFactory = Callable[[int], Awaitable[dict[str, str]]]
+
 
 def future_date(days: int) -> str:
     return (datetime.date.today() + datetime.timedelta(days=days)).isoformat()
 
 
-def authorization(user_id: int) -> dict[str, str]:
-    token = create_access_token(user_id, uuid.uuid4()).token
-    return {"Authorization": f"Bearer {token}"}
+@pytest_asyncio.fixture
+async def authorization_factory(
+    test_session_factory: async_sessionmaker[AsyncSession],
+) -> AuthorizationFactory:
+    async def create_authorization(user_id: int) -> dict[str, str]:
+        session_id = uuid.uuid4()
+        access_token = create_access_token(user_id, session_id)
+        refresh_token = create_refresh_token(user_id, session_id)
+
+        async with test_session_factory.begin() as session:
+            session.add(
+                AuthSession(
+                    id=session_id,
+                    user_id=user_id,
+                    current_jti=refresh_token.jti,
+                    current_issued_at=refresh_token.issued_at,
+                    expires_at=refresh_token.expires_at,
+                )
+            )
+
+        return {"Authorization": f"Bearer {access_token.token}"}
+
+    return create_authorization
 
 
 def item_payload(
@@ -120,17 +142,24 @@ async def test_cart_requires_authentication(
 
 
 async def test_empty_cart(
-    client: AsyncClient, test_user: SeededUser, cart_products: None
+    client: AsyncClient,
+    test_user: SeededUser,
+    cart_products: None,
+    authorization_factory: AuthorizationFactory,
 ) -> None:
-    response = await client.get("/cart", headers=authorization(test_user.id))
+    headers = await authorization_factory(test_user.id)
+    response = await client.get("/cart", headers=headers)
     assert response.status_code == 200
     assert response.json() == []
 
 
 async def test_cart_status_tracks_if_user_has_items(
-    client: AsyncClient, test_user: SeededUser, cart_products: None
+    client: AsyncClient,
+    test_user: SeededUser,
+    cart_products: None,
+    authorization_factory: AuthorizationFactory,
 ) -> None:
-    headers = authorization(test_user.id)
+    headers = await authorization_factory(test_user.id)
 
     empty_status = await client.get("/cart/status", headers=headers)
     assert empty_status.status_code == 200
@@ -152,9 +181,12 @@ async def test_cart_status_tracks_if_user_has_items(
 
 
 async def test_adds_groups_and_orders_terms(
-    client: AsyncClient, test_user: SeededUser, cart_products: None
+    client: AsyncClient,
+    test_user: SeededUser,
+    cart_products: None,
+    authorization_factory: AuthorizationFactory,
 ) -> None:
-    headers = authorization(test_user.id)
+    headers = await authorization_factory(test_user.id)
     first = await client.post(
         "/cart/items",
         headers=headers,
@@ -188,9 +220,12 @@ async def test_adds_groups_and_orders_terms(
 
 
 async def test_identical_addition_merges_quantity(
-    client: AsyncClient, test_user: SeededUser, cart_products: None
+    client: AsyncClient,
+    test_user: SeededUser,
+    cart_products: None,
+    authorization_factory: AuthorizationFactory,
 ) -> None:
-    headers = authorization(test_user.id)
+    headers = await authorization_factory(test_user.id)
     first = await client.post(
         "/cart/items", headers=headers, json=item_payload(quantity=2)
     )
@@ -204,9 +239,12 @@ async def test_identical_addition_merges_quantity(
 
 
 async def test_patch_fully_edits_and_merges_collision(
-    client: AsyncClient, test_user: SeededUser, cart_products: None
+    client: AsyncClient,
+    test_user: SeededUser,
+    cart_products: None,
+    authorization_factory: AuthorizationFactory,
 ) -> None:
-    headers = authorization(test_user.id)
+    headers = await authorization_factory(test_user.id)
     first = (
         await client.post("/cart/items", headers=headers, json=item_payload(quantity=2))
     ).json()
@@ -249,9 +287,12 @@ async def test_patch_fully_edits_and_merges_collision(
 
 
 async def test_removes_term_then_product_disappears(
-    client: AsyncClient, test_user: SeededUser, cart_products: None
+    client: AsyncClient,
+    test_user: SeededUser,
+    cart_products: None,
+    authorization_factory: AuthorizationFactory,
 ) -> None:
-    headers = authorization(test_user.id)
+    headers = await authorization_factory(test_user.id)
     item = (
         await client.post("/cart/items", headers=headers, json=item_payload())
     ).json()
@@ -262,9 +303,12 @@ async def test_removes_term_then_product_disappears(
 
 
 async def test_removes_all_product_terms(
-    client: AsyncClient, test_user: SeededUser, cart_products: None
+    client: AsyncClient,
+    test_user: SeededUser,
+    cart_products: None,
+    authorization_factory: AuthorizationFactory,
 ) -> None:
-    headers = authorization(test_user.id)
+    headers = await authorization_factory(test_user.id)
     await client.post("/cart/items", headers=headers, json=item_payload())
     await client.post(
         "/cart/items",
@@ -284,6 +328,7 @@ async def test_users_are_isolated(
     test_user: SeededUser,
     cart_products: None,
     test_session_factory: async_sessionmaker[AsyncSession],
+    authorization_factory: AuthorizationFactory,
 ) -> None:
     second_user_id = 9199
     async with test_session_factory.begin() as session:
@@ -294,22 +339,23 @@ async def test_users_are_isolated(
                 password_hash=TEST_PASSWORD,
             )
         )
+    headers = await authorization_factory(test_user.id)
     item = (
         await client.post(
             "/cart/items",
-            headers=authorization(test_user.id),
+            headers=headers,
             json=item_payload(),
         )
     ).json()
 
-    other_headers = authorization(second_user_id)
+    other_headers = await authorization_factory(second_user_id)
     assert (await client.get("/cart", headers=other_headers)).json() == []
     assert (await client.get("/cart/status", headers=other_headers)).json() == {
         "has_items": False
     }
-    assert (
-        await client.get("/cart/status", headers=authorization(test_user.id))
-    ).json() == {"has_items": True}
+    assert (await client.get("/cart/status", headers=headers)).json() == {
+        "has_items": True
+    }
     assert (
         await client.patch(
             f"/cart/items/{item['id']}",
@@ -353,19 +399,22 @@ async def test_rejects_invalid_additions(
     client: AsyncClient,
     test_user: SeededUser,
     cart_products: None,
+    authorization_factory: AuthorizationFactory,
     payload: dict[str, object],
     status_code: int,
 ) -> None:
-    response = await client.post(
-        "/cart/items", headers=authorization(test_user.id), json=payload
-    )
+    headers = await authorization_factory(test_user.id)
+    response = await client.post("/cart/items", headers=headers, json=payload)
     assert response.status_code == status_code
 
 
 async def test_rejects_empty_patch_and_invalid_duplicate_without_mutation(
-    client: AsyncClient, test_user: SeededUser, cart_products: None
+    client: AsyncClient,
+    test_user: SeededUser,
+    cart_products: None,
+    authorization_factory: AuthorizationFactory,
 ) -> None:
-    headers = authorization(test_user.id)
+    headers = await authorization_factory(test_user.id)
     item = (
         await client.post("/cart/items", headers=headers, json=item_payload(quantity=2))
     ).json()
@@ -382,9 +431,12 @@ async def test_rejects_empty_patch_and_invalid_duplicate_without_mutation(
 
 
 async def test_parallel_identical_addition_is_atomic(
-    client: AsyncClient, test_user: SeededUser, cart_products: None
+    client: AsyncClient,
+    test_user: SeededUser,
+    cart_products: None,
+    authorization_factory: AuthorizationFactory,
 ) -> None:
-    headers = authorization(test_user.id)
+    headers = await authorization_factory(test_user.id)
     responses = await asyncio.gather(
         *[
             client.post("/cart/items", headers=headers, json=item_payload(quantity=1))
@@ -402,9 +454,12 @@ async def test_parallel_identical_addition_is_atomic(
 
 
 async def test_missing_item_and_product_return_not_found(
-    client: AsyncClient, test_user: SeededUser, cart_products: None
+    client: AsyncClient,
+    test_user: SeededUser,
+    cart_products: None,
+    authorization_factory: AuthorizationFactory,
 ) -> None:
-    headers = authorization(test_user.id)
+    headers = await authorization_factory(test_user.id)
     assert (
         await client.patch("/cart/items/999999", headers=headers, json={"quantity": 2})
     ).status_code == 404
