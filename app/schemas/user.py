@@ -3,14 +3,14 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
-class UpdateUserRequest(BaseModel):
-    first_name: str
-    last_name: str
-    city: str
-    first_line: str
-    second_line: str | None
-    postal_code: str
-    country: str
+class UpdateAddressRequest(BaseModel):
+    first_name: str | None = None
+    last_name: str | None = None
+    city: str | None = None
+    first_line: str | None = None
+    second_line: str | None = None
+    postal_code: str | None = None
+    country: str | None = None
 
 
 class UserResponse(BaseModel):
