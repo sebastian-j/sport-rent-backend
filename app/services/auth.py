@@ -4,12 +4,16 @@ import uuid
 from dataclasses import dataclass
 
 import jwt
-from sqlalchemy import select
+from sqlalchemy import delete, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.email import normalize_email
+from app.core.password_reset import (
+    generate_password_reset_token,
+    hash_password_reset_token,
+)
 from app.core.passwords import DUMMY_PASSWORD_HASH, hash_password, verify_password
 from app.core.tokens import (
     IssuedToken,
@@ -19,7 +23,7 @@ from app.core.tokens import (
     decode_refresh_token,
     encode_refresh_token,
 )
-from app.models import Address, AuthSession, User
+from app.models import Address, AuthSession, PasswordResetToken, User
 
 
 class InvalidCredentialsError(Exception):
@@ -27,6 +31,10 @@ class InvalidCredentialsError(Exception):
 
 
 class InvalidRefreshTokenError(Exception):
+    pass
+
+
+class InvalidPasswordResetTokenError(Exception):
     pass
 
 
@@ -136,6 +144,116 @@ async def authenticate_user(
         access_token=access_token,
         refresh_token=refresh_token,
     )
+
+
+async def request_password_reset(
+    session: AsyncSession,
+    *,
+    email: str,
+) -> str | None:
+    reset_token = generate_password_reset_token()
+    token_hash = hash_password_reset_token(reset_token)
+    normalized_email = email.strip().casefold()
+    user = await session.scalar(
+        select(User).where(User.email == normalized_email).with_for_update()
+    )
+
+    if user is None:
+        await session.rollback()
+        return None
+
+    await session.execute(
+        delete(PasswordResetToken).where(PasswordResetToken.user_id == user.id)
+    )
+    session.add(
+        PasswordResetToken(
+            user_id=user.id,
+            token_hash=token_hash,
+            expires_at=datetime.datetime.now(datetime.UTC)
+            + datetime.timedelta(seconds=settings.password_reset_expiration),
+        )
+    )
+    await session.commit()
+
+    return reset_token
+
+
+async def validate_password_reset_token(
+    session: AsyncSession,
+    *,
+    token: str,
+) -> str:
+    now = datetime.datetime.now(datetime.UTC)
+    email = await session.scalar(
+        select(User.email)
+        .join(
+            PasswordResetToken,
+            PasswordResetToken.user_id == User.id,
+        )
+        .where(
+            PasswordResetToken.token_hash == hash_password_reset_token(token),
+            PasswordResetToken.used_at.is_(None),
+            PasswordResetToken.expires_at > now,
+        )
+    )
+
+    if email is None:
+        raise InvalidPasswordResetTokenError
+
+    return email
+
+
+async def confirm_password_reset(
+    session: AsyncSession,
+    *,
+    token: str,
+    new_password: str,
+) -> None:
+    token_hash = hash_password_reset_token(token)
+    user_id = await session.scalar(
+        select(PasswordResetToken.user_id).where(
+            PasswordResetToken.token_hash == token_hash
+        )
+    )
+
+    if user_id is None:
+        raise InvalidPasswordResetTokenError
+
+    user = await session.get(User, user_id, with_for_update=True)
+    reset_token = await session.scalar(
+        select(PasswordResetToken)
+        .where(PasswordResetToken.token_hash == token_hash)
+        .with_for_update()
+    )
+    now = datetime.datetime.now(datetime.UTC)
+
+    if (
+        user is None
+        or reset_token is None
+        or reset_token.used_at is not None
+        or reset_token.expires_at <= now
+    ):
+        raise InvalidPasswordResetTokenError
+
+    user.password_hash = await asyncio.to_thread(hash_password, new_password)
+
+    await session.execute(
+        update(PasswordResetToken)
+        .where(
+            PasswordResetToken.user_id == user.id,
+            PasswordResetToken.used_at.is_(None),
+        )
+        .values(used_at=now)
+    )
+    await session.execute(
+        update(AuthSession)
+        .where(
+            AuthSession.user_id == user.id,
+            AuthSession.revoked_at.is_(None),
+        )
+        .values(revoked_at=now)
+    )
+    await session.commit()
 
 
 async def rotate_refresh_token(

@@ -5,6 +5,7 @@ from app.models.cart import CartItem
 from app.models.category import Category
 from app.models.order import Order, OrderStatus
 from app.models.order_address import OrderAddress
+from app.models.password_reset_token import PasswordResetToken
 from app.models.product import (
     Favorite,
     Instance,
@@ -22,6 +23,7 @@ __all__ = [
     "CartItem",
     "Favorite",
     "Instance",
+    "PasswordResetToken",
     "Product",
     "ProductImage",
     "ProductSize",
