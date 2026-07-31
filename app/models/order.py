@@ -1,11 +1,21 @@
 from __future__ import annotations
 
 import enum
-from datetime import datetime
+from datetime import date, datetime
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, Uuid, func
+from sqlalchemy import (
+    Boolean,
+    Date,
+    DateTime,
+    Enum,
+    Float,
+    ForeignKey,
+    Integer,
+    Uuid,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -63,8 +73,48 @@ class Order(Base):
         passive_deletes=True,
         uselist=False,
     )
+    instances: Mapped[list[OrderInstance]] = relationship(
+        back_populates="order",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+
+
+class OrderInstance(Base):
+    __tablename__ = "order_instances"
+
+    id: Mapped[int] = mapped_column(
+        Integer,
+        primary_key=True,
+        nullable=False,
+    )
+    order_id: Mapped[int] = mapped_column(
+        ForeignKey("orders.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    instance_id: Mapped[int] = mapped_column(
+        ForeignKey("instances.id", ondelete="RESTRICT"),
+        nullable=False,
+    )
+    start_date: Mapped[date] = mapped_column(
+        Date,
+        nullable=False,
+    )
+    end_date: Mapped[date] = mapped_column(
+        Date,
+        nullable=False,
+    )
+    price: Mapped[float] = mapped_column(
+        Float,
+        nullable=False,
+    )
+    order: Mapped[Order] = relationship(
+        back_populates="instances",
+    )
+    instance: Mapped[Instance] = relationship()
 
 
 if TYPE_CHECKING:
     from app.models.order_address import OrderAddress
+    from app.models.product import Instance
     from app.models.user import User
