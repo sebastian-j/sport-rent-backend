@@ -38,6 +38,10 @@ class InvalidPasswordResetTokenError(Exception):
     pass
 
 
+class InvalidCurrentPasswordError(Exception):
+    pass
+
+
 class EmailAlreadyRegisteredError(Exception):
     pass
 
@@ -253,6 +257,32 @@ async def confirm_password_reset(
         )
         .values(revoked_at=now)
     )
+    await session.commit()
+
+
+async def change_user_password(
+    session: AsyncSession,
+    *,
+    user_id: int,
+    current_password: str,
+    new_password: str,
+) -> None:
+    user = await session.scalar(
+        select(User).where(User.id == user_id).with_for_update()
+    )
+
+    if user is None:
+        raise InvalidCurrentPasswordError
+
+    password_is_valid = await asyncio.to_thread(
+        verify_password,
+        current_password,
+        user.password_hash,
+    )
+    if not password_is_valid:
+        raise InvalidCurrentPasswordError
+
+    user.password_hash = await asyncio.to_thread(hash_password, new_password)
     await session.commit()
 
 

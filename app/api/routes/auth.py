@@ -2,7 +2,6 @@ import asyncio
 import datetime
 import hashlib
 import time
-from time import sleep
 from typing import Annotated
 
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response
@@ -18,7 +17,7 @@ from app.api.auth_helpers import (
     set_refresh_cookie,
     unauthorized,
 )
-from app.api.dependencies import get_password_reset_notifier
+from app.api.dependencies import get_current_user_id, get_password_reset_notifier
 from app.core.config import settings
 from app.core.rate_limit import SlidingWindowRateLimiter
 from app.db.session import get_db_session
@@ -36,10 +35,12 @@ from app.schemas.auth import (
 from app.services.auth import (
     EmailAlreadyRegisteredError,
     InvalidCredentialsError,
+    InvalidCurrentPasswordError,
     InvalidPasswordResetTokenError,
     InvalidRefreshTokenError,
     RegistrationAddress,
     authenticate_user,
+    change_user_password,
     confirm_password_reset,
     register_user,
     request_password_reset,
@@ -284,8 +285,20 @@ async def confirm_reset_password(
     return None
 
 
-# TODO: MOCK
 @router.post("/change-password", status_code=204)
-def change_password(request: ChangePasswordRequest):
-    sleep(1)
+async def change_password(
+    request: ChangePasswordRequest,
+    user_id: Annotated[int, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    try:
+        await change_user_password(
+            session,
+            user_id=user_id,
+            current_password=request.current_password,
+            new_password=request.new_password,
+        )
+    except InvalidCurrentPasswordError:
+        raise unauthorized("Current password is incorrect") from None
+
     return None
