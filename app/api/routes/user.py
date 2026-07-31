@@ -94,29 +94,24 @@ async def update_address(
     )
     if not user:
         raise unauthorized("User not found")
-    if request.first_name is not None:
-        user.first_name = request.first_name
-    if request.last_name is not None:
-        user.last_name = request.last_name
+    user.first_name = request.first_name
+    user.last_name = request.last_name
 
     addr = user.default_address
     if not addr:
         addr = Address(
-            first_line="",
-            postal_code="",
-            city="",
-            country="",
+            first_line=request.first_line,
+            second_line=request.second_line,
+            postal_code=request.postal_code,
+            city=request.city,
+            country=request.country,
         )
         user.default_address = addr
-    if request.first_line is not None:
+    else:
         addr.first_line = request.first_line
-    if request.second_line is not None:
         addr.second_line = request.second_line
-    if request.postal_code is not None:
         addr.postal_code = request.postal_code
-    if request.city is not None:
         addr.city = request.city
-    if request.country is not None:
         addr.country = request.country
 
     await session.commit()

@@ -1,16 +1,19 @@
 from datetime import datetime
+from typing import Annotated
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+StrippedString = Annotated[str, Field(strip_whitespace=True, min_length=1)]
 
 
 class UpdateAddressRequest(BaseModel):
-    first_name: str | None = None
-    last_name: str | None = None
-    city: str | None = None
-    first_line: str | None = None
-    second_line: str | None = None
-    postal_code: str | None = None
-    country: str | None = None
+    first_name: StrippedString
+    last_name: StrippedString
+    city: StrippedString
+    first_line: StrippedString
+    second_line: Annotated[str, Field(strip_whitespace=True)] | None = None
+    postal_code: StrippedString
+    country: StrippedString
 
 
 class UserResponse(BaseModel):
