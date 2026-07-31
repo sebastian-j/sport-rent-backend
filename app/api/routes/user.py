@@ -100,20 +100,32 @@ async def get_user_history(
     user_id: Annotated[int, Depends(get_current_user_id)],
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
-    result = await session.execute(
-        select(Order)
-        .options(selectinload(Order.instances))
-        .where(Order.user_id == user_id)
-        .order_by(Order.created_at.desc())
+    orders = (
+        (
+            await session.scalars(
+                select(Order)
+                .options(selectinload(Order.instances))
+                .where(Order.user_id == user_id)
+                .order_by(Order.created_at.desc())
+            )
+        )
+        .unique()
+        .all()
     )
-    orders = result.scalars().all()
 
     response = []
     for order in orders:
-        total = sum(
-            instance.price * max(1, (instance.end_date - instance.start_date).days)
-            for instance in order.instances
-        )
+        total = 0
+        for order_instance in order.instances:
+            days = (order_instance.end_date - order_instance.start_date).days
+            if days < 0:
+                raise ValueError(
+                    f"Rental #{order_instance.id}: end_date before start_date"
+                )
+            if days == 0:
+                days = 1
+            total += order_instance.price * days
+
         response.append(
             UserHistoryItemResponse(
                 id=order.id,
@@ -132,17 +144,22 @@ async def get_order_details(
     user_id: Annotated[int, Depends(get_current_user_id)],
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
-    result = await session.execute(
-        select(Order)
-        .options(
-            selectinload(Order.instances)
-            .selectinload(OrderInstance.instance)
-            .selectinload(Instance.product)
-            .selectinload(Product.images)
+    order = (
+        (
+            await session.scalars(
+                select(Order)
+                .options(
+                    selectinload(Order.instances)
+                    .selectinload(OrderInstance.instance)
+                    .selectinload(Instance.product)
+                    .selectinload(Product.images)
+                )
+                .where(Order.id == order_id)
+            )
         )
-        .where(Order.id == order_id)
+        .unique()
+        .first()
     )
-    order = result.scalar_one_or_none()
 
     if not order or order.user_id != user_id:
         raise HTTPException(status_code=404, detail="Order not found")
@@ -160,7 +177,12 @@ async def get_order_details(
             )
             image_b64 = get_image_as_base64(primary_img.image)
 
-        days = max(1, (order_instance.end_date - order_instance.start_date).days)
+        days = (order_instance.end_date - order_instance.start_date).days
+        if days < 0:
+            raise ValueError(f"Rental #{order_instance.id}: end_date before start_date")
+        if days == 0:
+            days = 1
+
         item_total = order_instance.price * days
         total += item_total
 
