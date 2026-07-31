@@ -82,7 +82,7 @@ async def get_user(
 
 
 @router.patch("/address", status_code=status.HTTP_204_NO_CONTENT)
-async def update_address(
+async def update_personal_address(
     request: UpdateAddressRequest,
     user_id: Annotated[int, Depends(get_current_user_id)],
     session: Annotated[AsyncSession, Depends(get_db_session)],
