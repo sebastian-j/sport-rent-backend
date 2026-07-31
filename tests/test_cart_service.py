@@ -60,6 +60,7 @@ def test_group_cart_items_groups_products_and_uses_first_image() -> None:
     result = group_cart_items([first, second])
 
     assert len(result) == 1
+    assert result[0].slug == "rower"
     assert result[0].image == "one.jpg"
     assert [item.id for item in result[0].dates] == [100, 101]
 

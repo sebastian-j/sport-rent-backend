@@ -52,7 +52,8 @@ def validate_dates(start_date: date, end_date: date, today: date | None = None) 
 async def validate_term(
     session: AsyncSession,
     *,
-    product_id: int,
+    product_id: int | None = None,
+    product_slug: str | None = None,
     quantity: int,
     size: str | None,
     start_date: date,
@@ -63,10 +64,15 @@ async def validate_term(
         raise CartValidationError("Quantity must be at least 1")
     validate_dates(start_date, end_date, today)
 
+    product_identifier = (
+        Product.id == product_id
+        if product_id is not None
+        else Product.slug == product_slug
+    )
     product = await session.scalar(
         select(Product)
         .options(selectinload(Product.sizes))
-        .where(Product.id == product_id, Product.visibility_status.is_(True))
+        .where(product_identifier, Product.visibility_status.is_(True))
     )
     if product is None:
         raise CartItemNotFoundError("Product not found")
@@ -102,7 +108,7 @@ async def add_item(
 ) -> CartItem:
     term = await validate_term(
         session,
-        product_id=request.product_id,
+        product_slug=request.product_slug,
         quantity=request.quantity,
         size=request.size,
         start_date=request.start_date,
@@ -206,10 +212,15 @@ async def remove_item(session: AsyncSession, user_id: int, item_id: int) -> None
     await session.commit()
 
 
-async def remove_product(session: AsyncSession, user_id: int, product_id: int) -> None:
+async def remove_product(
+    session: AsyncSession, user_id: int, product_slug: str
+) -> None:
     result = await session.execute(
         delete(CartItem).where(
-            CartItem.product_id == product_id, CartItem.user_id == user_id
+            CartItem.product_id.in_(
+                select(Product.id).where(Product.slug == product_slug)
+            ),
+            CartItem.user_id == user_id,
         )
     )
     if result.rowcount == 0:
@@ -229,7 +240,7 @@ def group_cart_items(items: Sequence[CartItem]) -> list[CartItemResponse]:
                 default=None,
             )
             response = CartItemResponse(
-                product_id=product.id,
+                slug=product.slug,
                 product_name=product.name,
                 image=(
                     get_image_as_base64(first_image.image) or first_image.image
