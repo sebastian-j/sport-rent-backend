@@ -43,15 +43,15 @@ async def test_seed_products_assigns_images_matching_category_names(
 
     assert images_by_slug == {
         "namioty": None,
-        "namioty-osobowe": ("assets/categories/pictures/namioty-osobowe.png"),
+        "namioty-osobowe": ("assets/categories/pictures/namioty-osobowe.webp"),
         "nosidelka-turystyczne": (
-            "assets/categories/pictures/nosidelka-turystyczne.png"
+            "assets/categories/pictures/nosidelka-turystyczne.webp"
         ),
-        "przyczepki-rowerowe": ("assets/categories/pictures/przyczepki-rowerowe.png"),
-        "rowery-i-akcesoria": ("assets/categories/pictures/rowery-i-akcesoria.png"),
-        "sprzet-wodny": "assets/categories/pictures/sprzet-wodny.png",
+        "przyczepki-rowerowe": ("assets/categories/pictures/przyczepki-rowerowe.webp"),
+        "rowery-i-akcesoria": ("assets/categories/pictures/rowery-i-akcesoria.webp"),
+        "sprzet-wodny": "assets/categories/pictures/sprzet-wodny.webp",
         "via-ferraty-i-wspinanie": (
-            "assets/categories/pictures/via-ferraty-i-wspinanie.png"
+            "assets/categories/pictures/via-ferraty-i-wspinanie.webp"
         ),
     }
 
