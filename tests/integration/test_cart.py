@@ -52,14 +52,14 @@ async def authorization_factory(
 
 def item_payload(
     *,
-    product_id: int = SIZED_PRODUCT_ID,
+    product_slug: str = "rower-testowy-cart",
     quantity: int = 1,
     size: str | None = "M",
     start_days: int = 2,
     end_days: int = 4,
 ) -> dict[str, object]:
     return {
-        "product_id": product_id,
+        "product_slug": product_slug,
         "quantity": quantity,
         "size": size,
         "start_date": future_date(start_days),
@@ -128,7 +128,7 @@ async def cart_products(
         ("POST", "/cart/items", item_payload()),
         ("PATCH", "/cart/items/1", {"quantity": 2}),
         ("DELETE", "/cart/items/1", None),
-        ("DELETE", f"/cart/products/{SIZED_PRODUCT_ID}", None),
+        ("DELETE", "/cart/products/rower-testowy-cart", None),
     ],
 )
 async def test_cart_requires_authentication(
@@ -205,7 +205,7 @@ async def test_adds_groups_and_orders_terms(
     assert response.status_code == 200
     assert response.json() == [
         {
-            "product_id": SIZED_PRODUCT_ID,
+            "slug": "rower-testowy-cart",
             "product_name": "Rower testowy",
             "image": "first.jpg",
             "alt": "Pierwszy",
@@ -316,9 +316,7 @@ async def test_removes_all_product_terms(
         json=item_payload(start_days=7, end_days=8),
     )
 
-    response = await client.delete(
-        f"/cart/products/{SIZED_PRODUCT_ID}", headers=headers
-    )
+    response = await client.delete("/cart/products/rower-testowy-cart", headers=headers)
     assert response.status_code == 204
     assert (await client.get("/cart", headers=headers)).json() == []
 
@@ -371,11 +369,11 @@ async def test_users_are_isolated(
 @pytest.mark.parametrize(
     ("payload", "status_code"),
     [
-        (item_payload(product_id=999999), 404),
-        (item_payload(product_id=HIDDEN_PRODUCT_ID), 404),
+        (item_payload(product_slug="nie-istnieje"), 404),
+        (item_payload(product_slug="ukryty-testowy-cart"), 404),
         (item_payload(size=None), 422),
         (item_payload(size="XL"), 422),
-        (item_payload(product_id=PLAIN_PRODUCT_ID, size="M"), 422),
+        (item_payload(product_slug="kajak-testowy-cart", size="M"), 422),
         (item_payload(quantity=0), 422),
         (
             {
@@ -467,5 +465,5 @@ async def test_missing_item_and_product_return_not_found(
         await client.delete("/cart/items/999999", headers=headers)
     ).status_code == 404
     assert (
-        await client.delete(f"/cart/products/{SIZED_PRODUCT_ID}", headers=headers)
+        await client.delete("/cart/products/rower-testowy-cart", headers=headers)
     ).status_code == 404

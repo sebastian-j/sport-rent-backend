@@ -102,15 +102,15 @@ async def remove_cart_item(
 
 
 @router.delete(
-    "/products/{product_id}",
+    "/products/{product_slug}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Całkowite usunięcie produktu z koszyka",
 )
 async def remove_product_from_cart(
-    product_id: int, user_id: CurrentUser, session: DatabaseSession
+    product_slug: str, user_id: CurrentUser, session: DatabaseSession
 ):
     try:
-        await cart_service.remove_product(session, user_id, product_id)
+        await cart_service.remove_product(session, user_id, product_slug)
     except cart_service.CartItemNotFoundError as error:
         raise not_found(error) from error
 

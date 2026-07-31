@@ -17,7 +17,7 @@ class CartItemDate(BaseModel):
 
 
 class CartItemResponse(BaseModel):
-    product_id: int
+    slug: str
     product_name: str
     image: str
     alt: str | None = None
@@ -31,7 +31,7 @@ class CartStatusResponse(BaseModel):
 
 
 class AddToCartRequest(BaseModel):
-    product_id: int
+    product_slug: str
     start_date: date
     end_date: date
     quantity: int = Field(default=1, ge=1)
