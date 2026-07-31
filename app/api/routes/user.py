@@ -1,14 +1,21 @@
 import json
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.api.auth_helpers import unauthorized
 from app.api.dependencies import get_current_user_id
 from app.api.routes.product import products_file_path
+from app.db.session import get_db_session
+from app.models.address import Address
+from app.models.user import User
 from app.schemas.user import (
     OrderDetailResponse,
     OrderItemDetailsResponse,
+    UpdateAddressRequest,
     UserHistoryItemResponse,
     UserResponse,
 )
@@ -42,27 +49,73 @@ for user in users:
 
 
 @router.get("", response_model=UserResponse)
-async def get_user(user_id: Annotated[int, Depends(get_current_user_id)]):
-    user = next((user for user in users if user["id"] == user_id), None)
+async def get_user(
+    user_id: Annotated[int, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    user = await session.scalar(
+        select(User)
+        .options(selectinload(User.default_address))
+        .where(User.id == user_id)
+    )
 
-    if user is None:
+    if not user:
         raise unauthorized(
             "Could not validate credentials",
             bearer_challenge=True,
         )
 
+    addr = user.default_address
+
     user_response = UserResponse(
-        email=user["email"],
-        first_name=user["address"]["first_name"],
-        last_name=user["address"]["last_name"],
-        city=user["address"]["city"],
-        first_line=user["address"]["first_line"],
-        second_line=user["address"].get("second_line"),
-        postal_code=user["address"]["postal_code"],
-        country=user["address"]["country"],
-        privacy_policy_accepted=user["privacy_policy_accepted"],
+        email=user.email,
+        first_name=user.first_name or "",
+        last_name=user.last_name or "",
+        city=addr.city if addr else "",
+        first_line=addr.first_line if addr else "",
+        second_line=addr.second_line if addr else "",
+        postal_code=addr.postal_code if addr else "",
+        country=addr.country if addr else "",
+        privacy_policy_accepted=True,
     )
     return user_response
+
+
+@router.patch("/address", status_code=status.HTTP_204_NO_CONTENT)
+async def update_personal_address(
+    request: UpdateAddressRequest,
+    user_id: Annotated[int, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    user = await session.scalar(
+        select(User)
+        .options(selectinload(User.default_address))
+        .where(User.id == user_id)
+    )
+    if not user:
+        raise unauthorized("User not found")
+    user.first_name = request.first_name
+    user.last_name = request.last_name
+
+    addr = user.default_address
+    if not addr:
+        addr = Address(
+            first_line=request.first_line,
+            second_line=request.second_line,
+            postal_code=request.postal_code,
+            city=request.city,
+            country=request.country,
+        )
+        user.default_address = addr
+    else:
+        addr.first_line = request.first_line
+        addr.second_line = request.second_line
+        addr.postal_code = request.postal_code
+        addr.city = request.city
+        addr.country = request.country
+
+    await session.commit()
+    return None
 
 
 @router.get("/history", response_model=list[UserHistoryItemResponse])
