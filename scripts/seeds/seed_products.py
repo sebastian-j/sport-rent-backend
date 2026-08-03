@@ -9,7 +9,13 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.db.session import async_session_factory
 from app.models.category import Category
-from app.models.product import Product, ProductImage, ProductSize
+from app.models.product import (
+    Instance,
+    InstanceStatus,
+    Product,
+    ProductImage,
+    ProductSize,
+)
 
 PRODUCTS_FILE_PATH = Path("app/assets/mock_products.json")
 CATEGORY_IMAGES_DIRECTORY = Path("app/assets/categories/pictures")
@@ -116,6 +122,12 @@ async def seed_products(
                     description=s_data.get("description"),
                 )
                 product.sizes.append(size)
+
+            instance = Instance(
+                status=InstanceStatus.AVAILABLE,
+                size=sizes[0]["size"] if sizes else None,
+            )
+            product.instances.append(instance)
 
             session.add(product)
 
