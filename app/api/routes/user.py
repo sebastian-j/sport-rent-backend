@@ -1,4 +1,4 @@
-import json
+from datetime import datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -10,6 +10,8 @@ from app.api.auth_helpers import unauthorized
 from app.api.dependencies import get_current_user_id
 from app.db.session import get_db_session
 from app.models.address import Address
+from app.models.order import Order, OrderInstance
+from app.models.product import Instance, Product
 from app.models.user import User
 from app.schemas.user import (
     OrderDetailResponse,
@@ -21,31 +23,6 @@ from app.schemas.user import (
 from app.services.image import get_image_as_base64
 
 router = APIRouter(prefix="/user", tags=["user"])
-
-users_file_path = "app/assets/mock_users.json"
-address_file_path = "app/assets/mock_addresses.json"
-history_file_path = "app/assets/mock_history.json"
-products_file_path = "app/assets/mock_products.json"
-
-with open(users_file_path, encoding="utf-8") as f:
-    users = json.load(f)["users"]
-
-with open(address_file_path, encoding="utf-8") as f:
-    addresses = json.load(f)["addresses"]
-
-with open(history_file_path, encoding="utf-8") as f:
-    history = json.load(f)["orders"]
-
-with open(products_file_path, encoding="utf-8") as f:
-    products = json.load(f)["products"]
-
-for user in users:
-    address_id = user.get("address_id")
-    if address_id:
-        address = next(
-            (address for address in addresses if address["id"] == address_id), None
-        )
-        user["address"] = address
 
 
 @router.get("", response_model=UserResponse)
@@ -119,65 +96,116 @@ async def update_personal_address(
 
 
 @router.get("/history", response_model=list[UserHistoryItemResponse])
-async def get_user_history(user_id: Annotated[int, Depends(get_current_user_id)]):
-    user_history = [
-        UserHistoryItemResponse(
-            id=order["id"],
-            created_at=order["created_at"],
-            status=order["status"],
-            payment_code=order["payment_code"],
-            total=sum(item["price"] for item in order["items"]),
+async def get_user_history(
+    user_id: Annotated[int, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    orders = (
+        (
+            await session.scalars(
+                select(Order)
+                .options(selectinload(Order.instances))
+                .where(Order.user_id == user_id)
+                .order_by(Order.created_at.desc())
+            )
         )
-        for order in history
-        if order["user_id"] == user_id
-    ]
-    return user_history
+        .unique()
+        .all()
+    )
+
+    response = []
+    for order in orders:
+        total = 0
+        for order_instance in order.instances:
+            days = (order_instance.end_date - order_instance.start_date).days
+            if days < 0:
+                raise ValueError(
+                    f"Rental #{order_instance.id}: end_date before start_date"
+                )
+            if days == 0:
+                days = 1
+            total += order_instance.price * days
+
+        response.append(
+            UserHistoryItemResponse(
+                id=order.id,
+                created_at=order.created_at,
+                status=order.status.value,
+                payment_code=str(order.payment_code) if order.payment_code else None,
+                total=total,
+            )
+        )
+    return response
 
 
 @router.get("/history/{order_id}", response_model=OrderDetailResponse)
 async def get_order_details(
-    order_id: int, user_id: Annotated[int, Depends(get_current_user_id)]
+    order_id: int,
+    user_id: Annotated[int, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
-    order = next(
-        (order for order in history if order["id"] == order_id),
-        None,
+    order = (
+        (
+            await session.scalars(
+                select(Order)
+                .options(
+                    selectinload(Order.instances)
+                    .selectinload(OrderInstance.instance)
+                    .selectinload(Instance.product)
+                    .selectinload(Product.images)
+                )
+                .where(Order.id == order_id)
+            )
+        )
+        .unique()
+        .first()
     )
 
-    if not order or order["user_id"] != user_id:
+    if not order or order.user_id != user_id:
         raise HTTPException(status_code=404, detail="Order not found")
 
-    order_total = sum(i["price"] for i in order["items"])
+    total = 0
+    items_response = []
+    for order_instance in order.instances:
+        product_obj = order_instance.instance.product
 
-    order_details = OrderDetailResponse(
-        id=order["id"],
-        created_at=order["created_at"],
-        status=order["status"],
-        total=order_total,
-        discount=0.0,
-        items=[
-            OrderItemDetailsResponse(
-                product_id=item["product_id"],
-                product_name=next(
-                    (p["name"] for p in products if p["id"] == item["product_id"]),
-                    "Nieznany produkt",
-                ),
-                image=get_image_as_base64(
-                    next(
-                        (
-                            p["images"][0]
-                            for p in products
-                            if p["id"] == item["product_id"] and p.get("images")
-                        ),
-                        None,
-                    )
-                ),
-                size=item.get("size"),
-                quantity=item.get("quantity", 1),
-                start_date=item["startDate"],
-                end_date=item["endDate"],
-                unit_price=item["price"],
+        image_b64 = None
+        if product_obj.images:
+            primary_img = next(
+                (img for img in product_obj.images if img.display_order == 1),
+                product_obj.images[0],
             )
-            for item in order["items"]
-        ],
+            image_b64 = get_image_as_base64(primary_img.image)
+
+        days = (order_instance.end_date - order_instance.start_date).days
+        if days < 0:
+            raise ValueError(f"Rental #{order_instance.id}: end_date before start_date")
+        if days == 0:
+            days = 1
+
+        item_total = order_instance.price * days
+        total += item_total
+
+        items_response.append(
+            OrderItemDetailsResponse(
+                product_id=product_obj.id,
+                product_name=product_obj.name,
+                image=image_b64,
+                size=order_instance.instance.size,
+                quantity=1,
+                start_date=datetime.combine(
+                    order_instance.start_date, datetime.min.time()
+                ),
+                end_date=datetime.combine(order_instance.end_date, datetime.min.time()),
+                unit_price=item_total,
+            )
+        )
+
+    return OrderDetailResponse(
+        id=order.id,
+        created_at=order.created_at,
+        status=order.status.value,
+        total=total,
+        discount=0.0,
+        items=items_response,
     )
-    return order_details
