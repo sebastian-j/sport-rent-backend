@@ -32,8 +32,8 @@ async def get_products(
     max_price = params.maxPrice
     categories = params.category
     search_query = params.query
-    page = params.page or 1
-    page_size = params.pageSize or 10
+    page = params.page
+    page_size = params.pageSize
 
     product_query = (
         select(Product)
