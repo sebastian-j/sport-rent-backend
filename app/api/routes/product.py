@@ -60,12 +60,15 @@ async def get_products(
         is_desc = order == "desc"
         if sort == "price":
             product_query = product_query.order_by(
-                Product.price.desc() if is_desc else Product.price.asc()
+                Product.price.desc() if is_desc else Product.price.asc(),
+                Product.id.asc(),
             )
         elif sort == "name":
             product_query = product_query.order_by(
-                Product.name.desc() if is_desc else Product.name.asc()
+                Product.name.desc() if is_desc else Product.name.asc(), Product.id.asc()
             )
+    else:
+        product_query = product_query.order_by(Product.id.asc())
 
     start_index = (page - 1) * page_size
     product_query = product_query.offset(start_index).limit(page_size)
@@ -83,8 +86,9 @@ async def get_products(
     results = []
     for p in paginated_products:
         sorted_images = sorted(p.images, key=lambda x: x.display_order)
-        images_paths = [img.image for img in sorted_images if img.image]
-        images_alts = [img.alt_text for img in sorted_images if img.alt_text]
+        valid_images = [img for img in sorted_images if img.image]
+        images_paths = [img.image for img in valid_images]
+        images_alts = [img.alt_text or "" for img in valid_images]
         sizes = (
             [{"size": s.size, "description": s.description} for s in p.sizes]
             if p.sizes
@@ -148,9 +152,7 @@ async def get_categories_count(
         for row in category_results
     ]
 
-    total_count_query = select(func.count(Product.id)).select_from(
-        base_query.subquery()
-    )
+    total_count_query = select(func.count()).select_from(base_query.subquery())
     total_count = await session.scalar(total_count_query) or 0
 
     return (categories, total_count)
@@ -188,8 +190,9 @@ async def get_product(
         )
 
     sorted_images = sorted(p.images, key=lambda x: x.display_order)
-    images_paths = [img.image for img in sorted_images if img.image]
-    images_alts = [img.alt_text for img in sorted_images if img.alt_text]
+    valid_images = [img for img in sorted_images if img.image]
+    images_paths = [img.image for img in valid_images]
+    images_alts = [img.alt_text or "" for img in valid_images]
     sizes = (
         [{"size": s.size, "description": s.description} for s in p.sizes]
         if p.sizes
