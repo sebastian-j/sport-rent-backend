@@ -8,7 +8,6 @@ from sqlalchemy.orm import selectinload
 
 from app.api.auth_helpers import unauthorized
 from app.api.dependencies import get_current_user_id
-from app.api.routes.product import products_file_path
 from app.db.session import get_db_session
 from app.models.address import Address
 from app.models.user import User
@@ -26,6 +25,7 @@ router = APIRouter(prefix="/user", tags=["user"])
 users_file_path = "app/assets/mock_users.json"
 address_file_path = "app/assets/mock_addresses.json"
 history_file_path = "app/assets/mock_history.json"
+products_file_path = "app/assets/mock_products.json"
 
 with open(users_file_path, encoding="utf-8") as f:
     users = json.load(f)["users"]

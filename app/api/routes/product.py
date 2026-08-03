@@ -1,13 +1,14 @@
-import json
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.api.dependencies import get_optional_current_user_id
 from app.db.session import get_db_session
-from app.models.product import Favorite
+from app.models.category import Category
+from app.models.product import Favorite, Product
 from app.schemas.product import (
     CategoryResponse,
     ProductAvailabilityResponse,
@@ -17,11 +18,6 @@ from app.schemas.product import (
 from app.services.image import convert_images_to_base64
 
 router = APIRouter(prefix="/product", tags=["product"])
-
-products_file_path = "app/assets/mock_products.json"
-
-with open(products_file_path, encoding="utf-8") as f:
-    products = json.load(f)["products"]
 
 
 @router.get("", response_model=list[ProductResponse])
@@ -35,34 +31,46 @@ async def get_products(
     min_price = params.minPrice
     max_price = params.maxPrice
     categories = params.category
-    query = params.query
-
-    filtered_products = [
-        product
-        for product in products
-        if (min_price is None or product.get("price", 0) >= min_price)
-        and (max_price is None or product.get("price", 0) <= max_price)
-        and (not categories or product.get("category") in categories)
-        and (not query or query.lower() in product.get("name", "").lower())
-    ]
-
-    if sort and order:
-        if sort == "price":
-            filtered_products.sort(
-                key=lambda x: x.get("price", 0), reverse=(order == "desc")
-            )
-        elif sort == "name":
-            filtered_products.sort(
-                key=lambda x: x.get("name", "").lower(), reverse=(order == "desc")
-            )
-
+    search_query = params.query
     page = params.page or 1
     page_size = params.pageSize or 10
 
-    start_index = (page - 1) * page_size
-    end_index = start_index + page_size
+    product_query = (
+        select(Product)
+        .options(
+            selectinload(Product.images),
+            selectinload(Product.category),
+            selectinload(Product.sizes),
+        )
+        .where(Product.visibility_status.is_(True))
+    )
 
-    paginated_products = filtered_products[start_index:end_index]
+    if min_price is not None:
+        product_query = product_query.where(Product.price >= min_price)
+    if max_price is not None:
+        product_query = product_query.where(Product.price <= max_price)
+    if search_query:
+        product_query = product_query.where(Product.name.ilike(f"%{search_query}%"))
+    if categories:
+        product_query = product_query.outerjoin(Product.category).where(
+            Category.name.in_(categories)
+        )
+
+    if sort and order:
+        is_desc = order == "desc"
+        if sort == "price":
+            product_query = product_query.order_by(
+                Product.price.desc() if is_desc else Product.price.asc()
+            )
+        elif sort == "name":
+            product_query = product_query.order_by(
+                Product.name.desc() if is_desc else Product.name.asc()
+            )
+
+    start_index = (page - 1) * page_size
+    product_query = product_query.offset(start_index).limit(page_size)
+
+    paginated_products = (await session.scalars(product_query)).unique().all()
 
     favorites_set = set()
     if user_id is not None:
@@ -74,40 +82,78 @@ async def get_products(
 
     results = []
     for p in paginated_products:
-        p_copy = dict(p)
-        p_copy["images"] = convert_images_to_base64(p_copy.get("images"))
-        p_copy["isFavorite"] = p_copy.get("slug") in favorites_set
-        results.append(p_copy)
+        sorted_images = sorted(p.images, key=lambda x: x.display_order)
+        images_paths = [img.image for img in sorted_images if img.image]
+        images_alts = [img.alt_text for img in sorted_images if img.alt_text]
+        sizes = (
+            [{"size": s.size, "description": s.description} for s in p.sizes]
+            if p.sizes
+            else None
+        )
+
+        results.append(
+            ProductResponse(
+                id=p.id,
+                name=p.name,
+                slug=p.slug,
+                price=p.price,
+                description=p.description,
+                category=p.category.name if p.category else None,
+                images=convert_images_to_base64(images_paths),
+                imageAlts=images_alts,
+                sizes=sizes,
+                isFavorite=p.slug in favorites_set,
+            )
+        )
 
     return results
 
 
 @router.get("/count", response_model=tuple[list[CategoryResponse], int])
-async def get_categories_count(params: Annotated[ProductQueryParams, Query()]):
+async def get_categories_count(
+    params: Annotated[ProductQueryParams, Query()],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
     min_price = params.minPrice
     max_price = params.maxPrice
     search_query = params.query
 
-    filtered_products = [
-        product
-        for product in products
-        if (min_price is None or product.get("price", 0) >= min_price)
-        and (max_price is None or product.get("price", 0) <= max_price)
-        and (
-            not search_query or search_query.lower() in product.get("name", "").lower()
-        )
+    base_query = select(Product).where(Product.visibility_status.is_(True))
+
+    if min_price is not None:
+        base_query = base_query.where(Product.price >= min_price)
+    if max_price is not None:
+        base_query = base_query.where(Product.price <= max_price)
+    if search_query:
+        base_query = base_query.where(Product.name.ilike(f"%{search_query}%"))
+
+    category_query = (
+        select(Category.name, func.count(Product.id))
+        .select_from(Product)
+        .outerjoin(Product.category)
+        .where(Product.visibility_status.is_(True))
+    )
+    if min_price is not None:
+        category_query = category_query.where(Product.price >= min_price)
+    if max_price is not None:
+        category_query = category_query.where(Product.price <= max_price)
+    if search_query:
+        category_query = category_query.where(Product.name.ilike(f"%{search_query}%"))
+
+    category_query = category_query.group_by(Category.name)
+    category_results = (await session.execute(category_query)).all()
+
+    categories = [
+        CategoryResponse(name=row[0] if row[0] else "Bez kategorii", count=row[1])
+        for row in category_results
     ]
 
-    category_count = {}
-    for product in filtered_products:
-        category = product.get("category")
-        if category:
-            category_count[category] = category_count.get(category, 0) + 1
-
-    return (
-        [{"name": cat, "count": count} for cat, count in category_count.items()],
-        len(filtered_products),
+    total_count_query = select(func.count(Product.id)).select_from(
+        base_query.subquery()
     )
+    total_count = await session.scalar(total_count_query) or 0
+
+    return (categories, total_count)
 
 
 @router.get("/{product_slug}", response_model=ProductResponse)
@@ -116,30 +162,52 @@ async def get_product(
     user_id: Annotated[int | None, Depends(get_optional_current_user_id)],
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
-    product = next(
-        (product for product in products if product.get("slug") == product_slug), None
+    p = await session.scalar(
+        select(Product)
+        .options(
+            selectinload(Product.images),
+            selectinload(Product.category),
+            selectinload(Product.sizes),
+        )
+        .where(Product.slug == product_slug, Product.visibility_status.is_(True))
     )
 
-    if product:
-        p_copy = dict(product)
-        p_copy["images"] = convert_images_to_base64(p_copy.get("images"))
+    if not p:
+        raise HTTPException(status_code=404, detail="Product not found")
 
-        is_favorite = False
-        if user_id is not None:
-            is_favorite = (
-                await session.scalar(
-                    select(Favorite).where(
-                        Favorite.user_id == user_id,
-                        Favorite.product_slug == product_slug,
-                    )
+    is_favorite = False
+    if user_id is not None:
+        is_favorite = (
+            await session.scalar(
+                select(Favorite).where(
+                    Favorite.user_id == user_id,
+                    Favorite.product_slug == product_slug,
                 )
-                is not None
             )
+            is not None
+        )
 
-        p_copy["isFavorite"] = is_favorite
-        return p_copy
+    sorted_images = sorted(p.images, key=lambda x: x.display_order)
+    images_paths = [img.image for img in sorted_images if img.image]
+    images_alts = [img.alt_text for img in sorted_images if img.alt_text]
+    sizes = (
+        [{"size": s.size, "description": s.description} for s in p.sizes]
+        if p.sizes
+        else None
+    )
 
-    raise HTTPException(status_code=404, detail="Product not found")
+    return ProductResponse(
+        id=p.id,
+        name=p.name,
+        slug=p.slug,
+        price=p.price,
+        description=p.description,
+        category=p.category.name if p.category else None,
+        images=convert_images_to_base64(images_paths),
+        imageAlts=images_alts,
+        sizes=sizes,
+        isFavorite=is_favorite,
+    )
 
 
 @router.get("/{product_slug}/availability", response_model=ProductAvailabilityResponse)
