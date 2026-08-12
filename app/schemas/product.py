@@ -26,6 +26,7 @@ class ProductResponse(BaseModel):
 
 class ProductAvailabilityResponse(BaseModel):
     available: bool
+    availableQuantity: int
 
 
 class ProductQueryParams(BaseModel):

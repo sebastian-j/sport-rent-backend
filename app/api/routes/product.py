@@ -1,14 +1,16 @@
+from datetime import date
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import func, select
+from sqlalchemy import exists, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.api.dependencies import get_optional_current_user_id
 from app.db.session import get_db_session
 from app.models.category import Category
-from app.models.product import Favorite, Product
+from app.models.order import Order, OrderInstance, OrderStatus
+from app.models.product import Favorite, Instance, InstanceStatus, Product
 from app.schemas.product import (
     CategoryResponse,
     ProductAvailabilityResponse,
@@ -214,5 +216,49 @@ async def get_product(
 
 
 @router.get("/{product_slug}/availability", response_model=ProductAvailabilityResponse)
-async def get_product_availability(product_slug: str, start_date: str, end_date: str):
-    return ProductAvailabilityResponse(available=True)
+async def get_product_availability(
+    product_slug: str,
+    start_date: date,
+    end_date: date,
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+    size: str | None = None,
+):
+    if start_date > end_date:
+        raise HTTPException(
+            status_code=422, detail="start_date cannot be after end_date"
+        )
+
+    product = await session.scalar(
+        select(Product.id).where(
+            Product.slug == product_slug,
+            Product.visibility_status.is_(True),
+        )
+    )
+    if product is None:
+        raise HTTPException(status_code=404, detail="Product not found")
+
+    occupied_instance = exists(
+        select(1)
+        .select_from(OrderInstance)
+        .join(Order, Order.id == OrderInstance.order_id)
+        .where(
+            OrderInstance.instance_id == Instance.id,
+            Order.status != OrderStatus.CANCELLED,
+            OrderInstance.start_date <= end_date,
+            OrderInstance.end_date >= start_date,
+        )
+    )
+
+    availability_query = select(func.count(Instance.id)).where(
+        Instance.product_id == product,
+        Instance.status == InstanceStatus.AVAILABLE,
+        ~occupied_instance,
+    )
+    if size is not None:
+        availability_query = availability_query.where(Instance.size == size)
+
+    available_quantity = await session.scalar(availability_query) or 0
+    return ProductAvailabilityResponse(
+        available=available_quantity > 0,
+        availableQuantity=available_quantity,
+    )
