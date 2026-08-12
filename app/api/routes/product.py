@@ -14,6 +14,8 @@ from app.schemas.product import (
     ProductAvailabilityResponse,
     ProductQueryParams,
     ProductResponse,
+    PriceFacetResponse,
+    ProductFacetsResponse,
 )
 from app.services.image import convert_images_to_base64
 
@@ -113,7 +115,7 @@ async def get_products(
     return results
 
 
-@router.get("/count", response_model=tuple[list[CategoryResponse], int])
+@router.get("/count", response_model=ProductFacetsResponse)
 async def get_categories_count(
     params: Annotated[ProductQueryParams, Query()],
     session: Annotated[AsyncSession, Depends(get_db_session)],
@@ -121,6 +123,7 @@ async def get_categories_count(
     min_price = params.minPrice
     max_price = params.maxPrice
     search_query = params.query
+    selected_categories = params.category
 
     base_query = select(Product).where(Product.visibility_status.is_(True))
 
@@ -130,6 +133,10 @@ async def get_categories_count(
         base_query = base_query.where(Product.price <= max_price)
     if search_query:
         base_query = base_query.where(Product.name.ilike(f"%{search_query}%"))
+    if selected_categories:
+        base_query = base_query.join(Product.category).where(
+            Category.name.in_(selected_categories)
+        )
 
     category_query = (
         select(Category.name, func.count(Product.id))
@@ -155,7 +162,33 @@ async def get_categories_count(
     total_count_query = select(func.count()).select_from(base_query.subquery())
     total_count = await session.scalar(total_count_query) or 0
 
-    return (categories, total_count)
+    price_query = select(
+        func.min(Product.price),
+        func.max(Product.price),
+    ).where(Product.visibility_status.is_(True))
+
+    if search_query:
+        price_query = price_query.where(
+            Product.name.ilike(f"%{search_query}%")
+        )
+    if selected_categories:
+        price_query = price_query.join(Product.category).where(
+            Category.name.in_(selected_categories)
+        )
+
+    price_min, price_max = (
+        await session.execute(price_query)
+    ).one()
+
+    return ProductFacetsResponse(
+        categories=categories,
+        total=total_count,
+        price=PriceFacetResponse(
+            min=price_min or 0,
+            max=price_max or 0,
+        ),
+    )
+
 
 
 @router.get("/{product_slug}", response_model=ProductResponse)
