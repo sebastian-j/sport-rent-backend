@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.models import CartItem, Order, OrderInstance, OrderStatus, Product, ProductSize
-from app.models.product import Instance, InstanceStatus, OrderInstance
+from app.models.product import Instance, InstanceStatus
 from app.schemas.cart import (
     AddToCartRequest,
     CartItemDate,
