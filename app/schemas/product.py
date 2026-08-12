@@ -4,7 +4,7 @@ MIN_PRICE = 0
 MAX_PRICE = 200
 DEFAULT_PAGE_SIZE = 10
 DEFAULT_PAGE = 1
-
+MAX_PAGE_SIZE = 100
 
 class ProductSize(BaseModel):
     size: str
@@ -36,7 +36,11 @@ class ProductQueryParams(BaseModel):
     category: list[str] | None = None
     query: str | None = None
     page: int = Field(default=DEFAULT_PAGE, ge=1)
-    pageSize: int = Field(default=DEFAULT_PAGE_SIZE, ge=1)
+    pageSize: int = Field(
+        default=DEFAULT_PAGE_SIZE,
+        ge=1,
+        le=MAX_PAGE_SIZE,
+    )
 
 
 class CategoryResponse(BaseModel):
