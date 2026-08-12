@@ -1,8 +1,8 @@
 from datetime import datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -19,6 +19,7 @@ from app.schemas.user import (
     UpdateAddressRequest,
     UserHistoryItemResponse,
     UserResponse,
+    PaginatedUserHistoryResponse
 )
 from app.services.image import get_image_as_base64
 
@@ -95,11 +96,21 @@ async def update_personal_address(
     return None
 
 
-@router.get("/history", response_model=list[UserHistoryItemResponse])
+@router.get("/history", response_model=PaginatedUserHistoryResponse)
 async def get_user_history(
     user_id: Annotated[int, Depends(get_current_user_id)],
     session: Annotated[AsyncSession, Depends(get_db_session)],
+    page: Annotated[int, Query(ge=1)] = 1,
+    page_size: Annotated[int, Query(alias="pageSize", ge=1, le=100)] = 10,
 ):
+    total_orders = (
+        await session.scalar(
+            select(func.count(Order.id)).where(Order.user_id == user_id)
+        )
+    or 0
+    )
+
+    offset = (page - 1) * page_size
     orders = (
         (
             await session.scalars(
@@ -107,15 +118,17 @@ async def get_user_history(
                 .options(selectinload(Order.instances))
                 .where(Order.user_id == user_id)
                 .order_by(Order.created_at.desc())
+                .offset(offset)
+                .limit(page_size)
             )
         )
         .unique()
         .all()
     )
 
-    response = []
+    items = []
     for order in orders:
-        total = 0
+        order_total = 0
         for order_instance in order.instances:
             days = (order_instance.end_date - order_instance.start_date).days
             if days < 0:
@@ -124,18 +137,25 @@ async def get_user_history(
                 )
             if days == 0:
                 days = 1
-            total += order_instance.price * days
+            order_total += order_instance.price * days
 
-        response.append(
+        items.append(
             UserHistoryItemResponse(
                 id=order.id,
                 created_at=order.created_at,
                 status=order.status.value,
                 payment_code=str(order.payment_code) if order.payment_code else None,
-                total=total,
+                total=order_total,
             )
         )
-    return response
+    total_pages = (total_orders + page_size - 1) // page_size
+    return PaginatedUserHistoryResponse(
+        items=items,
+        page=page,
+        pageSize=page_size,
+        total=total_orders,
+        totalPages=total_pages,
+    )
 
 
 @router.get("/history/{order_id}", response_model=OrderDetailResponse)

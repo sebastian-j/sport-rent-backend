@@ -54,3 +54,10 @@ class OrderDetailResponse(BaseModel):
     total: float
     discount: float | None
     items: list[OrderItemDetailsResponse]
+
+class PaginatedUserHistoryResponse(BaseModel):
+    items: list[UserHistoryItemResponse]
+    page: int
+    pageSize: int
+    total: int
+    totalPages: int
