@@ -4,12 +4,13 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import date
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, exists, func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models import CartItem, Product, ProductSize
+from app.models import CartItem, Order, OrderInstance, OrderStatus, Product, ProductSize
+from app.models.product import Instance, InstanceStatus, OrderInstance
 from app.schemas.cart import (
     AddToCartRequest,
     CartItemDate,
@@ -76,6 +77,32 @@ async def validate_term(
     )
     if product is None:
         raise CartItemNotFoundError("Product not found")
+
+    occupied_instance = exists(
+        select(1)
+        .select_from(OrderInstance)
+        .join(Order, Order.id == OrderInstance.order_id)
+        .where(
+            OrderInstance.instance_id == Instance.id,
+            Order.status != OrderStatus.CANCELLED,
+            OrderInstance.start_date <= end_date,
+            OrderInstance.end_date >= start_date,
+        )
+    )
+
+    availability_query = select(func.count(Instance.id)).where(
+        Instance.product_id == product.id,
+        Instance.status == InstanceStatus.AVAILABLE,
+        ~occupied_instance,
+    )
+    if size is not None:
+        availability_query = availability_query.where(Instance.size == size)
+
+    available_quantity = await session.scalar(availability_query) or 0
+    if quantity > available_quantity:
+        raise CartValidationError(
+            f"Requested quantity ({quantity}) exceeds available quantity ({available_quantity}) for selected dates"
+        )
 
     product_size = None
     if product.sizes:
