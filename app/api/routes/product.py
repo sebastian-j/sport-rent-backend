@@ -11,11 +11,11 @@ from app.models.category import Category
 from app.models.product import Favorite, Product
 from app.schemas.product import (
     CategoryResponse,
+    PriceFacetResponse,
     ProductAvailabilityResponse,
+    ProductFacetsResponse,
     ProductQueryParams,
     ProductResponse,
-    PriceFacetResponse,
-    ProductFacetsResponse,
 )
 from app.services.image import convert_images_to_base64
 
@@ -168,17 +168,13 @@ async def get_categories_count(
     ).where(Product.visibility_status.is_(True))
 
     if search_query:
-        price_query = price_query.where(
-            Product.name.ilike(f"%{search_query}%")
-        )
+        price_query = price_query.where(Product.name.ilike(f"%{search_query}%"))
     if selected_categories:
         price_query = price_query.join(Product.category).where(
             Category.name.in_(selected_categories)
         )
 
-    price_min, price_max = (
-        await session.execute(price_query)
-    ).one()
+    price_min, price_max = (await session.execute(price_query)).one()
 
     return ProductFacetsResponse(
         categories=categories,
@@ -188,7 +184,6 @@ async def get_categories_count(
             max=price_max or 0,
         ),
     )
-
 
 
 @router.get("/{product_slug}", response_model=ProductResponse)

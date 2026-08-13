@@ -43,6 +43,7 @@ class CategoryResponse(BaseModel):
     name: str
     count: int
 
+
 class PriceFacetResponse(BaseModel):
     min: float
     max: float
