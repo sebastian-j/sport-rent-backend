@@ -106,7 +106,7 @@ class Settings:
             for origin in os.getenv("ALLOWED_ORIGINS", "").split(",")
             if origin.strip()
         )
-        
+
         return cls(
             allowed_origins=allowed_origins,
             database_url=_required_environment_variable("DATABASE_URL"),
