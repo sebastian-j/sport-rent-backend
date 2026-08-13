@@ -9,6 +9,7 @@ from app.db.base import Base
 
 if TYPE_CHECKING:
     from app.models.product import Product
+    from app.models.subcategory import Subcategory
 
 
 class Category(Base):
@@ -20,6 +21,12 @@ class Category(Base):
     image: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     products: Mapped[list[Product]] = relationship(
+        back_populates="category",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+
+    subcategories: Mapped[list[Subcategory]] = relationship(
         back_populates="category",
         cascade="all, delete-orphan",
         passive_deletes=True,

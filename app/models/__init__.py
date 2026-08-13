@@ -32,6 +32,7 @@ __all__ = [
     "OrderAddress",
     "OrderInstance",
     "OrderStatus",
+    "Subcategory",
     "User",
     "PromoCode",
 ]
