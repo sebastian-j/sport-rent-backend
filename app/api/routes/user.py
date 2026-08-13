@@ -107,7 +107,7 @@ async def get_user_history(
         await session.scalar(
             select(func.count(Order.id)).where(Order.user_id == user_id)
         )
-    or 0
+        or 0
     )
 
     offset = (page - 1) * page_size

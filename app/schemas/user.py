@@ -55,6 +55,7 @@ class OrderDetailResponse(BaseModel):
     discount: float | None
     items: list[OrderItemDetailsResponse]
 
+
 class PaginatedUserHistoryResponse(BaseModel):
     items: list[UserHistoryItemResponse]
     page: int
