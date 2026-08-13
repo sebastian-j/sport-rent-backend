@@ -1,8 +1,8 @@
 from datetime import datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query
-from sqlalchemy import select, func
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -16,10 +16,10 @@ from app.models.user import User
 from app.schemas.user import (
     OrderDetailResponse,
     OrderItemDetailsResponse,
+    PaginatedUserHistoryResponse,
     UpdateAddressRequest,
     UserHistoryItemResponse,
     UserResponse,
-    PaginatedUserHistoryResponse
 )
 from app.services.image import get_image_as_base64
 

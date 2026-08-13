@@ -1,5 +1,5 @@
 from collections.abc import AsyncIterator
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 import pytest_asyncio
@@ -81,7 +81,7 @@ async def test_user_history_returns_requested_page_and_metadata(
     test_session_factory: async_sessionmaker[AsyncSession],
     clean_up_orders: None,
 ) -> None:
-    created_at = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    created_at = datetime(2026, 1, 1, tzinfo=UTC)
     async with test_session_factory.begin() as session:
         session.add_all(
             [
