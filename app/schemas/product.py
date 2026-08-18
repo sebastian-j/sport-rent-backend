@@ -43,3 +43,14 @@ class ProductQueryParams(BaseModel):
 class CategoryResponse(BaseModel):
     name: str
     count: int
+
+
+class PriceFacetResponse(BaseModel):
+    min: float
+    max: float
+
+
+class ProductFacetsResponse(BaseModel):
+    categories: list[CategoryResponse]
+    total: int
+    price: PriceFacetResponse
