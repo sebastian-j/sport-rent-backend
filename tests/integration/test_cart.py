@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.core.tokens import create_access_token, create_refresh_token
 from app.models import AuthSession, Product, ProductImage, ProductSize, User
+from app.models.product import Instance, InstanceStatus
 from tests.conftest import TEST_PASSWORD
 from tests.support import SeededUser
 
@@ -88,6 +89,16 @@ async def cart_products(
                 ProductSize(size="M", description="Medium"),
                 ProductSize(size="L", description="Large"),
             ],
+            instances=[
+                *[
+                    Instance(size="M", status=InstanceStatus.AVAILABLE)
+                    for _ in range(6)
+                ],
+                *[
+                    Instance(size="L", status=InstanceStatus.AVAILABLE)
+                    for _ in range(2)
+                ],
+            ],
         )
         plain = Product(
             id=PLAIN_PRODUCT_ID,
@@ -96,6 +107,10 @@ async def cart_products(
             price=80,
             slug="kajak-testowy-cart",
             visibility_status=True,
+            instances=[
+                Instance(status=InstanceStatus.AVAILABLE),
+                Instance(status=InstanceStatus.AVAILABLE),
+            ],
         )
         hidden = Product(
             id=HIDDEN_PRODUCT_ID,
