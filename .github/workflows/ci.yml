@@ -45,7 +45,13 @@ jobs:
       CSRF_EXPIRATION: "2592000"
       AUTH_COOKIE_SECURE: "false"
       SEED_USER_PASSWORD: Test123!
-
+      SMTP_HOST: localhost
+      SMTP_PORT: "1025"
+      SMTP_USERNAME: ci
+      SMTP_PASSWORD: ci
+      SMTP_FROM_EMAIL: no-reply@example.test
+      SMTP_USE_TLS: "false"
+      SMTP_USE_AUTH: "false"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6

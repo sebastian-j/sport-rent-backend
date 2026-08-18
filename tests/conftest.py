@@ -16,6 +16,7 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy.pool import NullPool
 from sqlalchemy.schema import CreateSchema, DropSchema
 
+from app.api.dependencies import get_password_reset_notifier
 from app.api.routes.auth import password_reset_rate_limiter
 from app.core.config import settings
 from app.core.passwords import hash_password
@@ -27,6 +28,20 @@ from tests.support import SeededUser
 
 TEST_EMAIL = "jan.kowalski@poczta.pl"
 TEST_PASSWORD = "Correct-test-password-123!"
+
+
+class TestPasswordResetNotifier:
+    async def send_password_reset_link(
+        self,
+        *,
+        email: str,
+        token: str,
+    ) -> None:
+        print(
+            f"Password reset link for {email}: "
+            f"{settings.frontend_url}/reset-password/confirm#token={token}",
+            flush=True,
+        )
 
 
 @pytest_asyncio.fixture(scope="session", loop_scope="session")
@@ -81,11 +96,15 @@ async def application(
             yield session
 
     fastapi_app.dependency_overrides[get_db_session] = override_db_session
+    fastapi_app.dependency_overrides[get_password_reset_notifier] = (
+        TestPasswordResetNotifier
+    )
 
     try:
         yield fastapi_app
     finally:
         fastapi_app.dependency_overrides.pop(get_db_session, None)
+        fastapi_app.dependency_overrides.pop(get_password_reset_notifier, None)
 
 
 @pytest_asyncio.fixture

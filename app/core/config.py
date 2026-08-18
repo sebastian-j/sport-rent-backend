@@ -79,6 +79,13 @@ class Settings:
     password_reset_ip_rate_limit: int
     password_reset_rate_limit_window: int
     password_reset_min_response_time_ms: int
+    smtp_host: str
+    smtp_port: int
+    smtp_username: str
+    smtp_password: str
+    smtp_from_email: str
+    smtp_use_tls: bool
+    smtp_use_auth: bool
     seed_user_password: str | None
 
     @classmethod
@@ -147,6 +154,13 @@ class Settings:
                 "PASSWORD_RESET_MIN_RESPONSE_TIME_MS",
                 default=300,
             ),
+            smtp_host=_required_environment_variable("SMTP_HOST"),
+            smtp_port=_positive_integer("SMTP_PORT", default=587),
+            smtp_username=_required_environment_variable("SMTP_USERNAME"),
+            smtp_password=_required_environment_variable("SMTP_PASSWORD"),
+            smtp_from_email=_required_environment_variable("SMTP_FROM_EMAIL"),
+            smtp_use_tls=_boolean("SMTP_USE_TLS", default=True),
+            smtp_use_auth=_boolean("SMTP_USE_AUTH", default=True),
             seed_user_password=os.getenv("SEED_USER_PASSWORD"),
         )
 

@@ -12,13 +12,30 @@ from app.core.config import settings
 from app.core.tokens import decode_access_token
 from app.db.session import get_db_session
 from app.models import AuthSession
+from app.services.email_sender import EmailSender, SmtpEmailSender
 from app.services.password_reset_notifier import (
-    ConsolePasswordResetNotifier,
+    EmailPasswordResetNotifier,
     PasswordResetNotifier,
 )
 
 bearer_scheme = HTTPBearer(auto_error=False)
-password_reset_notifier = ConsolePasswordResetNotifier(settings.frontend_url)
+email_sender = SmtpEmailSender(
+    host=settings.smtp_host,
+    port=settings.smtp_port,
+    username=settings.smtp_username,
+    password=settings.smtp_password,
+    use_tls=settings.smtp_use_tls,
+    use_auth=settings.smtp_use_auth,
+)
+password_reset_notifier = EmailPasswordResetNotifier(
+    frontend_url=settings.frontend_url,
+    from_email=settings.smtp_from_email,
+    email_sender=email_sender,
+)
+
+
+def get_email_sender() -> EmailSender:
+    return email_sender
 
 
 def get_password_reset_notifier() -> PasswordResetNotifier:
