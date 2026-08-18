@@ -4,12 +4,13 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import date
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, exists, func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models import CartItem, Product, ProductSize
+from app.models import CartItem, Order, OrderInstance, OrderStatus, Product, ProductSize
+from app.models.product import Instance, InstanceStatus
 from app.schemas.cart import (
     AddToCartRequest,
     CartItemDate,
@@ -33,12 +34,21 @@ class ValidatedTerm:
     product: Product
     product_size: ProductSize | None
     quantity: int
+    available_quantity: int
     start_date: date
     end_date: date
 
 
 def merge_quantities(existing_quantity: int, added_quantity: int) -> int:
     return existing_quantity + added_quantity
+
+
+def ensure_quantity_available(quantity: int, available_quantity: int) -> None:
+    if quantity > available_quantity:
+        raise CartValidationError(
+            f"Requested quantity ({quantity}) exceeds available quantity "
+            f"({available_quantity}) for selected dates"
+        )
 
 
 def validate_dates(start_date: date, end_date: date, today: date | None = None) -> None:
@@ -77,6 +87,29 @@ async def validate_term(
     if product is None:
         raise CartItemNotFoundError("Product not found")
 
+    occupied_instance = exists(
+        select(1)
+        .select_from(OrderInstance)
+        .join(Order, Order.id == OrderInstance.order_id)
+        .where(
+            OrderInstance.instance_id == Instance.id,
+            Order.status != OrderStatus.CANCELLED,
+            OrderInstance.start_date <= end_date,
+            OrderInstance.end_date >= start_date,
+        )
+    )
+
+    availability_query = select(func.count(Instance.id)).where(
+        Instance.product_id == product.id,
+        Instance.status == InstanceStatus.AVAILABLE,
+        ~occupied_instance,
+    )
+    if size is not None:
+        availability_query = availability_query.where(Instance.size == size)
+
+    available_quantity = await session.scalar(availability_query) or 0
+    ensure_quantity_available(quantity, available_quantity)
+
     product_size = None
     if product.sizes:
         if size is None:
@@ -98,6 +131,7 @@ async def validate_term(
         product=product,
         product_size=product_size,
         quantity=quantity,
+        available_quantity=available_quantity,
         start_date=start_date,
         end_date=end_date,
     )
@@ -114,6 +148,18 @@ async def add_item(
         start_date=request.start_date,
         end_date=request.end_date,
     )
+    existing_quantity = await _locked_term_quantity(
+        session,
+        user_id=user_id,
+        product_id=term.product.id,
+        product_size_id=term.product_size.id if term.product_size else None,
+        start_date=term.start_date,
+        end_date=term.end_date,
+    )
+    ensure_quantity_available(
+        merge_quantities(existing_quantity, term.quantity),
+        term.available_quantity,
+    )
     statement = (
         insert(CartItem)
         .values(
@@ -127,12 +173,52 @@ async def add_item(
         .on_conflict_do_update(
             constraint="uq_cart_item_term",
             set_={"quantity": CartItem.quantity + term.quantity},
+            where=(CartItem.quantity + term.quantity) <= term.available_quantity,
         )
         .returning(CartItem.id)
     )
-    item_id = (await session.execute(statement)).scalar_one()
+    item_id = (await session.execute(statement)).scalar_one_or_none()
+    if item_id is None:
+        current_quantity = await _locked_term_quantity(
+            session,
+            user_id=user_id,
+            product_id=term.product.id,
+            product_size_id=term.product_size.id if term.product_size else None,
+            start_date=term.start_date,
+            end_date=term.end_date,
+        )
+        ensure_quantity_available(
+            merge_quantities(current_quantity, term.quantity),
+            term.available_quantity,
+        )
+        raise CartValidationError("Cart item could not be added")
     await session.commit()
     return await get_item(session, user_id, item_id)
+
+
+async def _locked_term_quantity(
+    session: AsyncSession,
+    *,
+    user_id: int,
+    product_id: int,
+    product_size_id: int | None,
+    start_date: date,
+    end_date: date,
+) -> int:
+    return (
+        await session.scalar(
+            select(CartItem.quantity)
+            .where(
+                CartItem.user_id == user_id,
+                CartItem.product_id == product_id,
+                CartItem.product_size_id == product_size_id,
+                CartItem.start_date == start_date,
+                CartItem.end_date == end_date,
+            )
+            .with_for_update()
+        )
+        or 0
+    )
 
 
 async def get_item(session: AsyncSession, user_id: int, item_id: int) -> CartItem:
@@ -188,7 +274,9 @@ async def update_item(
         .with_for_update()
     )
     if collision is not None:
-        collision.quantity = merge_quantities(collision.quantity, term.quantity)
+        merged_quantity = merge_quantities(collision.quantity, term.quantity)
+        ensure_quantity_available(merged_quantity, term.available_quantity)
+        collision.quantity = merged_quantity
         result_id = collision.id
         await session.delete(item)
     else:

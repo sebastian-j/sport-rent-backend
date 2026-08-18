@@ -5,6 +5,7 @@ import pytest
 from app.models import CartItem, Product, ProductImage, ProductSize
 from app.services.cart import (
     CartValidationError,
+    ensure_quantity_available,
     group_cart_items,
     merge_quantities,
     validate_dates,
@@ -67,3 +68,9 @@ def test_group_cart_items_groups_products_and_uses_first_image() -> None:
 
 def test_merge_quantities_adds_the_updated_term_to_existing_term() -> None:
     assert merge_quantities(2, 4) == 6
+
+
+def test_ensure_quantity_available_rejects_overflow() -> None:
+    ensure_quantity_available(2, 2)
+    with pytest.raises(CartValidationError, match="exceeds available"):
+        ensure_quantity_available(3, 2)
