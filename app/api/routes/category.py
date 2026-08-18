@@ -35,13 +35,12 @@ async def get_random_category(
         slug=category.slug,
     )
 
+
 @router.get("", response_model=list[CategoryResponse])
 async def get_categories(
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> list[CategoryResponse]:
-    categories = (
-        await session.scalars(select(Category).order_by(Category.id))
-    ).all()
+    categories = (await session.scalars(select(Category).order_by(Category.id))).all()
 
     return [
         CategoryResponse(
