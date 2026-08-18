@@ -101,7 +101,8 @@ async def validate_term(
     available_quantity = await session.scalar(availability_query) or 0
     if quantity > available_quantity:
         raise CartValidationError(
-            f"Requested quantity ({quantity}) exceeds available quantity ({available_quantity}) for selected dates"
+            f"Requested quantity ({quantity}) exceeds available quantity "
+            f"({available_quantity}) for selected dates"
         )
 
     product_size = None
