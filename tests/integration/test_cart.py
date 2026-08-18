@@ -253,6 +253,32 @@ async def test_identical_addition_merges_quantity(
     assert second.json()["quantity"] == 5
 
 
+async def test_identical_addition_does_not_exceed_available_quantity(
+    client: AsyncClient,
+    test_user: SeededUser,
+    cart_products: None,
+    authorization_factory: AuthorizationFactory,
+) -> None:
+    headers = await authorization_factory(test_user.id)
+    first = await client.post(
+        "/cart/items",
+        headers=headers,
+        json=item_payload(product_slug="kajak-testowy-cart", size=None, quantity=2),
+    )
+    second = await client.post(
+        "/cart/items",
+        headers=headers,
+        json=item_payload(product_slug="kajak-testowy-cart", size=None, quantity=1),
+    )
+
+    assert first.status_code == 201
+    assert first.json()["quantity"] == 2
+    assert second.status_code == 422
+
+    cart = (await client.get("/cart", headers=headers)).json()
+    assert cart[0]["dates"][0]["quantity"] == 2
+
+
 async def test_patch_fully_edits_and_merges_collision(
     client: AsyncClient,
     test_user: SeededUser,
@@ -299,6 +325,51 @@ async def test_patch_fully_edits_and_merges_collision(
 
     cart = (await client.get("/cart", headers=headers)).json()
     assert len(cart[0]["dates"]) == 1
+
+
+async def test_patch_merge_does_not_exceed_available_quantity(
+    client: AsyncClient,
+    test_user: SeededUser,
+    cart_products: None,
+    authorization_factory: AuthorizationFactory,
+) -> None:
+    headers = await authorization_factory(test_user.id)
+    first = (
+        await client.post(
+            "/cart/items",
+            headers=headers,
+            json=item_payload(product_slug="kajak-testowy-cart", size=None, quantity=2),
+        )
+    ).json()
+    second = (
+        await client.post(
+            "/cart/items",
+            headers=headers,
+            json=item_payload(
+                product_slug="kajak-testowy-cart",
+                size=None,
+                quantity=1,
+                start_days=8,
+                end_days=10,
+            ),
+        )
+    ).json()
+
+    merged = await client.patch(
+        f"/cart/items/{second['id']}",
+        headers=headers,
+        json={
+            "start_date": first["start_date"],
+            "end_date": first["end_date"],
+        },
+    )
+    assert merged.status_code == 422
+
+    cart = (await client.get("/cart", headers=headers)).json()
+    assert {item["id"]: item["quantity"] for item in cart[0]["dates"]} == {
+        first["id"]: 2,
+        second["id"]: 1,
+    }
 
 
 async def test_removes_term_then_product_disappears(
@@ -390,6 +461,7 @@ async def test_users_are_isolated(
         (item_payload(size="XL"), 422),
         (item_payload(product_slug="kajak-testowy-cart", size="M"), 422),
         (item_payload(quantity=0), 422),
+        (item_payload(product_slug="kajak-testowy-cart", size=None, quantity=3), 422),
         (
             {
                 **item_payload(),
