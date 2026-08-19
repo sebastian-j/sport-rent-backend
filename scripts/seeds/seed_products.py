@@ -1,7 +1,5 @@
 import asyncio
 import json
-import re
-import unicodedata
 from pathlib import Path
 
 from sqlalchemy import select
@@ -16,34 +14,11 @@ from app.models.product import (
     ProductImage,
     ProductSize,
 )
+from scripts.seeds.utils import find_image, slugify
 
 PRODUCTS_FILE_PATH = Path("app/assets/mock_products.json")
 CATEGORY_IMAGES_DIRECTORY = Path("app/assets/categories/pictures")
 CATEGORY_IMAGES_STORAGE_PATH = Path("assets/categories/pictures")
-
-
-def slugify(text: str) -> str:
-    text = text.translate(str.maketrans({"ł": "l", "Ł": "L"}))
-    text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("utf-8")
-    text = re.sub(r"[^\w\s-]", "", text).strip().lower()
-    return re.sub(r"[-\s]+", "-", text)
-
-
-def find_category_image(category_name: str) -> str | None:
-    if not CATEGORY_IMAGES_DIRECTORY.is_dir():
-        return None
-
-    category_slug = slugify(category_name)
-    matching_images = sorted(
-        path
-        for path in CATEGORY_IMAGES_DIRECTORY.iterdir()
-        if path.is_file() and slugify(path.stem) == category_slug
-    )
-
-    if not matching_images:
-        return None
-
-    return (CATEGORY_IMAGES_STORAGE_PATH / matching_images[0].name).as_posix()
 
 
 async def seed_products(
@@ -64,7 +39,9 @@ async def seed_products(
             category = await session.scalar(
                 select(Category).where(Category.name == c_name)
             )
-            category_image = find_category_image(c_name)
+            category_image = find_image(c_name,
+                                        CATEGORY_IMAGES_DIRECTORY,
+                                        CATEGORY_IMAGES_STORAGE_PATH)
 
             if category is None:
                 category = Category(
