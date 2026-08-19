@@ -13,6 +13,7 @@ from app.models.product import (
     ProductImage,
     ProductSize,
 )
+from app.models.promo_codes import PromoCode
 from app.models.user import User
 
 __all__ = [
@@ -32,4 +33,5 @@ __all__ = [
     "OrderInstance",
     "OrderStatus",
     "User",
+    "PromoCode",
 ]
