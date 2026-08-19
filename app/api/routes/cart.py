@@ -1,4 +1,3 @@
-from time import sleep
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -16,6 +15,7 @@ from app.schemas.cart import (
     UpdateCartItemRequest,
 )
 from app.services import cart as cart_service
+from app.services import promo_code as promo_code_service
 
 router = APIRouter(prefix="/cart", tags=["cart"])
 
@@ -115,16 +115,28 @@ async def remove_product_from_cart(
         raise not_found(error) from error
 
 
-# TODO: MOCK
 @router.post(
     "/promo-code/validate",
     response_model=PromoCodeValidationResponse,
     summary="Sprawdź kod promocyjny",
     response_description="Wartość rabatu przypisana do kodu promocyjnego",
 )
-def validate_promo_code(request: PromoCodeValidationRequest):
-    if request.promo_code.upper().startswith("D"):
-        sleep(1)
-    if request.promo_code.upper().endswith("SPORT10"):
-        return PromoCodeValidationResponse(discount_rate=0.1)
-    return PromoCodeValidationResponse()
+async def validate_promo_code(
+    request: PromoCodeValidationRequest,
+    _user_id: CurrentUser,
+    session: DatabaseSession,
+) -> PromoCodeValidationResponse:
+    promo_code = await promo_code_service.get_valid_promo_code(
+        session,
+        request.promo_code,
+    )
+
+    if promo_code is None:
+        return PromoCodeValidationResponse(valid=False)
+
+    return PromoCodeValidationResponse(
+        valid=True,
+        discount_type=promo_code.discount_type,
+        discount_value=promo_code.discount_value,
+        minimum_order_value=promo_code.minimum_order_value,
+    )

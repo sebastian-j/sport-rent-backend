@@ -1,6 +1,9 @@
 from datetime import date
+from decimal import Decimal
 
 from pydantic import BaseModel, Field, model_validator
+
+from app.models.promo_codes import DiscountType
 
 
 class CartProductSize(BaseModel):
@@ -56,4 +59,7 @@ class PromoCodeValidationRequest(BaseModel):
 
 
 class PromoCodeValidationResponse(BaseModel):
-    discount_rate: float | None = Field(default=None, ge=0, le=1)
+    valid: bool
+    discount_type: DiscountType | None = None
+    discount_value: Decimal | None = None
+    minimum_order_value: Decimal | None = None

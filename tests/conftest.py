@@ -23,7 +23,14 @@ from app.core.passwords import hash_password
 from app.db.base import Base
 from app.db.session import get_db_session
 from app.main import app as fastapi_app
-from app.models import Address, AuthSession, Order, PasswordResetToken, User
+from app.models import (
+    Address,
+    AuthSession,
+    Order,
+    PasswordResetToken,
+    PromoCode,
+    User,
+)
 from tests.support import SeededUser
 
 TEST_EMAIL = "jan.kowalski@poczta.pl"
@@ -149,6 +156,20 @@ async def empty_auth_database(
         yield
     finally:
         await clear_auth_database(test_session_factory)
+
+
+@pytest_asyncio.fixture
+async def empty_promo_codes(
+    test_session_factory: async_sessionmaker[AsyncSession],
+) -> AsyncIterator[None]:
+    async with test_session_factory.begin() as session:
+        await session.execute(delete(PromoCode))
+
+    try:
+        yield
+    finally:
+        async with test_session_factory.begin() as session:
+            await session.execute(delete(PromoCode))
 
 
 @pytest_asyncio.fixture
