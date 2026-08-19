@@ -39,9 +39,9 @@ async def seed_products(
             category = await session.scalar(
                 select(Category).where(Category.name == c_name)
             )
-            category_image = find_image(c_name,
-                                        CATEGORY_IMAGES_DIRECTORY,
-                                        CATEGORY_IMAGES_STORAGE_PATH)
+            category_image = find_image(
+                c_name, CATEGORY_IMAGES_DIRECTORY, CATEGORY_IMAGES_STORAGE_PATH
+            )
 
             if category is None:
                 category = Category(

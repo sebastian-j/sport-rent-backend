@@ -44,8 +44,10 @@ async def seed_subcategories(
                 select(Category).where(Category.name == c_name)
             )
             if category is None:
-                print(f"Warning: category '{c_name}' not found, "
-                      f"skipping subcategory '{sc_name}'")
+                print(
+                    f"Warning: category '{c_name}' not found, "
+                    f"skipping subcategory '{sc_name}'"
+                )
                 continue
 
             subcategory = await session.scalar(
