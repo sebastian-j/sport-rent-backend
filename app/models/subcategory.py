@@ -9,6 +9,7 @@ from app.db.base import Base
 
 if TYPE_CHECKING:
     from app.models.category import Category
+    from app.models.product import Product
 
 
 class Subcategory(Base):
@@ -22,3 +23,4 @@ class Subcategory(Base):
     )
 
     category: Mapped[Category] = relationship(back_populates="subcategories")
+    products: Mapped[list[Product]] = relationship(back_populates="subcategory")

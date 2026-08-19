@@ -24,6 +24,13 @@ table categories {
   image varchar
 }
 
+table subcategories {
+  id integer [primary key]
+  name varchar [not null]
+  slug varchar [not null]
+  category_id integer [not null]
+}
+
 table addresses {
   id integer [primary key]
   first_name varchar
@@ -97,6 +104,7 @@ table products {
   meta_description varchar
   visibility_status bool
   category_id integer
+  subcategory_id integer
 
   checks {
     `price > 0`
@@ -193,3 +201,6 @@ ref: products.id < cart_items.product_id
 ref: product_sizes.id < cart_items.product_size_id
 ref: instances.id < calendar_blocks.instance_id
 ref: products.id < product_sizes.product_id
+ref: categories.id < subcategories.category_id
+ref: categories.id < products.category_id
+ref: subcategories.id < products.subcategory_id

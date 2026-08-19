@@ -2,6 +2,7 @@ from app.db.base import Base
 from app.models.address import Address
 from app.models.auth_session import AuthSession
 from app.models.cart import CartItem
+from app.models.subcategory import Subcategory
 from app.models.category import Category
 from app.models.order import Order, OrderInstance, OrderStatus
 from app.models.order_address import OrderAddress
