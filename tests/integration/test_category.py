@@ -42,11 +42,13 @@ async def test_random_category_returns_category_with_image(
             "name": "Rowery",
             "image": "missing/rowery.jpg",
             "slug": "rowery",
+            "subcategories": [],
         },
         {
             "name": "Namioty",
             "image": "missing/namioty.jpg",
             "slug": "namioty",
+            "subcategories": [],
         },
     )
 
