@@ -14,6 +14,7 @@ from app.models.product import (
     ProductSize,
 )
 from app.models.promo_codes import PromoCode
+from app.models.subcategory import Subcategory
 from app.models.user import User
 
 __all__ = [
@@ -32,6 +33,7 @@ __all__ = [
     "OrderAddress",
     "OrderInstance",
     "OrderStatus",
+    "Subcategory",
     "User",
     "PromoCode",
 ]
