@@ -26,6 +26,7 @@ from app.main import app as fastapi_app
 from app.models import (
     Address,
     AuthSession,
+    LoyaltyTransaction,
     Order,
     PasswordResetToken,
     PromoCode,
@@ -141,6 +142,7 @@ async def clear_auth_database(
     session_factory: async_sessionmaker[AsyncSession],
 ) -> None:
     async with session_factory.begin() as session:
+        await session.execute(delete(LoyaltyTransaction))
         await session.execute(delete(Order))
         await session.execute(delete(User))
         await session.execute(delete(Address))
