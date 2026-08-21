@@ -32,6 +32,13 @@ table subcategories {
   category_id integer [not null]
 }
 
+table manufacturers {
+  id integer [primary key]
+  name varchar [not null]
+  slug varchar [not null]
+  image varchar
+}
+
 table addresses {
   id integer [primary key]
   first_name varchar
@@ -106,6 +113,7 @@ table products {
   visibility_status bool
   category_id integer
   subcategory_id integer
+  manufacturer_id integer
 
   checks {
     `price > 0`
@@ -205,3 +213,4 @@ ref: products.id < product_sizes.product_id
 ref: categories.id < subcategories.category_id
 ref: categories.id < products.category_id
 ref: subcategories.id < products.subcategory_id
+ref: manufacturers.id < products.manufacturer_id
