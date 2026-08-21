@@ -35,6 +35,7 @@ class ProductQueryParams(BaseModel):
     minPrice: int | None = Field(default=MIN_PRICE, ge=0)
     maxPrice: int | None = Field(default=MAX_PRICE, ge=0)
     category: list[str] | None = None
+    subcategory: list[str] | None = None
     query: str | None = None
     page: int = Field(default=DEFAULT_PAGE, ge=1)
     pageSize: int = Field(default=DEFAULT_PAGE_SIZE, ge=1)

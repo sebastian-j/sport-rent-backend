@@ -11,6 +11,7 @@ from app.db.session import get_db_session
 from app.models.category import Category
 from app.models.order import Order, OrderInstance, OrderStatus
 from app.models.product import Favorite, Instance, InstanceStatus, Product
+from app.models.subcategory import Subcategory
 from app.schemas.product import (
     CategoryResponse,
     PriceFacetResponse,
@@ -35,6 +36,7 @@ async def get_products(
     min_price = params.minPrice
     max_price = params.maxPrice
     categories = params.category
+    subcategories = params.subcategory
     search_query = params.query
     page = params.page
     page_size = params.pageSize
@@ -58,6 +60,10 @@ async def get_products(
     if categories:
         product_query = product_query.outerjoin(Product.category).where(
             Category.name.in_(categories)
+        )
+    if subcategories:
+        product_query = product_query.outerjoin(Product.subcategory).where(
+            Subcategory.name.in_(subcategories)
         )
 
     if sort and order:
@@ -126,6 +132,7 @@ async def get_categories_count(
     max_price = params.maxPrice
     search_query = params.query
     selected_categories = params.category
+    selected_subcategories = params.subcategory
 
     base_query = select(Product).where(Product.visibility_status.is_(True))
 
@@ -138,6 +145,10 @@ async def get_categories_count(
     if selected_categories:
         base_query = base_query.join(Product.category).where(
             Category.name.in_(selected_categories)
+        )
+    if selected_subcategories:
+        base_query = base_query.join(Product.subcategory).where(
+            Subcategory.name.in_(selected_subcategories)
         )
 
     category_query = (
@@ -152,6 +163,10 @@ async def get_categories_count(
         category_query = category_query.where(Product.price <= max_price)
     if search_query:
         category_query = category_query.where(Product.name.ilike(f"%{search_query}%"))
+    if selected_subcategories:
+        category_query = category_query.join(Product.subcategory).where(
+            Subcategory.name.in_(selected_subcategories)
+        )
 
     category_query = category_query.group_by(Category.name)
     category_results = (await session.execute(category_query)).all()
@@ -174,6 +189,10 @@ async def get_categories_count(
     if selected_categories:
         price_query = price_query.join(Product.category).where(
             Category.name.in_(selected_categories)
+        )
+    if selected_subcategories:
+        price_query = price_query.join(Product.subcategory).where(
+            Subcategory.name.in_(selected_subcategories)
         )
 
     price_min, price_max = (await session.execute(price_query)).one()
