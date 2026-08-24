@@ -13,6 +13,7 @@ from app.models.product import (
     ProductImage,
     ProductSize,
 )
+from app.models.product_accessory import ProductAccessory
 from app.models.promo_codes import PromoCode
 from app.models.subcategory import Subcategory
 from app.models.user import User
@@ -27,6 +28,7 @@ __all__ = [
     "Instance",
     "PasswordResetToken",
     "Product",
+    "ProductAccessory",
     "ProductImage",
     "ProductSize",
     "Order",

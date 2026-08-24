@@ -22,6 +22,7 @@ from app.db.base import Base
 if TYPE_CHECKING:
     from app.models.cart import CartItem
     from app.models.category import Category
+    from app.models.product_accessory import ProductAccessory
     from app.models.subcategory import Subcategory
     from app.models.user import User
 
@@ -102,6 +103,18 @@ class Product(Base):
     )
     cart_items: Mapped[list[CartItem]] = relationship(
         back_populates="product", cascade="all, delete-orphan", passive_deletes=True
+    )
+    accessory_links: Mapped[list[ProductAccessory]] = relationship(
+        foreign_keys="ProductAccessory.product_id",
+        back_populates="product",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+    suggested_for_links: Mapped[list[ProductAccessory]] = relationship(
+        foreign_keys="ProductAccessory.accessory_id",
+        back_populates="accessory",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
     )
 
 
