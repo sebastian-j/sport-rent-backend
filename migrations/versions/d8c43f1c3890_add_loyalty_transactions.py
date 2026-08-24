@@ -53,6 +53,7 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(
             ["order_id"],
             ["orders.id"],
+            ondelete="SET NULL",
         ),
         sa.ForeignKeyConstraint(
             ["user_id"],

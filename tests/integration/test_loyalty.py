@@ -14,7 +14,9 @@ from app.models import (
     OrderStatus,
 )
 from app.services.loyalty import (
+    MAX_LOYALTY_POINTS_AMOUNT,
     InsufficientLoyaltyPointsError,
+    InvalidLoyaltyPointsAmountError,
     earn_points,
     get_balance,
     spend_points,
@@ -240,6 +242,80 @@ async def test_earn_points_creates_positive_transaction(
 
     async with test_session_factory() as session:
         assert await get_balance(session, test_user.id) == 75
+
+
+async def test_loyalty_history_survives_order_deletion(
+    test_user: SeededUser,
+    test_session_factory: async_sessionmaker[AsyncSession],
+    clean_loyalty_transactions: None,
+) -> None:
+    async with test_session_factory.begin() as session:
+        order = Order(user_id=test_user.id, status=OrderStatus.PAID)
+        session.add(order)
+        await session.flush()
+        transaction = await earn_points(
+            session,
+            test_user.id,
+            order.id,
+            100,
+            description="Points for deleted order",
+        )
+        order_id = order.id
+        transaction_id = transaction.id
+
+    async with test_session_factory.begin() as session:
+        await session.execute(delete(Order).where(Order.id == order_id))
+
+    async with test_session_factory() as session:
+        transaction = await session.get(LoyaltyTransaction, transaction_id)
+        assert transaction is not None
+        assert transaction.order_id is None
+        assert await get_balance(session, test_user.id) == 100
+
+
+@pytest.mark.parametrize(
+    ("amount", "expected_message"),
+    [
+        (True, "Loyalty points amount must be an integer"),
+        (1.5, "Loyalty points amount must be an integer"),
+        ("100", "Loyalty points amount must be an integer"),
+        (0, "Loyalty points amount must be positive"),
+        (-1, "Loyalty points amount must be positive"),
+        (
+            MAX_LOYALTY_POINTS_AMOUNT + 1,
+            f"Loyalty points amount must not exceed {MAX_LOYALTY_POINTS_AMOUNT}",
+        ),
+    ],
+)
+async def test_earn_points_rejects_invalid_amount(
+    test_session_factory: async_sessionmaker[AsyncSession],
+    amount: object,
+    expected_message: str,
+) -> None:
+    async with test_session_factory() as session:
+        with pytest.raises(InvalidLoyaltyPointsAmountError) as exception_info:
+            await earn_points(session, 1, 1, amount)  # type: ignore[arg-type]
+
+    assert str(exception_info.value) == expected_message
+
+
+async def test_earn_points_accepts_maximum_integer_amount(
+    test_user: SeededUser,
+    test_session_factory: async_sessionmaker[AsyncSession],
+    clean_loyalty_transactions: None,
+) -> None:
+    async with test_session_factory.begin() as session:
+        order = Order(user_id=test_user.id, status=OrderStatus.PAID)
+        session.add(order)
+        await session.flush()
+        transaction = await earn_points(
+            session,
+            test_user.id,
+            order.id,
+            MAX_LOYALTY_POINTS_AMOUNT,
+        )
+
+    assert transaction.amount == MAX_LOYALTY_POINTS_AMOUNT
 
 
 async def test_spend_points_rejects_amount_above_balance(

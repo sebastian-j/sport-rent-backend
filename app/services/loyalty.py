@@ -3,6 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import LoyaltyTransaction, LoyaltyTransactionType, User
 
+MAX_LOYALTY_POINTS_AMOUNT = 2_147_483_647
+
 
 class InvalidLoyaltyPointsAmountError(ValueError):
     pass
@@ -68,9 +70,17 @@ async def _lock_user(session: AsyncSession, user_id: int) -> None:
         raise LoyaltyUserNotFoundError(f"User {user_id} not found")
 
 
-def _require_positive_amount(amount: int) -> None:
+def _require_valid_amount(amount: object) -> None:
+    if isinstance(amount, bool) or not isinstance(amount, int):
+        raise InvalidLoyaltyPointsAmountError(
+            "Loyalty points amount must be an integer"
+        )
     if amount <= 0:
         raise InvalidLoyaltyPointsAmountError("Loyalty points amount must be positive")
+    if amount > MAX_LOYALTY_POINTS_AMOUNT:
+        raise InvalidLoyaltyPointsAmountError(
+            f"Loyalty points amount must not exceed {MAX_LOYALTY_POINTS_AMOUNT}"
+        )
 
 
 async def earn_points(
@@ -81,7 +91,7 @@ async def earn_points(
     *,
     description: str | None = None,
 ) -> LoyaltyTransaction:
-    _require_positive_amount(amount)
+    _require_valid_amount(amount)
     await _lock_user(session, user_id)
 
     transaction = LoyaltyTransaction(
@@ -104,7 +114,7 @@ async def spend_points(
     *,
     description: str | None = None,
 ) -> LoyaltyTransaction:
-    _require_positive_amount(amount)
+    _require_valid_amount(amount)
     await _lock_user(session, user_id)
 
     balance = await get_balance(session, user_id)
