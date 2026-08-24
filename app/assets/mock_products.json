@@ -33,7 +33,8 @@
                     "description": "wzrost 180-190 cm"
                 }
             ],
-            "subcategory": "Rowery gravel"
+            "subcategory": "Rowery gravel",
+            "manufacturer": "Producent 5"
         },
         {
             "id": 2,
@@ -68,7 +69,8 @@
                     "description": "wzrost 180-190 cm"
                 }
             ],
-            "subcategory": "Rowery gravel"
+            "subcategory": "Rowery gravel",
+            "manufacturer": "Producent 4"
         },
         {
             "id": 3,
@@ -99,7 +101,8 @@
                     "description": "obwód głowy 58-62 cm"
                 }
             ],
-            "subcategory": "Akcesoria rowerowe"
+            "subcategory": "Akcesoria rowerowe",
+            "manufacturer": "Producent 1"
         },
         {
             "id": 4,
@@ -114,7 +117,8 @@
             ],
             "category": "Przyczepki rowerowe",
             "description": "# Przyczepka rowerowa dla dzieci\n\nDwuosobowa przyczepka przeznaczona na rodzinne przejazdy po spokojnych drogach i utwardzonych trasach rowerowych. Zabudowana kabina osłania pasażerów podczas jazdy, a duże boczne koła i niski środek ciężkości ułatwiają stabilne prowadzenie zestawu.\n\n## Najważniejsze cechy\n\n- dwa oddzielne miejsca z pasami podtrzymującymi\n- niebieska kabina z przewiewnymi panelami bocznymi\n- dwa koła rowerowe oraz sztywna, czarna rama\n- dyszel zakończony zaczepem do połączenia z rowerem\n- wysoka pomarańczowa chorągiewka poprawiająca widoczność przyczepki\n\n## Przed rozpoczęciem jazdy\n\nSprawdź zgodność zaczepu z rowerem, prawidłowe zapięcie dodatkowego zabezpieczenia, mocowanie kół i działanie pasów. Dzieci powinny siedzieć zapięte i korzystać z odpowiednio dobranych kasków. Nie przekraczaj limitu masy ani wieku podanego na oznaczeniu rzeczywistego egzemplarza, a prędkość dopasuj do nawierzchni, zakrętów i dłuższej drogi hamowania.\n\n## Co obejmuje wypożyczenie?\n\nOtrzymujesz przyczepkę z dyszlem i chorągiewką pokazanymi na zdjęciu. Rower oraz kaski są dobierane osobno. Przy odbiorze porównaj komplet elementów z listą wydania i poproś o pokazanie prawidłowego montażu zaczepu.",
-            "subcategory": "Przyczepki rowerowe"
+            "subcategory": "Przyczepki rowerowe",
+            "manufacturer": "Producent 2"
         },
         {
             "id": 5,
@@ -129,7 +133,8 @@
             ],
             "category": "Przyczepki rowerowe",
             "description": "# Przyczepka rowerowa bagażowa\n\nPraktyczna dwukołowa przyczepka z otwartą skrzynią do przewozu zakupów, wyposażenia biwakowego i innego bagażu. Nisko położona przestrzeń ładunkowa ułatwia równomierne rozmieszczenie rzeczy, a dwa boczne koła zapewniają stabilność podczas postoju i spokojnej jazdy.\n\n## Konstrukcja\n\n- sztywna, prostokątna skrzynia z trwałego tworzywa\n- czarna rama rurowa chroniąca boki pojemnika\n- dwa koła ze szprychami i ogumieniem drogowym\n- długi dyszel z przegubem i zaczepem rowerowym\n- otwarta przestrzeń ułatwiająca wkładanie większych przedmiotów\n\n## Pakowanie i prowadzenie\n\nCięższe rzeczy układaj nisko i możliwie blisko środka przyczepki. Ładunek musi mieścić się w obrysie skrzyni i zostać zabezpieczony przed przesuwaniem lub wypadnięciem. Nie przekraczaj dopuszczalnej masy podanej na rzeczywistym egzemplarzu. Z obciążoną przyczepką rower wolniej przyspiesza, ma szerszy tor na zakrętach i potrzebuje więcej miejsca do hamowania.\n\n## Przed wyjazdem\n\nSprawdź zaczep, dodatkowe zabezpieczenie połączenia, mocowanie kół, ciśnienie w oponach i stabilność ładunku. Wypożyczenie obejmuje pustą przyczepkę z dyszlem widoczną na zdjęciu; pasy transportowe oraz rower nie są elementem przedstawionego zestawu.",
-            "subcategory": "Przyczepki rowerowe"
+            "subcategory": "Przyczepki rowerowe",
+            "manufacturer": "Producent 1"
         },
         {
             "id": 6,
@@ -144,7 +149,8 @@
             ],
             "category": "Przyczepki rowerowe",
             "description": "# Przyczepka rowerowa dla psa\n\nZabudowana przyczepka do przewozu psa podczas rekreacyjnych przejazdów. Niskie wejście ułatwia zajęcie miejsca, a duże panele z siatki zapewniają widoczność i przepływ powietrza bez pozostawiania otwartej kabiny.\n\n## Najważniejsze cechy\n\n- oliwkowozielona kabina z przednim i bocznymi panelami wentylacyjnymi\n- niska podłoga ułatwiająca wejście mniejszym i starszym psom\n- sztywna czarna rama oraz dwa koła rowerowe\n- osłonięte wnętrze bez wystających elementów ładunku\n- dyszel z zaczepem do połączenia z rowerem\n\n## Przyzwyczajenie psa\n\nPrzed pierwszą trasą pozwól psu poznać nieruchomą przyczepkę, a następnie wykonaj krótki przejazd w spokojnym miejscu. Zwierzę nie powinno swobodnie wyskakiwać z kabiny ani być przypięte za samą obrożę. Sposób zabezpieczenia dobierz do konstrukcji rzeczywistego egzemplarza i szelek psa. Obserwuj temperaturę wewnątrz oraz reakcję zwierzęcia.\n\n## Kontrola zestawu\n\nPrzed jazdą sprawdź zaczep, koła, zamknięcia i stan siatki. Nie przekraczaj limitu masy podanego przez producenta danego egzemplarza. Wypożyczenie obejmuje przyczepkę z dyszlem pokazaną na zdjęciu; rower, szelki i inne akcesoria dobiera się oddzielnie.",
-            "subcategory": "Przyczepki rowerowe"
+            "subcategory": "Przyczepki rowerowe",
+            "manufacturer": "Producent 5"
         },
         {
             "id": 7,
@@ -159,7 +165,8 @@
             ],
             "category": "Namioty osobowe",
             "description": "# Namiot dwuosobowy\n\nKompaktowy namiot kopułowy dla dwóch osób, odpowiedni na weekendowy biwak, kemping i krótszą pieszą wycieczkę. Prosta konstrukcja oparta na dwóch krzyżujących się pałąkach pozwala sprawnie przygotować nocleg, a niewielki przedsionek osłania wejście.\n\n## Konstrukcja i przestrzeń\n\n- miejsce do spania dla dwóch osób\n- turkusowy tropik i podwyższony grafitowy pas podłogi\n- samonośna bryła kopułowa z dwoma głównymi pałąkami\n- zamykane wejście z przodu\n- kompaktowy przedsionek na obuwie lub drobny bagaż\n\n## Zastosowanie\n\nNamiot sprawdzi się w typowych warunkach od późnej wiosny do wczesnej jesieni, na przygotowanym kempingu albo osłoniętym miejscu biwakowym. Nie jest namiotem zimowym ani ekspedycyjnym. Miejsce rozstawienia powinno być równe, odpływowe i oddalone od suchych gałęzi, zagłębień terenu oraz otwartego ognia.\n\n## Przy odbiorze\n\nSprawdź tropik, sypialnię, podłogę, pałąki, odciągi i elementy mocujące zgodnie z listą wydania. Zdjęcie pokazuje rozstawiony namiot; dokładny komplet transportowy i parametry odporności konkretnego egzemplarza należy potwierdzić przed wyjazdem.",
-            "subcategory": "Namioty klasyczne"
+            "subcategory": "Namioty klasyczne",
+            "manufacturer": "Producent 1"
         },
         {
             "id": 8,
@@ -174,7 +181,8 @@
             ],
             "category": "Namioty osobowe",
             "description": "# Namiot trzyosobowy\n\nUniwersalny namiot kopułowy dla trzech osób, przeznaczony na kemping, weekendowe wyjazdy i spokojne biwaki. Szersza sypialnia zapewnia miejsce dla trzech karimat, a przedni przedsionek pomaga oddzielić mokre obuwie od przestrzeni noclegowej.\n\n## Najważniejsze cechy\n\n- przestrzeń noclegowa dla trzech osób\n- rdzawopomarańczowy tropik z grafitowym pasem przy podłożu\n- dwa krzyżujące się pałąki tworzące stabilną kopułę\n- dodatkowe podparcie niewielkiego przedsionka\n- jedno zamykane wejście z przodu\n\n## Na jaki wyjazd?\n\nTo dobry wybór dla pary z większą ilością bagażu albo trzech osób podróżujących w prostym układzie noclegowym. Namiot jest przeznaczony do typowych warunków kempingowych, a nie do zimy, wysokich gór czy ekspedycji. Przed wyjazdem sprawdź prognozę i dobierz miejsce osłonięte od silnego wiatru oraz spływającej wody.\n\n## Komplet i rozstawienie\n\nPrzy odbiorze policz pałąki, elementy mocujące i odciągi oraz obejrzyj podłogę, zamki i szwy. Rozstaw namiot próbnie przed dłuższą wyprawą. Zdjęcie prezentuje bryłę produktu; dokładną listę elementów konkretnego egzemplarza potwierdza protokół wydania.",
-            "subcategory": "Namioty klasyczne"
+            "subcategory": "Namioty klasyczne",
+            "manufacturer": "Producent 2"
         },
         {
             "id": 9,
@@ -189,7 +197,8 @@
             ],
             "category": "Namioty osobowe",
             "description": "# Namiot czteroosobowy\n\nPrzestronny namiot kempingowy dla czterech osób z przedłużonym przedsionkiem. Główna kopuła zapewnia miejsce na wspólny nocleg, a osobna strefa przy wejściu pomaga uporządkować obuwie i bagaż podczas rodzinnego wyjazdu.\n\n## Konstrukcja\n\n- sypialnia przewidziana dla maksymalnie czterech osób\n- leśnozielony tropik z grafitowym pasem przy podłożu\n- kopuła oparta na krzyżujących się pałąkach\n- obszerny przedsionek podparty dodatkowym pałąkiem\n- zamykane wejście oraz osłonięte przejście do sypialni\n\n## Komfort na kempingu\n\nPrzy czterech użytkownikach przestrzeń jest wykorzystana przede wszystkim do spania; większy bagaż najlepiej przechowywać w przedsionku w sposób nieblokujący wyjścia. Dla mniejszej grupy namiot oferuje więcej swobody. Model jest przeznaczony do rekreacyjnego kempingu w umiarkowanych warunkach, nie do zimowych biwaków ani zastosowań ekspedycyjnych.\n\n## Przed wyjazdem\n\nSprawdź stan materiału, podłogi, zamków, pałąków, odciągów i mocowań, a także przećwicz rozstawienie. Zdjęcie pokazuje namiot w konfiguracji użytkowej; zawartość pokrowca i parametry konkretnego egzemplarza potwierdź przy odbiorze.",
-            "subcategory": "Namioty klasyczne"
+            "subcategory": "Namioty klasyczne",
+            "manufacturer": "Producent 5"
         },
         {
             "id": 10,
@@ -204,7 +213,8 @@
             ],
             "category": "Sprzęt wodny",
             "description": "# Deska SUP\n\nPompowana deska typu all-round do rekreacyjnego pływania na stojąco lub na kolanach. Szeroki obrys i duża powierzchnia pokładu ułatwiają naukę równowagi, spokojne manewrowanie oraz krótkie wycieczki po osłoniętych akwenach.\n\n## Najważniejsze cechy\n\n- turkusowo-granatowa konstrukcja o zaokrąglonym dziobie\n- duża, antypoślizgowa mata pokładowa\n- centralny uchwyt do przenoszenia\n- tylny statecznik wspierający utrzymanie kierunku\n- regulowane wiosło widoczne w zestawie\n\n## Gdzie pływać?\n\nDeska jest przeznaczona na spokojne jeziora, zatoki i wolno płynące odcinki w warunkach odpowiednich do umiejętności użytkownika. Przed wejściem na wodę sprawdź prognozę, wiatr, temperaturę i lokalne przepisy. Nie wypływaj podczas burzy, przy silnym wietrze ani na akwen, którego charakteru nie znasz.\n\n## Przygotowanie zestawu\n\nNapompuj deskę do ciśnienia podanego przy zaworze rzeczywistego egzemplarza, zamocuj statecznik i wyreguluj długość wiosła. Kamizelkę asekuracyjną dobierz osobno. Zdjęcie pokazuje deskę i wiosło; obecność pompki, smyczy oraz pokrowca należy potwierdzić na liście wydania.",
-            "subcategory": "Deski sup"
+            "subcategory": "Deski sup",
+            "manufacturer": "Producent 3"
         },
         {
             "id": 11,
@@ -219,7 +229,8 @@
             ],
             "category": "Sprzęt wodny",
             "description": "# Kajak dwuosobowy\n\nRekreacyjny kajak sit-on-top dla dwóch osób, odpowiedni na spokojne wycieczki po jeziorach i łatwe odcinki wody. Otwarty pokład ułatwia zajmowanie miejsc, a dwa oddzielne stanowiska pozwalają wspólnie utrzymywać rytm wiosłowania.\n\n## Konstrukcja zestawu\n\n- sztywny, żółty kadłub z wyprofilowanym pokładem\n- dwa oddzielne miejsca z czarnymi oparciami\n- podparcia stóp i uchwyty transportowe\n- otwarta konstrukcja umożliwiająca odpływ wody z pokładu\n- dwa dwupiórowe wiosła pokazane na zdjęciu\n\n## Planowanie trasy\n\nKajak wybierz na akwen i odcinek odpowiedni do doświadczenia obu osób. Przed startem sprawdź pogodę, poziom wody, nurt, miejsca wyjścia oraz lokalne ograniczenia. Każdy uczestnik powinien mieć prawidłowo dobraną kamizelkę asekuracyjną. Telefon i rzeczy wrażliwe na wilgoć przechowuj w osobnym worku wodoodpornym.\n\n## Przed wodowaniem\n\nObejrzyj kadłub, uchwyty, siedziska i wiosła. Ustal sygnały oraz stronę wykonywania manewrów z drugą osobą. Wypożyczenie obejmuje kajak i dwa wiosła widoczne na zdjęciu; kamizelki i worek transportowy są dobierane oddzielnie.",
-            "subcategory": "Kajaki"
+            "subcategory": "Kajaki",
+            "manufacturer": "Producent 2"
         },
         {
             "id": 12,
@@ -234,7 +245,8 @@
             ],
             "category": "Sprzęt wodny",
             "description": "# Kamizelka asekuracyjna\n\nRegulowana kamizelka wypornościowa do rekreacyjnego kajakarstwa, SUP-u i innych aktywności na wodzie. Krótki krój pozostawia swobodę ruchu ramion, a trzy przednie pasy pomagają ustabilizować kamizelkę na tułowiu.\n\n## Konstrukcja i dopasowanie\n\n- czerwono-granatowe panele wypornościowe\n- trzy poziome pasy z klamrami z przodu\n- regulowane taśmy na ramionach\n- duże otwory na ręce ułatwiające wiosłowanie\n- wyraźny kolor poprawiający widoczność na wodzie\n\n## Dobór\n\nKamizelkę dobierz na podstawie zakresu masy i obwodu podanego na etykiecie rzeczywistego egzemplarza, nie wyłącznie według zwykłego rozmiaru odzieży. Po zapięciu dociągnij pasy równomiernie. Kamizelka powinna przylegać, nie ograniczać oddechu i nie przesuwać się nadmiernie ku górze po uniesieniu za ramiona.\n\n## Ważne przed użyciem\n\nSprawdź materiał, wkłady wypornościowe, szwy, taśmy i wszystkie klamry. Kamizelka asekuracyjna nie zastępuje specjalistycznego sprzętu ratunkowego i musi być dobrana do użytkownika, akwenu oraz planowanej aktywności. Zdjęcie prezentuje wygląd produktu; o dopuszczeniu konkretnego egzemplarza decyduje kontrola jego rzeczywistego stanu i oznaczeń.",
-            "subcategory": "Kajaki"
+            "subcategory": "Kajaki",
+            "manufacturer": "Producent 4"
         },
         {
             "id": 13,
@@ -249,7 +261,8 @@
             ],
             "category": "Via ferraty i wspinanie",
             "description": "# Zestaw via ferrata\n\nLonża typu Y przeznaczona do asekuracji na przygotowanych trasach via ferrata. Dwa elastyczne ramiona pozwalają przepinać karabinki pomiędzy odcinkami stalowej liny, a centralny absorber jest elementem zaprojektowanym do ograniczenia skutków odpadnięcia zgodnie z przeznaczeniem konkretnego modelu.\n\n## Elementy widoczne w zestawie\n\n- zamknięty absorber energii w czerwonym pokrowcu\n- pętla służąca do połączenia lonży z uprzężą\n- dwa elastyczne ramiona tekstylne\n- dwa duże karabinki z mechanizmem ułatwiającym obsługę dłonią\n\n## Wymagane wyposażenie i umiejętności\n\nLonża nie jest samodzielnym kompletem do wyjścia na trasę. Potrzebne są także prawidłowo dobrana uprząż i kask, a sposób użycia powinien zostać poznany pod opieką kompetentnej osoby. Oba karabinki muszą pozostawać używane zgodnie z instrukcją danego modelu. Nie wolno wiązać ramion, przedłużać ich ani wpinać w sposób omijający absorber.\n\n## Kontrola przed każdym użyciem\n\nSprawdź oznaczenia i instrukcję rzeczywistego egzemplarza, historię wypożyczeń, stan szwów, taśm, absorbera i mechanizmów karabinków. Sprzęt po odpadnięciu, z uruchomionym absorberem albo z niepewną historią nie może być używany bez oceny osoby odpowiedzialnej. Zdjęcie AI służy wyłącznie identyfikacji typu produktu i nie dokumentuje stanu ani certyfikacji wypożyczanego egzemplarza.",
-            "subcategory": "Sprzęt górski"
+            "subcategory": "Sprzęt górski",
+            "manufacturer": "Producent 4"
         },
         {
             "id": 14,
@@ -278,7 +291,8 @@
                     "description": "obwód talii 85-95 cm"
                 }
             ],
-            "subcategory": "Sprzęt górski"
+            "subcategory": "Sprzęt górski",
+            "manufacturer": "Producent 4"
         },
         {
             "id": 15,
@@ -303,7 +317,8 @@
                     "description": "obwód głowy 58-62 cm"
                 }
             ],
-            "subcategory": "Sprzęt górski"
+            "subcategory": "Sprzęt górski",
+            "manufacturer": "Producent 3"
         },
         {
             "id": 16,
@@ -318,7 +333,8 @@
             ],
             "category": "Nosidełka turystyczne",
             "description": "# Nosidełko turystyczne dla dziecka\n\nStelażowe nosidełko plecakowe do pieszych wycieczek z dzieckiem, które spełnia wymagania rozwojowe i wagowe określone dla rzeczywistego modelu. Rozbudowany system nośny pomaga przenieść część obciążenia na biodra, a podwyższone siedzisko zapewnia dziecku widok na otoczenie.\n\n## Najważniejsze elementy\n\n- aluminiowy stelaż z rozkładaną podpórką\n- wyściełane siedzisko z pasami podtrzymującymi dziecko\n- boczne podparcia oraz wysoki daszek przeciwsłoneczny\n- regulowane szelki, wentylowany panel pleców i szeroki pas biodrowy\n- dolna kieszeń na podręczny bagaż\n\n## Dopasowanie\n\nNajpierw ustaw długość systemu nośnego i pas biodrowy do osoby dorosłej, a następnie dopasuj siedzisko oraz pasy dziecka zgodnie z instrukcją. Dziecko nie może stać w nosidełku ani pozostawać w nim bez nadzoru. Rozłożona podpórka służy do stabilizacji podczas wkładania i wyjmowania dziecka, nie do ustawiania nosidełka na nierównym podłożu z dzieckiem bez asekuracji.\n\n## Przed wyjściem\n\nSprawdź ramę, zawias podpórki, wszystkie klamry, taśmy, szwy i punkty mocowania. Potwierdź limit masy, minimalne wymagania rozwojowe oraz sposób użycia zapisany na realnym egzemplarzu. Zdjęcie AI ma charakter prezentacyjny i nie dokumentuje stanu ani kompletności wypożyczanego nosidełka.",
-            "subcategory": "Nosidełka turystyczne"
+            "subcategory": "Nosidełka turystyczne",
+            "manufacturer": "Producent 5"
         },
         {
             "id": 17,
@@ -333,7 +349,8 @@
             ],
             "category": "Nosidełka turystyczne",
             "description": "# Lekkie nosidełko turystyczne\n\nKompaktowe nosidełko stelażowe na krótsze spacery, wycieczki po łatwych szlakach i sytuacje, w których liczy się mniejsza masa bagażu. Smukła konstrukcja zachowuje oddzielne siedzisko dziecka oraz regulowany system nośny, ale ma mniej przestrzeni transportowej i nie posiada rozbudowanego daszka.\n\n## Konstrukcja\n\n- lekki aluminiowy stelaż z niewielką podpórką\n- niebiesko-grafitowe siedzisko z pasami podtrzymującymi\n- boczne podparcia dziecka\n- wentylowany panel pleców, szelki i pas biodrowy\n- mała dolna kieszeń na najpotrzebniejsze rzeczy\n\n## Ustawienie\n\nDopasuj długość pleców, szelki i pas biodrowy przed umieszczeniem dziecka. Następnie ustaw wysokość siedziska oraz pasy dziecka według instrukcji konkretnego modelu. Nie przekraczaj limitu obciążenia i nie używaj nosidełka, jeżeli dziecko nie spełnia wymagań rozwojowych podanych przez producenta.\n\n## Kontrola\n\nPrzed każdą wycieczką obejrzyj ramę, podpórkę, siedzisko, szwy, taśmy i klamry. Podczas postoju trzymaj nosidełko, gdy dziecko znajduje się w środku. Zdjęcie AI pokazuje typ i kolorystykę produktu, lecz rzeczywisty stan oraz kompletność należy potwierdzić przy odbiorze.",
-            "subcategory": "Nosidełka turystyczne"
+            "subcategory": "Nosidełka turystyczne",
+            "manufacturer": "Producent 1"
         },
         {
             "id": 18,
@@ -348,7 +365,8 @@
             ],
             "category": "Namioty",
             "description": "# Namiot rodzinny\n\nDuży namiot tunelowy przeznaczony na rodzinny kemping i dłuższy pobyt w jednym miejscu. Wysoka część środkowa daje przestrzeń na wspólne przygotowanie się do dnia, a wydłużona bryła pozwala rozdzielić strefę noclegową od miejsca na bagaż.\n\n## Konstrukcja i przestrzeń\n\n- piaskowobeżowy tropik z grafitowym pasem przy podłożu\n- trzy łukowe pałąki tworzące obszerny tunel\n- wysokie wejście z przodu oraz dodatkowe wejście boczne\n- przestrzeń umożliwiająca podział na część mieszkalną i sypialną\n- stabilna, wydłużona podstawa odpowiednia na przygotowane stanowisko\n\n## Na rodzinny wyjazd\n\nModel sprawdzi się przede wszystkim na kempingu, gdzie większy rozmiar po spakowaniu i dłuższy czas rozstawiania nie są problemem. Dokładną liczbę miejsc noclegowych należy dobrać do układu sypialni i szerokości używanych materacy, a nie tylko do nazwy produktu. Namiot nie jest przeznaczony do zimy ani warunków ekspedycyjnych.\n\n## Przed wyjazdem\n\nSprawdź tropik, podłogę, pałąki, zamki, odciągi i elementy mocujące według listy wydania. Dużą konstrukcję należy starannie napiąć i zakotwić, uwzględniając wiatr oraz rodzaj podłoża. Zdjęcie pokazuje rozstawioną bryłę; dokładny komplet konkretnego egzemplarza potwierdź przy odbiorze.",
-            "subcategory": "Namioty klasyczne"
+            "subcategory": "Namioty klasyczne",
+            "manufacturer": "Producent 2"
         },
         {
             "id": 19,
@@ -363,7 +381,8 @@
             ],
             "category": "Namioty",
             "description": "# Namiot kempingowy\n\nUniwersalny namiot kopułowy na weekendowy kemping, biwak i krótszy wyjazd samochodowy. Średniej wielkości bryła łączy prostsze rozstawianie z większą przestrzenią niż kompaktowe namioty trekkingowe, a przednia część tworzy osłonę wejścia.\n\n## Najważniejsze cechy\n\n- granatowy tropik z grafitowym pasem przy podłożu\n- kopuła oparta na dwóch krzyżujących się pałąkach\n- dodatkowy pałąk wspierający strefę wejściową\n- zamykane drzwi z przodu\n- boczny daszek wentylacyjny\n\n## Zastosowanie\n\nNamiot jest odpowiedni do rekreacyjnego użytkowania w typowych warunkach od późnej wiosny do wczesnej jesieni. Nie należy traktować go jako modelu zimowego lub ekspedycyjnego. Wybierz równe, odpływowe miejsce, zachowaj drogę wyjścia i ustaw konstrukcję z dala od otwartego ognia oraz spadających gałęzi.\n\n## Kontrola kompletu\n\nPrzy odbiorze sprawdź materiał, podłogę, pałąki, zamki, odciągi i mocowania. Warto wykonać próbne rozstawienie przed pierwszym noclegiem. Zdjęcie prezentuje namiot w konfiguracji użytkowej; dokładną pojemność i zawartość pokrowca potwierdza opis rzeczywistego egzemplarza.",
-            "subcategory": "Namioty klasyczne"
+            "subcategory": "Namioty klasyczne",
+            "manufacturer": "Producent 4"
         },
         {
             "id": 20,
@@ -378,7 +397,8 @@
             ],
             "category": "Namioty",
             "description": "# Namiot dachowy\n\nRozkładany namiot ze sztywną skorupą, przeznaczony do montażu na zgodnym bagażniku dachowym pojazdu. Podniesiona kabina oddziela miejsce noclegu od wilgotnego podłoża, a teleskopowa drabina zapewnia dostęp po prawidłowym ustawieniu zestawu.\n\n## Konstrukcja\n\n- prostokątna podstawa mocowana do belek dachowych\n- czarna sztywna skorupa pełniąca funkcję dachu po otwarciu\n- oliwkowa kabina z panelami wentylacyjnymi z siatki\n- wsporniki utrzymujące otwartą konstrukcję\n- regulowana drabina oparta o stabilne podłoże\n\n## Zgodność z samochodem\n\nPrzed rezerwacją trzeba potwierdzić dopuszczalne obciążenie dachu, rodzaj i rozstaw belek, szerokość pojazdu oraz kompatybilność elementów montażowych. Masa namiotu, użytkowników i wyposażenia nie może przekraczać limitów pojazdu ani bagażnika. Montaż powinien wykonać ktoś znający instrukcję obu systemów.\n\n## Użytkowanie\n\nSamochód ustaw na twardym, równym podłożu, zabezpiecz przed przemieszczeniem i wyreguluj drabinę pod właściwym kątem. Nie korzystaj z namiotu podczas jazdy ani przy nieprawidłowo zablokowanej konstrukcji. Zdjęcie pokazuje namiot, podstawę i drabinę; pojazd, belki dachowe oraz wyposażenie sypialne nie są częścią przedstawionego zestawu.",
-            "subcategory": "Namioty dachowe"
+            "subcategory": "Namioty dachowe",
+            "manufacturer": "Producent 3"
         },
         {
             "id": 21,
@@ -407,7 +427,8 @@
                     "description": "wzrost 180-190 cm"
                 }
             ],
-            "subcategory": "Rowery miejskie"
+            "subcategory": "Rowery miejskie",
+            "manufacturer": "Producent 1"
         },
         {
             "id": 22,
@@ -436,7 +457,8 @@
                     "description": "wzrost 180-190 cm"
                 }
             ],
-            "subcategory": "E-bike full"
+            "subcategory": "E-bike full",
+            "manufacturer": "Producent 2"
         },
         {
             "id": 23,
@@ -451,7 +473,8 @@
             ],
             "category": "Rowery i akcesoria",
             "description": "# Sakwy rowerowe\n\nPara sakw montowanych po obu stronach tylnego bagażnika, przeznaczona do przewozu ubrań, zakupów i wyposażenia na wycieczkę. Oddzielenie bagażu na dwa pojemniki pomaga równomiernie obciążyć rower i pozostawia środek bagażnika wolny.\n\n## Konstrukcja zestawu\n\n- dwie rdzawoczerwone sakwy o takim samym rozmiarze\n- zwijane zamknięcia z czarnymi paskami i klamrami\n- grafitowe, wzmocnione dolne panele\n- sztywne tylne ścianki ograniczające kontakt z kołem\n- regulowane haki i dolne zaczepy do połączenia z bagażnikiem\n- jasne elementy odblaskowe bez nadruków\n\n## Pakowanie\n\nRozłóż masę możliwie równo pomiędzy lewą i prawą stroną, a cięższe przedmioty umieść nisko i blisko roweru. Nie przekraczaj limitu sakw ani bagażnika. Rzeczy wrażliwe na wilgoć warto dodatkowo zabezpieczyć, jeżeli oznaczenie konkretnego modelu nie potwierdza pełnej wodoodporności.\n\n## Przed jazdą\n\nSprawdź zgodność haków ze średnicą rurek bagażnika, zablokowanie mocowań i odstęp od koła, hamulca oraz napędu. Po krótkim odcinku zatrzymaj się i ponownie skontroluj zestaw. Wypożyczenie obejmuje dwie sakwy widoczne na zdjęciu; rower i bagażnik nie są częścią tego produktu.",
-            "subcategory": "Akcesoria rowerowe"
+            "subcategory": "Akcesoria rowerowe",
+            "manufacturer": "Producent 3"
         },
         {
             "id": 24,
@@ -466,7 +489,8 @@
             ],
             "category": "Przyczepki rowerowe",
             "description": "# Jednokołowa przyczepka rowerowa\n\nWąska przyczepka bagażowa prowadzona na jednym kole, przeznaczona do przewozu wyposażenia na trasach, gdzie ważny jest ślad zbliżony do szerokości roweru. Nisko umieszczona torba pomaga utrzymać środek ciężkości blisko osi, a dwuramienne mocowanie łączy przyczepkę z tylną częścią roweru.\n\n## Konstrukcja\n\n- czarna rama rurowa osłaniająca bagaż\n- jedno koło z terenowym bieżnikiem\n- dopasowana granatowa torba zamykana przez rolowanie\n- dwa ramiona mocujące po obu stronach tylnej osi\n- paski stabilizujące torbę wewnątrz ramy\n\n## Pakowanie i prowadzenie\n\nCiężkie przedmioty układaj nisko i centralnie, a całość zabezpiecz przed przesuwaniem. Nie przekraczaj limitu masy rzeczywistego egzemplarza. Przyczepka reaguje na pochylenie roweru i wymaga uwzględnienia dodatkowej długości zestawu, większej drogi hamowania oraz ograniczonego promienia skrętu.\n\n## Przed wyjazdem\n\nSprawdź zgodność mocowania z rowerem, blokady obu ramion, koło, oponę, ramę i paski torby. Wypożyczenie obejmuje przyczepkę z torbą widoczną na zdjęciu; rower i dodatkowe zabezpieczenia bagażu nie są częścią produktu.",
-            "subcategory": "Przyczepki rowerowe"
+            "subcategory": "Przyczepki rowerowe",
+            "manufacturer": "Producent 5"
         },
         {
             "id": 25,
@@ -481,7 +505,8 @@
             ],
             "category": "Przyczepki rowerowe",
             "description": "# Składana przyczepka rowerowa\n\nDwukołowa przyczepka bagażowa z ramą umożliwiającą zmniejszenie wymiarów na czas transportu i przechowywania. Otwarta skrzynia sprawdza się przy zakupach lub wyposażeniu rekreacyjnym, a dwa boczne koła utrzymują przyczepkę pionowo podczas postoju.\n\n## Najważniejsze cechy\n\n- składana czarna rama z blokowanymi przegubami\n- dwie opony drogowe na kołach ze szprychami\n- musztardowa materiałowa skrzynia z usztywnionym dnem\n- dyszel z przegubem i zaczepem rowerowym\n- otwarta przestrzeń ładunkowa bez dodatkowych akcesoriów\n\n## Użytkowanie\n\nPrzed załadunkiem rozłóż konstrukcję do końca i sprawdź wszystkie blokady. Bagaż rozmieść nisko, równomiernie i zabezpiecz przed wypadnięciem. Nie składaj przyczepki z ładunkiem ani wtedy, gdy jest połączona z rowerem. Limit masy i sposób składania należy sprawdzić na rzeczywistym egzemplarzu.\n\n## Kontrola przed jazdą\n\nObejrzyj przeguby, zaczep, dodatkowe zabezpieczenie połączenia, koła, opony i dno skrzyni. Wypożyczenie obejmuje rozkładaną przyczepkę z dyszlem pokazaną na zdjęciu; rower i pasy transportowe dobiera się osobno.",
-            "subcategory": "Przyczepki rowerowe"
+            "subcategory": "Przyczepki rowerowe",
+            "manufacturer": "Producent 5"
         },
         {
             "id": 26,
@@ -496,7 +521,8 @@
             ],
             "category": "Namioty osobowe",
             "description": "# Namiot trekkingowy\n\nKompaktowy namiot dla dwóch osób przeznaczony do przenoszenia w plecaku podczas pieszych wycieczek. Niska bryła ogranicza powierzchnię wystawioną na wiatr, a boczny przedsionek tworzy miejsce na obuwie i podstawowy bagaż poza sypialnią.\n\n## Konstrukcja\n\n- oliwkowy tropik z lekkiej tkaniny\n- grafitowa podłoga o podwyższonych brzegach\n- dwa krzyżujące się lekkie pałąki\n- boczne wejście z pomarańczowym obramowaniem zamka\n- niewielki przedsionek i punkty do napięcia odciągów\n\n## Na trasę\n\nModel sprawdzi się podczas wędrówek od późnej wiosny do wczesnej jesieni w warunkach zgodnych z parametrami konkretnego egzemplarza. Niewielka masa oznacza mniej przestrzeni i delikatniejsze materiały niż w namiocie kempingowym. Miejsce biwaku powinno być równe, odpływowe i osłonięte.\n\n## Przed wyjazdem\n\nSprawdź tropik, sypialnię, podłogę, pałąki, odciągi, zamki i mocowania. Wykonaj próbne rozstawienie oraz potwierdź masę i zawartość pokrowca na liście wydania. Zdjęcie przedstawia rozstawiony namiot, nie pełny komplet transportowy.",
-            "subcategory": "Namioty klasyczne"
+            "subcategory": "Namioty klasyczne",
+            "manufacturer": "Producent 2"
         },
         {
             "id": 27,
@@ -511,7 +537,8 @@
             ],
             "category": "Namioty osobowe",
             "description": "# Namiot zimowy\n\nNiski namiot geodezyjny przeznaczony do użytkowania w chłodniejszych warunkach zgodnych ze specyfikacją konkretnego modelu. Kilka krzyżujących się pałąków tworzy sztywniejszą bryłę niż w typowym namiocie trzysezonowym, a niewielki przedsionek osłania wejście i część wyposażenia.\n\n## Konstrukcja\n\n- czerwony tropik zwiększający widoczność\n- grafitowy, wzmocniony pas przy podłożu\n- wielopunktowy układ krzyżujących się pałąków\n- zamykany przedsionek\n- osłonięte otwory wentylacyjne\n\n## Planowanie noclegu\n\nOkreślenie „zimowy” nie zwalnia z oceny prognozy, lokalizacji, temperatury, wiatru i ryzyka śnieżnego. Parametry odporności, liczbę miejsc i wymagany sposób kotwienia trzeba potwierdzić dla realnego egzemplarza. Użytkownik powinien mieć odpowiedni śpiwór, matę, odzież i doświadczenie adekwatne do warunków.\n\n## Kontrola kompletu\n\nPrzed wyprawą obejrzyj materiał, podłogę, szwy, wszystkie pałąki, zamki, odciągi i punkty mocowania. Przećwicz rozstawienie w bezpiecznym miejscu. Zdjęcie AI pokazuje rodzaj konstrukcji, ale nie potwierdza parametrów ani stanu wypożyczanego namiotu.",
-            "subcategory": "Namioty klasyczne"
+            "subcategory": "Namioty klasyczne",
+            "manufacturer": "Producent 5"
         },
         {
             "id": 28,
@@ -526,7 +553,8 @@
             ],
             "category": "Sprzęt wodny",
             "description": "# Kajak dmuchany\n\nDwuosobowy kajak pneumatyczny do rekreacyjnego pływania po spokojnych akwenach. Po spuszczeniu powietrza zajmuje mniej miejsca niż sztywny kadłub, a dwie oddzielne komory boczne i pompowana podłoga tworzą kształt jednostki po prawidłowym napełnieniu.\n\n## Zestaw widoczny na zdjęciu\n\n- turkusowo-grafitowy kadłub z kilkoma zaworami\n- dwie komory burtowe i pompowana podłoga\n- dwa regulowane czarne siedziska\n- uchwyty do przenoszenia na dziobie i rufie\n- dwa czarne wiosła dwupiórowe\n\n## Przygotowanie do pływania\n\nRozłóż kajak na czystym podłożu, sprawdź materiał i zawory, a następnie pompuj komory w kolejności oraz do ciśnienia podanego na rzeczywistym egzemplarzu. Nie używaj sprężarki bez odpowiedniego ograniczenia ciśnienia. Po zamocowaniu siedzisk sprawdź szczelność i kompletność zestawu.\n\n## Bezpieczeństwo na wodzie\n\nKażda osoba powinna mieć dopasowaną kamizelkę asekuracyjną. Trasę dobierz do pogody, temperatury, wiatru, nurtu i doświadczenia. Zdjęcie pokazuje kajak i dwa wiosła; obecność pompki, statecznika, zestawu naprawczego i torby należy potwierdzić na liście wydania.",
-            "subcategory": "Kajaki"
+            "subcategory": "Kajaki",
+            "manufacturer": "Producent 4"
         },
         {
             "id": 29,
@@ -541,7 +569,8 @@
             ],
             "category": "Sprzęt wodny",
             "description": "# Kanadyjka dwuosobowa\n\nOtwarta kanadyjka dla dwóch osób do spokojnych spływów i wycieczek po jeziorach. Symetryczny kadłub, dwa oddzielne miejsca oraz jednopiórowe wiosła pozwalają podzielić napędzanie i sterowanie pomiędzy osobę siedzącą z przodu i z tyłu.\n\n## Konstrukcja zestawu\n\n- ciemnozielony sztywny kadłub z wysokimi burtami\n- dwie drewniane ławki\n- centralne jarzmo do przenoszenia pustej łodzi\n- ciemne listwy wzmacniające górną krawędź\n- dwa drewniane wiosła jednopiórowe\n\n## Na wodzie\n\nPrzed wypłynięciem ustal sposób komunikacji i podstawowe manewry. Bagaż rozmieść nisko i równomiernie, nie przekraczając nośności konkretnego egzemplarza. Trasę, miejsca wejścia i wyjścia oraz wyposażenie dobierz do pogody, nurtu i umiejętności obu osób.\n\n## Przed wodowaniem\n\nObejrzyj kadłub, ławki, jarzmo i wiosła. Każdy uczestnik powinien używać prawidłowo dobranej kamizelki asekuracyjnej. Wypożyczenie obejmuje kanadyjkę i dwa wiosła widoczne na zdjęciu; kamizelki oraz zabezpieczenie bagażu dobiera się oddzielnie.",
-            "subcategory": "Kanoo"
+            "subcategory": "Kanoo",
+            "manufacturer": "Producent 3"
         },
         {
             "id": 30,
@@ -556,7 +585,8 @@
             ],
             "category": "Sprzęt wodny",
             "description": "# Wiosło kajakowe\n\nDwupiórowe wiosło do rekreacyjnego kajakarstwa, przeznaczone do naprzemiennych pociągnięć po obu stronach kajaka. Dzielony drążek ułatwia transport, a centralne łączenie pozwala ustawić długość lub kąt piór w zakresie przewidzianym dla konkretnego modelu.\n\n## Konstrukcja\n\n- czarny, lekki drążek z owalnymi strefami chwytu\n- centralne złącze z mechanizmem regulacji\n- dwie turkusowe, asymetryczne łopaty\n- niewielkie pierścienie ograniczające spływanie wody na dłonie\n- gładkie krawędzie bez widocznych uszkodzeń\n\n## Dobór i użycie\n\nDługość wiosła dobierz do szerokości kajaka, wzrostu użytkownika i stylu pływania. Chwyć drążek symetrycznie, pozostawiając swobodny kąt w łokciach. Nie używaj wiosła jako tyczki na skalistym dnie ani do podważania ciężkich przedmiotów.\n\n## Kontrola\n\nPrzed wejściem na wodę sprawdź obie łopaty, drążek i blokadę złącza. Wypożyczenie obejmuje jedno kompletne wiosło widoczne na zdjęciu; kajak i kamizelka asekuracyjna są oddzielnymi produktami.",
-            "subcategory": "Kajaki"
+            "subcategory": "Kajaki",
+            "manufacturer": "Producent 1"
         },
         {
             "id": 31,
@@ -571,7 +601,8 @@
             ],
             "category": "Via ferraty i wspinanie",
             "description": "# Lina wspinaczkowa 60 m\n\nDynamiczna lina o deklarowanej długości 60 metrów, przeznaczona do zastosowań zgodnych z oznaczeniem konkretnego modelu i używana wyłącznie przez osoby znające zasady asekuracji. Elastyczna konstrukcja ma ograniczać siłę działającą podczas odpadnięcia w sposób określony przez parametry producenta.\n\n## Wygląd produktu\n\n- pomarańczowy oplot z drobnym granatowym wzorem\n- zwarta konstrukcja o równomiernej średnicy\n- dwa zabezpieczone zakończenia\n- zwój związany bez dodatkowej torby lub osprzętu\n- długość katalogowa 60 m, wymagająca potwierdzenia na oznaczeniu egzemplarza\n\n## Dobór i użycie\n\nTyp liny, średnicę i długość należy dopasować do drogi, stanowisk, przyrządu asekuracyjnego oraz planowanej techniki. Nie wolno zakładać, że lina nadaje się do każdego rodzaju wspinaczki wyłącznie na podstawie wyglądu lub nazwy produktu.\n\n## Obowiązkowa kontrola\n\nPrzed każdym wydaniem i użyciem sprawdź oznaczenia, historię, wiek, oplot, rdzeń na całej długości oraz oba końce. Lina po ciężkim odpadnięciu, kontakcie z chemikaliami, wysoką temperaturą lub z wyczuwalnym uszkodzeniem wymaga wycofania i oceny osoby odpowiedzialnej. Zdjęcie AI nie dokumentuje stanu ani certyfikacji realnego egzemplarza.",
-            "subcategory": "Sprzęt górski"
+            "subcategory": "Sprzęt górski",
+            "manufacturer": "Producent 4"
         },
         {
             "id": 32,
@@ -586,7 +617,8 @@
             ],
             "category": "Via ferraty i wspinanie",
             "description": "# Zestaw karabinków wspinaczkowych\n\nKomplet pięciu karabinków o gruszkowym kształcie i zakręcanej blokadzie zamka, przeznaczony do zastosowań określonych przez producenta konkretnego modelu. Szeroka górna część ułatwia pracę z węzłem lub przyrządem, a ręcznie zamykana tuleja ogranicza przypadkowe otwarcie po prawidłowym dokręceniu.\n\n## Zawartość zestawu\n\n- pięć oddzielnych karabinków\n- srebrne aluminiowe korpusy\n- pomarańczowe, radełkowane tuleje zakręcane\n- sprężynowe zamki z widocznym zawiasem\n- jednolity kształt wszystkich elementów kompletu\n\n## Przed użyciem\n\nKażdy karabinek sprawdź osobno: korpus, zamek, zawias, sprężynę i gwint tulei. Zamek musi domykać się swobodnie, a tuleja blokować go bez zacięcia. Karabinka nie należy obciążać poprzecznie, na krawędzi ani z otwartym zamkiem, chyba że instrukcja właściwego produktu stanowi inaczej.\n\n## Ważne\n\nNie dobieraj zastosowania tylko na podstawie wyglądu. Oznaczenia, dopuszczalne kierunki obciążenia i kompatybilność z resztą systemu trzeba zweryfikować na rzeczywistym egzemplarzu. Zdjęcie AI służy prezentacji zestawu i nie potwierdza jego stanu ani certyfikacji.",
-            "subcategory": "Sprzęt górski"
+            "subcategory": "Sprzęt górski",
+            "manufacturer": "Producent 3"
         },
         {
             "id": 33,
@@ -635,7 +667,8 @@
                     "description": "orientacyjna długość stopy 28 cm"
                 }
             ],
-            "subcategory": "Sprzęt górski"
+            "subcategory": "Sprzęt górski",
+            "manufacturer": "Producent 1"
         },
         {
             "id": 34,
@@ -650,7 +683,8 @@
             ],
             "category": "Nosidełka turystyczne",
             "description": "# Nosidełko turystyczne premium\n\nRozbudowane nosidełko stelażowe do dłuższych wycieczek z dzieckiem spełniającym wymagania konkretnego modelu. Regulowany panel pleców, szeroki pas biodrowy i rozbudowane wyściełanie pomagają dopasować system nośny do osoby dorosłej, a osłonięte siedzisko stabilizuje dziecko podczas marszu.\n\n## Wyposażenie\n\n- bordowo-grafitowa konstrukcja na aluminiowym stelażu\n- rozkładana podpórka ułatwiająca przygotowanie nosidełka\n- głębokie siedzisko z regulowanymi pasami dziecka\n- wysoki daszek przeciwsłoneczny i boczne podparcia\n- regulowany, wentylowany panel pleców\n- szeroki pas biodrowy z dwiema kieszeniami i duży schowek dolny\n\n## Dopasowanie\n\nNajpierw wyreguluj długość pleców, szelki i pas biodrowy osoby niosącej. Następnie ustaw wysokość siedziska i pasy dziecka zgodnie z instrukcją. Dziecko nie może pozostawać w nosidełku bez nadzoru, a rozłożona podpórka nie zastępuje asekuracji osoby dorosłej.\n\n## Kontrola\n\nPrzed wyjściem sprawdź ramę, podpórkę, wszystkie klamry, taśmy, szwy, siedzisko i mocowanie daszka. Potwierdź limit masy oraz wymagania rozwojowe na realnym egzemplarzu. Zdjęcie AI nie dokumentuje stanu, kompletności ani certyfikacji wypożyczanego nosidełka.",
-            "subcategory": "Nosidełka turystyczne"
+            "subcategory": "Nosidełka turystyczne",
+            "manufacturer": "Producent 2"
         },
         {
             "id": 35,
@@ -665,7 +699,8 @@
             ],
             "category": "Nosidełka turystyczne",
             "description": "# Nosidełko z osłoną przeciwdeszczową\n\nStelażowe nosidełko wyposażone w dopasowaną osłonę pogodową nad miejscem dziecka. Powlekany dach i boczne panele ograniczają bezpośredni kontakt z lekkim deszczem, a duże przezroczyste okno zachowuje widoczność oraz pozwala obserwować dziecko.\n\n## Konstrukcja\n\n- grafitowe nosidełko na aluminiowym stelażu\n- wyściełane siedzisko z pasami dziecka\n- szelki, panel pleców i pas biodrowy dla osoby dorosłej\n- żółta osłona zamocowana do ramy\n- przednie przezroczyste okno i boczne szczeliny wentylacyjne\n- rozkładana podpórka\n\n## Użytkowanie osłony\n\nOsłona nie tworzy szczelnej kabiny i nie zastępuje odpowiedniej odzieży. Należy zachować drożną wentylację, regularnie kontrolować temperaturę i reakcję dziecka oraz przerwać spacer podczas silnego wiatru, burzy lub warunków przekraczających przeznaczenie produktu.\n\n## Przed wyjściem\n\nSprawdź ramę, podpórkę, pasy, klamry, mocowania osłony, szwy i przezroczysty panel. Potwierdź limit masy i wymagania rozwojowe konkretnego egzemplarza. Zdjęcie AI prezentuje konfigurację produktu, lecz jego realny stan i kompletność należy ocenić przy odbiorze.",
-            "subcategory": "Nosidełka turystyczne"
+            "subcategory": "Nosidełka turystyczne",
+            "manufacturer": "Producent 4"
         },
         {
             "id": 36,
@@ -680,7 +715,8 @@
             ],
             "category": "Namioty",
             "description": "# Namiot tunelowy\n\nWydłużony namiot oparty na trzech równoległych łukach, zapewniający dobre wykorzystanie powierzchni podłogi przy umiarkowanej wysokości. Opływowa bryła może sprawdzić się na dłuższym biwaku, o ile zostanie prawidłowo ustawiona względem wiatru, napięta i zakotwiona.\n\n## Konstrukcja\n\n- oliwkowy tropik z grafitowym pasem przy podłożu\n- trzy główne pałąki tworzące tunel\n- zamknięte wejście od czoła\n- wydłużona przestrzeń sypialna i przedsionek\n- osłonięty boczny otwór wentylacyjny\n\n## Rozstawienie\n\nNamiot tunelowy nie zachowuje pełnego kształtu bez właściwego napięcia odciągów. Wybierz równe, odpływowe miejsce, rozłóż pałąki we właściwej kolejności i równomiernie napręż tropik. Dokładną liczbę miejsc oraz parametry pogodowe należy potwierdzić dla konkretnego egzemplarza.\n\n## Kontrola kompletu\n\nPrzed wyjazdem sprawdź materiał, podłogę, trzy pałąki, zamki, odciągi i mocowania. Zdjęcie pokazuje namiot po rozstawieniu; zawartość pokrowca i sposób montażu potwierdź na liście wydania oraz w instrukcji.",
-            "subcategory": "Namioty klasyczne"
+            "subcategory": "Namioty klasyczne",
+            "manufacturer": "Producent 5"
         },
         {
             "id": 37,
@@ -695,7 +731,8 @@
             ],
             "category": "Namioty",
             "description": "# Namiot samorozkładający\n\nKompaktowy namiot typu pop-up, którego sprężysta obręcz rozwija bryłę po wyjęciu z pokrowca. To wygodne rozwiązanie na krótki kemping, festiwal lub spontaniczny nocleg w łagodnych warunkach, szczególnie gdy ważne jest szybkie przygotowanie miejsca do spania.\n\n## Konstrukcja\n\n- niebieski materiał z grafitowym pasem podłogi\n- elastyczna obręcz biegnąca wokół całej bryły\n- duże zamykane wejście z żółtym obramowaniem\n- dwa osłonięte otwory wentylacyjne\n- niska, zaokrąglona sylwetka dla dwóch osób\n\n## Rozkładanie i składanie\n\nPrzy otwieraniu zachowaj wolną przestrzeń, ponieważ rama może rozprężyć się szybko. Po rozłożeniu nadal trzeba zamocować namiot do podłoża. Składanie wymaga ułożenia obręczy w sekwencji wskazanej przez producenta; nie należy wymuszać zgięcia w przypadkowym kierunku.\n\n## Przed wyjazdem\n\nSprawdź materiał, podłogę, obręcz, zamki, wentylację i mocowania. Model jest przeznaczony do rekreacyjnych warunków, nie do zimy ani ekspedycji. Zdjęcie prezentuje namiot otwarty; pokrowiec i elementy mocujące potwierdź przy odbiorze.",
-            "subcategory": "Namioty klasyczne"
+            "subcategory": "Namioty klasyczne",
+            "manufacturer": "Producent 1"
         },
         {
             "id": 38,
@@ -710,7 +747,8 @@
             ],
             "category": "Namioty",
             "description": "# Namiot ekspedycyjny\n\nNamiot geodezyjny o rozbudowanym układzie pałąków, przeznaczony do zastosowań zgodnych z parametrami konkretnego modelu i doświadczeniem użytkowników. Niska kopuła, liczne punkty przecięcia stelaża oraz wzmocnione dolne panele tworzą konstrukcję odmienną od typowych namiotów kempingowych.\n\n## Konstrukcja\n\n- żółty tropik ułatwiający lokalizację namiotu\n- grafitowe wzmocnienia przy podłożu i narożnikach\n- wielopunktowy układ aluminiowych pałąków\n- zamykany przedsionek\n- osłonięte otwory wentylacyjne i liczne punkty odciągowe\n\n## Planowanie wyprawy\n\nNazwa „ekspedycyjny” nie jest gwarancją przydatności do dowolnej pogody ani wysokości. Odporność na wiatr, opad i temperaturę, liczbę użytkowników oraz sposób kotwienia trzeba zweryfikować w instrukcji realnego egzemplarza. Wymagające środowisko wymaga również zapasu sprzętu i kompetencji zespołu.\n\n## Kontrola\n\nPrzed wyprawą rozstaw cały namiot i sprawdź tropik, sypialnię, podłogę, każdy segment pałąków, odciągi, zamki i mocowania. Zdjęcie AI pokazuje typ konstrukcji, ale nie dokumentuje parametrów, stanu ani kompletności wypożyczanego egzemplarza.",
-            "subcategory": "Namioty klasyczne"
+            "subcategory": "Namioty klasyczne",
+            "manufacturer": "Producent 3"
         },
         {
             "id": 39,
@@ -725,7 +763,8 @@
             ],
             "category": "Rowery i akcesoria",
             "description": "# Zestaw naprawczy do roweru\n\nKompaktowy komplet do podstawowych regulacji oraz naprawy przebitej dętki podczas wycieczki. Elementy mieszczą się w zamykanym etui, które można spakować do sakwy lub plecaka. Zestaw jest pomocą w typowych usterkach, ale nie zastępuje serwisu przy uszkodzeniu hamulców, koła albo ramy.\n\n## Zawartość widoczna na zdjęciu\n\n- czarne etui zapinane na zamek\n- składane multinarzędzie z kluczami imbusowymi\n- kompaktowa pompka ręczna\n- zapasowa dętka\n- łatki z papierem do przygotowania powierzchni\n- trzy pomarańczowe łyżki do opon\n\n## Przed trasą\n\nSprawdź, czy dętka i końcówka pompki pasują do rozmiaru koła oraz rodzaju wentyla. Zapoznaj się z obsługą multinarzędzia i sposobem użycia łatek. Nie reguluj elementów krytycznych bez odpowiedniej wiedzy ani nie kontynuuj jazdy, jeżeli usterka wpływa na bezpieczeństwo.\n\n## Przy odbiorze\n\nPorównaj zawartość z listą wydania i sprawdź stan narzędzi, pompki, łatek oraz dętki. Zdjęcie przedstawia konkretny układ zestawu; materiały zużywalne powinny być uzupełnione przed każdym wypożyczeniem.",
-            "subcategory": "Akcesoria rowerowe"
+            "subcategory": "Akcesoria rowerowe",
+            "manufacturer": "Producent 2"
         },
         {
             "id": 40,
@@ -740,7 +779,8 @@
             ],
             "category": "Sprzęt wodny",
             "description": "# Wodoodporny worek transportowy\n\nCylindryczny worek typu dry bag do ochrony bagażu przed zachlapaniem, deszczem i zabrudzeniem podczas aktywności wodnych oraz biwaków. Rolowane zamknięcie ogranicza dostęp wody po prawidłowym złożeniu, a uchwyt i regulowany pasek ułatwiają przenoszenie na lądzie.\n\n## Konstrukcja\n\n- pomarańczowy korpus z powlekanej tkaniny\n- czarne, wzmocnione dno\n- zgrzewane szwy boczne\n- rolowana górna krawędź z klamrą\n- boczny uchwyt i regulowany pasek transportowy\n- pojemność orientacyjna odpowiadająca średniemu workowi wyprawowemu\n\n## Jak zamknąć worek?\n\nNie przepełniaj go. Usuń nadmiar powietrza, wyrównaj górne krawędzie, wykonaj liczbę zwojów wymaganą przez producenta i zapnij klamrę. Przed spakowaniem elektroniki lub dokumentów sprawdź szczelność pustego worka i zastosuj dodatkowe zabezpieczenie rzeczy szczególnie wrażliwych.\n\n## Ograniczenia\n\nOdporność na zachlapanie nie zawsze oznacza możliwość długotrwałego zanurzenia. Dokładny stopień ochrony trzeba potwierdzić dla konkretnego egzemplarza. Przed użyciem obejrzyj tkaninę, zgrzewy, rolowane zamknięcie, klamrę i mocowania paska.",
-            "subcategory": "Kajaki"
+            "subcategory": "Kajaki",
+            "manufacturer": "Producent 3"
         }
     ]
 }
