@@ -9,6 +9,7 @@ from app.api.routes import (
     favorites,
     health,
     loyalty,
+    manufacturer,
     product,
     user,
 )
@@ -32,5 +33,6 @@ app.include_router(category.router)
 app.include_router(favorites.router)
 app.include_router(health.router)
 app.include_router(loyalty.router)
+app.include_router(manufacturer.router)
 app.include_router(product.router)
 app.include_router(user.router)
