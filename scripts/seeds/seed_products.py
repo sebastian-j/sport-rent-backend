@@ -14,11 +14,8 @@ from app.models.product import (
     ProductImage,
     ProductSize,
 )
-from scripts.seeds.utils import find_image, slugify
 
 PRODUCTS_FILE_PATH = Path("app/assets/mock_products.json")
-CATEGORY_IMAGES_DIRECTORY = Path("app/assets/categories/pictures")
-CATEGORY_IMAGES_STORAGE_PATH = Path("assets/categories/pictures")
 
 
 async def seed_products(
@@ -30,36 +27,27 @@ async def seed_products(
     products_data = data.get("products", [])
 
     async with session_factory() as session:
-        category_names = sorted(
-            {p.get("category") for p in products_data if p.get("category")}
-        )
-        category_map = {}
+        category_names = {p.get("category") for p in products_data if p.get("category")}
+        category_map: dict[str, Category] = {}
 
         for c_name in category_names:
             category = await session.scalar(
                 select(Category).where(Category.name == c_name)
             )
-            category_image = find_image(
-                c_name, CATEGORY_IMAGES_DIRECTORY, CATEGORY_IMAGES_STORAGE_PATH
-            )
-
             if category is None:
-                category = Category(
-                    name=c_name,
-                    slug=slugify(c_name),
-                    image=category_image,
+                print(
+                    f"Warning: category '{c_name}' not found, "
+                    "products in this category will have no category_id"
                 )
-                session.add(category)
-                await session.flush()  # to get id
-            elif category_image is not None:
-                category.image = category_image
-
+                continue
             category_map[c_name] = category
 
         for p_data in products_data:
             category_id = None
             if p_data.get("category"):
-                category_id = category_map[p_data.get("category")].id
+                category = category_map.get(p_data.get("category"))
+                if category is not None:
+                    category_id = category.id
 
             result = await session.execute(
                 select(Product).where(Product.id == p_data["id"])
