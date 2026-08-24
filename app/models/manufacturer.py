@@ -7,7 +7,8 @@ from app.db.base import Base
 
 if TYPE_CHECKING:
     from app.models.product import Product
-    
+
+
 class Manufacturer(Base):
     __tablename__ = "manufacturers"
 
@@ -20,4 +21,3 @@ class Manufacturer(Base):
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
-    

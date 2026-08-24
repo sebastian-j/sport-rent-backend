@@ -10,15 +10,13 @@ from app.schemas.manufacturer import ManufacturerResponse
 
 router = APIRouter(prefix="/manufacturers", tags=["manufacturers"])
 
+
 @router.get("", response_model=list[ManufacturerResponse])
 async def get_manufacturers(
-        session: Annotated[AsyncSession, Depends(get_db_session)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> list[ManufacturerResponse]:
     manufacturers = (
-        await session.scalars(
-            select(Manufacturer)
-            .order_by(Manufacturer.id)
-        )
+        await session.scalars(select(Manufacturer).order_by(Manufacturer.id))
     ).all()
     return [
         ManufacturerResponse(
