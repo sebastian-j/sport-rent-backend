@@ -36,7 +36,6 @@ table manufacturers {
   id integer [primary key]
   name varchar [not null]
   slug varchar [not null]
-  image varchar
 }
 
 table addresses {
