@@ -22,6 +22,7 @@ from app.db.base import Base
 if TYPE_CHECKING:
     from app.models.cart import CartItem
     from app.models.category import Category
+    from app.models.manufacturer import Manufacturer
     from app.models.subcategory import Subcategory
     from app.models.user import User
 
@@ -83,11 +84,15 @@ class Product(Base):
     subcategory_id: Mapped[int | None] = mapped_column(
         Integer, ForeignKey("subcategories.id", ondelete="SET NULL"), nullable=True
     )
+    manufacturer_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("manufacturers.id", ondelete="SET NULL"), nullable=True
+    )
 
     __table_args__ = (CheckConstraint("price > 0", name="check_price_positive"),)
 
     category: Mapped[Category | None] = relationship(back_populates="products")
     subcategory: Mapped[Subcategory | None] = relationship(back_populates="products")
+    manufacturer: Mapped[Manufacturer | None] = relationship(back_populates="products")
     images: Mapped[list[ProductImage]] = relationship(
         back_populates="product", cascade="all, delete-orphan", passive_deletes=True
     )

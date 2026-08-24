@@ -20,6 +20,7 @@ class ProductResponse(BaseModel):
     images: list[str] | None = None
     imageAlts: list[str]
     category: str | None = None
+    manufacturer: str | None = None
     sizes: list[ProductSize] | None = None
     isFavorite: bool = False
 
@@ -36,6 +37,7 @@ class ProductQueryParams(BaseModel):
     maxPrice: int | None = Field(default=MAX_PRICE, ge=0)
     category: list[str] | None = None
     subcategory: list[str] | None = None
+    manufacturer: list[str] | None = None
     query: str | None = None
     page: int = Field(default=DEFAULT_PAGE, ge=1)
     pageSize: int = Field(default=DEFAULT_PAGE_SIZE, ge=1)
