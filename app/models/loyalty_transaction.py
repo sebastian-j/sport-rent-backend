@@ -37,7 +37,7 @@ class LoyaltyTransaction(Base):
         nullable=False,
     )
     order_id: Mapped[int | None] = mapped_column(
-        ForeignKey("orders.id"),
+        ForeignKey("orders.id", ondelete="SET NULL"),
         nullable=True,
     )
     type: Mapped[LoyaltyTransactionType] = mapped_column(
