@@ -78,12 +78,16 @@ class User(Base):
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
+    loyalty_transactions: Mapped[list[LoyaltyTransaction]] = relationship(
+        back_populates="user",
+    )
 
 
 if TYPE_CHECKING:
     from app.models.address import Address
     from app.models.auth_session import AuthSession
     from app.models.cart import CartItem
+    from app.models.loyalty_transaction import LoyaltyTransaction
     from app.models.order import Order
     from app.models.password_reset_token import PasswordResetToken
     from app.models.product import Favorite

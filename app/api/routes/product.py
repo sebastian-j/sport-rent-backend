@@ -9,6 +9,7 @@ from sqlalchemy.orm import selectinload
 from app.api.dependencies import get_optional_current_user_id
 from app.db.session import get_db_session
 from app.models.category import Category
+from app.models.manufacturer import Manufacturer
 from app.models.order import Order, OrderInstance, OrderStatus
 from app.models.product import Favorite, Instance, InstanceStatus, Product
 from app.models.subcategory import Subcategory
@@ -43,6 +44,7 @@ def _to_product_response(
     product: Product,
     favorite_slugs: set[str],
 ) -> ProductResponse:
+
     sorted_images = sorted(product.images, key=lambda image: image.display_order)
     valid_images = [image for image in sorted_images if image.image]
     sizes = (
@@ -59,6 +61,7 @@ def _to_product_response(
         category=product.category.name if product.category else None,
         images=convert_images_to_base64([image.image for image in valid_images]),
         imageAlts=[image.alt_text or "" for image in valid_images],
+        manufacturer=product.manufacturer.name if product.manufacturer else None,
         sizes=sizes,
         isFavorite=product.slug in favorite_slugs,
     )
@@ -76,6 +79,7 @@ async def get_products(
     max_price = params.maxPrice
     categories = params.category
     subcategories = params.subcategory
+    manufacturer = params.manufacturer
     search_query = params.query
     page = params.page
     page_size = params.pageSize
@@ -85,6 +89,7 @@ async def get_products(
         .options(
             selectinload(Product.images),
             selectinload(Product.category),
+            selectinload(Product.manufacturer),
             selectinload(Product.sizes),
         )
         .where(Product.visibility_status.is_(True))
@@ -103,6 +108,10 @@ async def get_products(
     if subcategories:
         product_query = product_query.outerjoin(Product.subcategory).where(
             Subcategory.name.in_(subcategories)
+        )
+    if manufacturer:
+        product_query = product_query.outerjoin(Product.manufacturer).where(
+            Manufacturer.name.in_(manufacturer)
         )
 
     if sort and order:
@@ -140,6 +149,7 @@ async def get_categories_count(
     search_query = params.query
     selected_categories = params.category
     selected_subcategories = params.subcategory
+    selected_manufacturers = params.manufacturer
 
     base_query = select(Product).where(Product.visibility_status.is_(True))
 
@@ -157,6 +167,10 @@ async def get_categories_count(
         base_query = base_query.join(Product.subcategory).where(
             Subcategory.name.in_(selected_subcategories)
         )
+    if selected_manufacturers:
+        base_query = base_query.join(Product.manufacturer).where(
+            Manufacturer.name.in_(selected_manufacturers)
+        )
 
     category_query = (
         select(Category.name, func.count(Product.id))
@@ -173,6 +187,10 @@ async def get_categories_count(
     if selected_subcategories:
         category_query = category_query.join(Product.subcategory).where(
             Subcategory.name.in_(selected_subcategories)
+        )
+    if selected_manufacturers:
+        category_query = category_query.join(Product.manufacturer).where(
+            Manufacturer.name.in_(selected_manufacturers)
         )
 
     category_query = category_query.group_by(Category.name)
@@ -201,6 +219,10 @@ async def get_categories_count(
         price_query = price_query.join(Product.subcategory).where(
             Subcategory.name.in_(selected_subcategories)
         )
+    if selected_manufacturers:
+        price_query = price_query.join(Product.manufacturer).where(
+            Manufacturer.name.in_(selected_manufacturers)
+        )
 
     price_min, price_max = (await session.execute(price_query)).one()
 
@@ -225,6 +247,7 @@ async def get_product(
         .options(
             selectinload(Product.images),
             selectinload(Product.category),
+            selectinload(Product.manufacturer),
             selectinload(Product.sizes),
         )
         .where(Product.slug == product_slug, Product.visibility_status.is_(True))

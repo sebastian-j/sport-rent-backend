@@ -31,6 +31,7 @@ async def get_suggested_accessories(
         .options(
             selectinload(Product.images),
             selectinload(Product.category),
+            selectinload(Product.manufacturer),
             selectinload(Product.sizes),
         )
         .where(
