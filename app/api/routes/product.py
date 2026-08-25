@@ -21,9 +21,50 @@ from app.schemas.product import (
     ProductQueryParams,
     ProductResponse,
 )
+from app.services import accessory as accessory_service
 from app.services.image import convert_images_to_base64
 
 router = APIRouter(prefix="/product", tags=["product"])
+
+
+async def _get_favorite_slugs(
+    session: AsyncSession,
+    user_id: int | None,
+) -> set[str]:
+    if user_id is None:
+        return set()
+    return set(
+        await session.scalars(
+            select(Favorite.product_slug).where(Favorite.user_id == user_id)
+        )
+    )
+
+
+def _to_product_response(
+    product: Product,
+    favorite_slugs: set[str],
+) -> ProductResponse:
+
+    sorted_images = sorted(product.images, key=lambda image: image.display_order)
+    valid_images = [image for image in sorted_images if image.image]
+    sizes = (
+        [{"size": size.size, "description": size.description} for size in product.sizes]
+        if product.sizes
+        else None
+    )
+    return ProductResponse(
+        id=product.id,
+        name=product.name,
+        slug=product.slug,
+        price=product.price,
+        description=product.description,
+        category=product.category.name if product.category else None,
+        images=convert_images_to_base64([image.image for image in valid_images]),
+        imageAlts=[image.alt_text or "" for image in valid_images],
+        manufacturer=product.manufacturer.name if product.manufacturer else None,
+        sizes=sizes,
+        isFavorite=product.slug in favorite_slugs,
+    )
 
 
 @router.get("", response_model=list[ProductResponse])
@@ -48,6 +89,7 @@ async def get_products(
         .options(
             selectinload(Product.images),
             selectinload(Product.category),
+            selectinload(Product.manufacturer),
             selectinload(Product.sizes),
         )
         .where(Product.visibility_status.is_(True))
@@ -91,42 +133,10 @@ async def get_products(
 
     paginated_products = (await session.scalars(product_query)).unique().all()
 
-    favorites_set = set()
-    if user_id is not None:
-        favorites_set = set(
-            await session.scalars(
-                select(Favorite.product_slug).where(Favorite.user_id == user_id)
-            )
-        )
-
-    results = []
-    for p in paginated_products:
-        sorted_images = sorted(p.images, key=lambda x: x.display_order)
-        valid_images = [img for img in sorted_images if img.image]
-        images_paths = [img.image for img in valid_images]
-        images_alts = [img.alt_text or "" for img in valid_images]
-        sizes = (
-            [{"size": s.size, "description": s.description} for s in p.sizes]
-            if p.sizes
-            else None
-        )
-
-        results.append(
-            ProductResponse(
-                id=p.id,
-                name=p.name,
-                slug=p.slug,
-                price=p.price,
-                description=p.description,
-                category=p.category.name if p.category else None,
-                images=convert_images_to_base64(images_paths),
-                imageAlts=images_alts,
-                sizes=sizes,
-                isFavorite=p.slug in favorites_set,
-            )
-        )
-
-    return results
+    favorite_slugs = await _get_favorite_slugs(session, user_id)
+    return [
+        _to_product_response(product, favorite_slugs) for product in paginated_products
+    ]
 
 
 @router.get("/count", response_model=ProductFacetsResponse)
@@ -246,41 +256,28 @@ async def get_product(
     if not p:
         raise HTTPException(status_code=404, detail="Product not found")
 
-    is_favorite = False
-    if user_id is not None:
-        is_favorite = (
-            await session.scalar(
-                select(Favorite).where(
-                    Favorite.user_id == user_id,
-                    Favorite.product_slug == product_slug,
-                )
-            )
-            is not None
+    favorite_slugs = await _get_favorite_slugs(session, user_id)
+    return _to_product_response(p, favorite_slugs)
+
+
+@router.get("/{product_slug}/accessories", response_model=list[ProductResponse])
+async def get_product_accessories(
+    product_slug: str,
+    user_id: Annotated[int | None, Depends(get_optional_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> list[ProductResponse]:
+    try:
+        accessories = await accessory_service.get_suggested_accessories(
+            session,
+            product_slug,
         )
+    except accessory_service.ProductNotFoundError as error:
+        raise HTTPException(status_code=404, detail="Product not found") from error
 
-    sorted_images = sorted(p.images, key=lambda x: x.display_order)
-    valid_images = [img for img in sorted_images if img.image]
-    images_paths = [img.image for img in valid_images]
-    images_alts = [img.alt_text or "" for img in valid_images]
-    sizes = (
-        [{"size": s.size, "description": s.description} for s in p.sizes]
-        if p.sizes
-        else None
-    )
-
-    return ProductResponse(
-        id=p.id,
-        name=p.name,
-        slug=p.slug,
-        price=p.price,
-        description=p.description,
-        category=p.category.name if p.category else None,
-        manufacturer=p.manufacturer.name if p.manufacturer else None,
-        images=convert_images_to_base64(images_paths),
-        imageAlts=images_alts,
-        sizes=sizes,
-        isFavorite=is_favorite,
-    )
+    favorite_slugs = await _get_favorite_slugs(session, user_id)
+    return [
+        _to_product_response(accessory, favorite_slugs) for accessory in accessories
+    ]
 
 
 @router.get("/{product_slug}/availability", response_model=ProductAvailabilityResponse)
