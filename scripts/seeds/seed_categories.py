@@ -42,7 +42,6 @@ async def seed_categories(
                     image=category_image,
                 )
                 session.add(category)
-                await session.flush()
             elif category_image is not None:
                 category.image = category_image
 
