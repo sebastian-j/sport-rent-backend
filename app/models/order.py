@@ -78,6 +78,9 @@ class Order(Base):
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
+    loyalty_transactions: Mapped[list[LoyaltyTransaction]] = relationship(
+        back_populates="order",
+    )
 
 
 class OrderInstance(Base):
@@ -115,6 +118,7 @@ class OrderInstance(Base):
 
 
 if TYPE_CHECKING:
+    from app.models.loyalty_transaction import LoyaltyTransaction
     from app.models.order_address import OrderAddress
     from app.models.product import Instance
     from app.models.user import User

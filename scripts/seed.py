@@ -3,6 +3,7 @@ import asyncio
 from app.db.session import engine
 from scripts.seeds.seed_categories import seed_categories
 from scripts.seeds.seed_favorites import seed_favorites
+from scripts.seeds.seed_loyalty_transactions import seed_loyalty_transactions
 from scripts.seeds.seed_manufacturers import seed_manufacturers
 from scripts.seeds.seed_orders import seed_orders
 from scripts.seeds.seed_products import seed_products
@@ -15,6 +16,7 @@ async def main() -> None:
         await seed_users()
         await seed_categories()
         await seed_manufacturers()
+        await seed_loyalty_transactions()
         await seed_products()
         await seed_subcategories()
         await seed_favorites()
