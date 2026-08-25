@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.orm import selectinload
 
 from app.models import Category, Product
+from scripts.seeds.seed_categories import seed_categories
 from scripts.seeds.seed_products import seed_products
 
 
@@ -21,6 +22,7 @@ async def test_seed_products_assigns_images_matching_category_names(
         )
 
     try:
+        await seed_categories(test_session_factory)
         await seed_products(test_session_factory)
 
         async with test_session_factory() as session:
