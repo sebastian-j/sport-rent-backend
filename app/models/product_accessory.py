@@ -29,6 +29,7 @@ class ProductAccessory(Base):
         Integer,
         ForeignKey("products.id", ondelete="CASCADE"),
         primary_key=True,
+        index=True,
     )
     display_order: Mapped[int] = mapped_column(
         SmallInteger,
