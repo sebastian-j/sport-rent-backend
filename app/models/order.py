@@ -118,7 +118,7 @@ class OrderInstance(Base):
         nullable=False,
     )
     price: Mapped[Decimal] = mapped_column(
-        Numeric(10,2),
+        Numeric(10, 2),
         nullable=False,
     )
     order: Mapped[Order] = relationship(
