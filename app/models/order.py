@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 import enum
 from datetime import date, datetime
 from typing import TYPE_CHECKING
@@ -14,6 +13,7 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     Uuid,
+    false,
     func,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -61,7 +61,7 @@ class Order(Base):
     used_points: Mapped[bool] = mapped_column(
         Boolean,
         default=False,
-        server_default="false",
+        server_default=false(),
         nullable=False,
     )
     promo_code_id: Mapped[int | None] = mapped_column(
@@ -115,8 +115,8 @@ class OrderInstance(Base):
         Date,
         nullable=False,
     )
-    price: Mapped[float] = mapped_column(
-        Float,
+    price: Mapped[Decimal] = mapped_column(
+        Numeric(10,2),
         nullable=False,
     )
     order: Mapped[Order] = relationship(
