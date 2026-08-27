@@ -25,7 +25,7 @@ from app.services.order_addresses import (
     snapshot_default_address,
 )
 
-#TODO - TEMPORARY
+# TODO - TEMPORARY
 POINTS_TO_CURRENCY = Decimal("1")
 
 
@@ -53,10 +53,7 @@ def line_total(unit_price: Decimal, start_date: date, end_date: date) -> Decimal
 
 
 def apply_promo_discount(subtotal: Decimal, promo: PromoCode) -> Decimal:
-    if (
-        promo.minimum_order_value is not None
-        and subtotal < promo.minimum_order_value
-    ):
+    if promo.minimum_order_value is not None and subtotal < promo.minimum_order_value:
         raise PromoCodeInvalidError(
             "Order total does not meet the promo code minimum value"
         )
