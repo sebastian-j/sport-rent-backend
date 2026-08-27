@@ -8,7 +8,14 @@ from sqlalchemy import delete, exists, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models import CartItem, Order, OrderInstance, OrderStatus, User
+from app.models import (
+    CartItem,
+    LoyaltyTransactionType,
+    Order,
+    OrderInstance,
+    OrderStatus,
+    User,
+)
 from app.models.product import Instance, InstanceStatus
 from app.models.promo_codes import DiscountType, PromoCode
 from app.schemas.order import (
@@ -41,6 +48,10 @@ class PromoCodeInvalidError(OrderValidationError):
     pass
 
 
+class OrderNotFoundError(ValueError):
+    pass
+
+
 def rental_days(start_date: date, end_date: date) -> int:
     days = (end_date - start_date).days
     if days < 0:
@@ -52,18 +63,20 @@ def line_total(unit_price: Decimal, start_date: date, end_date: date) -> Decimal
     return unit_price * rental_days(start_date, end_date)
 
 
+def _apply_promo_amount(subtotal: Decimal, promo: PromoCode) -> Decimal:
+    if promo.discount_type is DiscountType.PERCENTAGE:
+        discount = subtotal * promo.discount_value
+    else:
+        discount = promo.discount_value
+    return max(subtotal - discount, Decimal("0.00"))
+
+
 def apply_promo_discount(subtotal: Decimal, promo: PromoCode) -> Decimal:
     if promo.minimum_order_value is not None and subtotal < promo.minimum_order_value:
         raise PromoCodeInvalidError(
             "Order total does not meet the promo code minimum value"
         )
-
-    if promo.discount_type is DiscountType.PERCENTAGE:
-        discount = subtotal * promo.discount_value
-    else:
-        discount = promo.discount_value
-
-    return max(subtotal - discount, Decimal("0.00"))
+    return _apply_promo_amount(subtotal, promo)
 
 
 def address_response(address) -> OrderAddressRequest:
@@ -80,7 +93,39 @@ def address_response(address) -> OrderAddressRequest:
     )
 
 
-def order_response(order: Order, total_price: Decimal) -> OrderResponse:
+def order_total(order: Order) -> Decimal:
+    subtotal = Decimal("0.00")
+    for order_instance in order.instances:
+        subtotal += line_total(
+            Decimal(str(order_instance.price)),
+            order_instance.start_date,
+            order_instance.end_date,
+        )
+
+    total_price = (
+        _apply_promo_amount(subtotal, order.promo_code)
+        if order.promo_code is not None
+        else subtotal
+    )
+
+    if order.used_points:
+        points_spent = sum(
+            -transaction.amount
+            for transaction in order.loyalty_transactions
+            if transaction.type is LoyaltyTransactionType.SPEND
+        )
+        total_price = max(
+            total_price - (Decimal(points_spent) * POINTS_TO_CURRENCY),
+            Decimal("0.00"),
+        )
+
+    return total_price
+
+
+def order_response(order: Order, total_price: Decimal | None = None) -> OrderResponse:
+    if total_price is None:
+        total_price = order_total(order)
+
     return OrderResponse(
         id=order.id,
         user_id=order.user_id,
@@ -98,6 +143,17 @@ def order_response(order: Order, total_price: Decimal) -> OrderResponse:
             )
             for order_instance in order.instances
         ],
+    )
+
+
+def _order_load_options():
+    return (
+        selectinload(Order.address),
+        selectinload(Order.promo_code),
+        selectinload(Order.loyalty_transactions),
+        selectinload(Order.instances)
+        .selectinload(OrderInstance.instance)
+        .selectinload(Instance.product),
     )
 
 
@@ -287,16 +343,36 @@ async def create_order(
     await session.commit()
 
     order = await session.scalar(
-        select(Order)
-        .options(
-            selectinload(Order.address),
-            selectinload(Order.instances)
-            .selectinload(OrderInstance.instance)
-            .selectinload(Instance.product),
-        )
-        .where(Order.id == order.id)
+        select(Order).options(*_order_load_options()).where(Order.id == order.id)
     )
     if order is None:
         raise OrderValidationError("Order could not be loaded after creation")
 
     return order_response(order, total_price)
+
+
+async def list_orders(session: AsyncSession, user_id: int) -> list[OrderResponse]:
+    orders = (
+        await session.scalars(
+            select(Order)
+            .options(*_order_load_options())
+            .where(Order.user_id == user_id)
+            .order_by(Order.created_at.desc(), Order.id.desc())
+        )
+    ).all()
+    return [order_response(order) for order in orders]
+
+
+async def get_order(
+    session: AsyncSession,
+    user_id: int,
+    order_id: int,
+) -> OrderResponse:
+    order = await session.scalar(
+        select(Order)
+        .options(*_order_load_options())
+        .where(Order.id == order_id, Order.user_id == user_id)
+    )
+    if order is None:
+        raise OrderNotFoundError("Order not found")
+    return order_response(order)
