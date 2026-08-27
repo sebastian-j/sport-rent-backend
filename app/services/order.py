@@ -16,7 +16,7 @@ from app.models import (
     OrderStatus,
     User,
 )
-from app.models.product import Instance, InstanceStatus
+from app.models.product import Instance, InstanceStatus, Product
 from app.models.promo_codes import DiscountType, PromoCode
 from app.schemas.order import (
     CreateOrderRequest,
@@ -27,6 +27,7 @@ from app.schemas.order import (
 from app.services import cart as cart_service
 from app.services import loyalty as loyalty_service
 from app.services import promo_code as promo_code_service
+from app.services.image import get_image_as_base64
 from app.services.order_addresses import (
     create_order_address_snapshot,
     snapshot_default_address,
@@ -93,7 +94,7 @@ def address_response(address) -> OrderAddressRequest:
     )
 
 
-def order_total(order: Order) -> Decimal:
+def order_subtotal(order: Order) -> Decimal:
     subtotal = Decimal("0.00")
     for order_instance in order.instances:
         subtotal += line_total(
@@ -101,6 +102,11 @@ def order_total(order: Order) -> Decimal:
             order_instance.start_date,
             order_instance.end_date,
         )
+    return subtotal
+
+
+def order_total(order: Order) -> Decimal:
+    subtotal = order_subtotal(order)
 
     total_price = (
         _apply_promo_amount(subtotal, order.promo_code)
@@ -122,21 +128,39 @@ def order_total(order: Order) -> Decimal:
     return total_price
 
 
+def _primary_product_image(product: Product) -> str | None:
+    if not product.images:
+        return None
+
+    primary_image = next(
+        (image for image in product.images if image.display_order == 1),
+        product.images[0],
+    )
+    return get_image_as_base64(primary_image.image)
+
+
 def order_response(order: Order, total_price: Decimal | None = None) -> OrderResponse:
     if total_price is None:
         total_price = order_total(order)
 
+    discount = max(order_subtotal(order) - total_price, Decimal("0.00"))
+
     return OrderResponse(
         id=order.id,
         user_id=order.user_id,
+        created_at=order.created_at,
         status=order.status,
         total_price=float(total_price),
+        discount=float(discount),
         used_points=order.used_points,
         address=address_response(order.address),
         instances=[
             OrderInstanceResponse(
+                product_id=order_instance.instance.product.id,
                 product_name=order_instance.instance.product.name,
+                image=_primary_product_image(order_instance.instance.product),
                 size=order_instance.instance.size,
+                quantity=1,
                 start_date=order_instance.start_date,
                 end_date=order_instance.end_date,
                 price=float(order_instance.price),
@@ -153,7 +177,8 @@ def _order_load_options():
         selectinload(Order.loyalty_transactions),
         selectinload(Order.instances)
         .selectinload(OrderInstance.instance)
-        .selectinload(Instance.product),
+        .selectinload(Instance.product)
+        .selectinload(Product.images),
     )
 
 

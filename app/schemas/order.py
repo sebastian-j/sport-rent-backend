@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 
 from pydantic import BaseModel, Field
 
@@ -24,8 +24,11 @@ class CreateOrderRequest(BaseModel):
 
 
 class OrderInstanceResponse(BaseModel):
+    product_id: int
     product_name: str
+    image: str | None
     size: str | None
+    quantity: int
     start_date: date
     end_date: date
     price: float
@@ -34,8 +37,10 @@ class OrderInstanceResponse(BaseModel):
 class OrderResponse(BaseModel):
     id: int
     user_id: int
+    created_at: datetime
     status: OrderStatus
     total_price: float
+    discount: float
     used_points: bool
     address: OrderAddressRequest
     instances: list[OrderInstanceResponse]
