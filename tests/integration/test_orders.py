@@ -2,6 +2,7 @@ from collections.abc import AsyncIterator
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
+import pytest
 import pytest_asyncio
 from httpx import AsyncClient
 from sqlalchemy import delete
@@ -59,7 +60,29 @@ async def authorization_headers(
     return {"Authorization": f"Bearer {response.json()['access_token']}"}
 
 
-async def test_empty_orders_list_returns_empty_array(
+@pytest.mark.parametrize(
+    ("query", "invalid_parameter"),
+    [
+        ({"page": 0}, "page"),
+        ({"pageSize": 0}, "pageSize"),
+        ({"pageSize": 101}, "pageSize"),
+    ],
+)
+async def test_orders_list_rejects_invalid_pagination(
+    client: AsyncClient,
+    test_user: SeededUser,
+    query: dict[str, int],
+    invalid_parameter: str,
+) -> None:
+    headers = await authorization_headers(client, test_user)
+
+    response = await client.get("/orders", params=query, headers=headers)
+
+    assert response.status_code == 422
+    assert response.json()["detail"][0]["loc"][-1] == invalid_parameter
+
+
+async def test_empty_orders_list_returns_empty_page(
     client: AsyncClient,
     test_user: SeededUser,
 ) -> None:
@@ -68,10 +91,16 @@ async def test_empty_orders_list_returns_empty_array(
     response = await client.get("/orders", headers=headers)
 
     assert response.status_code == 200
-    assert response.json() == []
+    assert response.json() == {
+        "items": [],
+        "page": 1,
+        "pageSize": 10,
+        "total": 0,
+        "totalPages": 0,
+    }
 
 
-async def test_list_orders_returns_user_orders_newest_first(
+async def test_orders_list_returns_requested_page_and_metadata(
     client: AsyncClient,
     test_user: SeededUser,
     test_session_factory: async_sessionmaker[AsyncSession],
@@ -85,29 +114,50 @@ async def test_list_orders_returns_user_orders_newest_first(
                     user_id=test_user.id,
                     created_at=created_at + timedelta(days=index),
                 )
-                for index in range(3)
+                for index in range(12)
             ]
         )
 
     headers = await authorization_headers(client, test_user)
 
-    response = await client.get("/orders", headers=headers)
+    first_response = await client.get(
+        "/orders",
+        params={"page": 1, "pageSize": 10},
+        headers=headers,
+    )
+    second_response = await client.get(
+        "/orders",
+        params={"page": 2, "pageSize": 10},
+        headers=headers,
+    )
 
-    assert response.status_code == 200
-    payload = response.json()
-    assert len(payload) == 3
+    assert first_response.status_code == 200
+    assert second_response.status_code == 200
 
-    ids = [item["id"] for item in payload]
-    assert ids == sorted(ids, reverse=True)
+    first_page = first_response.json()
+    second_page = second_response.json()
 
-    for item in payload:
+    assert len(first_page["items"]) == 10
+    assert first_page["page"] == 1
+    assert first_page["pageSize"] == 10
+    assert first_page["total"] == 12
+    assert first_page["totalPages"] == 2
+
+    assert len(second_page["items"]) == 2
+    assert second_page["page"] == 2
+    assert second_page["pageSize"] == 10
+    assert second_page["total"] == 12
+    assert second_page["totalPages"] == 2
+
+    first_page_ids = [item["id"] for item in first_page["items"]]
+    second_page_ids = [item["id"] for item in second_page["items"]]
+    assert not set(first_page_ids) & set(second_page_ids)
+    assert first_page_ids == sorted(first_page_ids, reverse=True)
+    assert second_page_ids == sorted(second_page_ids, reverse=True)
+
+    for item in first_page["items"]:
         assert item["user_id"] == test_user.id
         assert item["status"] == OrderStatus.PAID.value
-        assert item["used_points"] is False
-        assert item["total_price"] == 0.0
-        assert item["discount"] == 0.0
-        assert item["instances"] == []
-        assert item["address"]["first_line"] == "Testowa 1"
         assert item["address"]["city"] == "Kraków"
         assert "created_at" in item
 

@@ -4,7 +4,7 @@ from datetime import date
 from decimal import Decimal
 from uuid import uuid4
 
-from sqlalchemy import delete, exists, select
+from sqlalchemy import delete, exists, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -150,6 +150,7 @@ def order_response(order: Order, total_price: Decimal | None = None) -> OrderRes
         user_id=order.user_id,
         created_at=order.created_at,
         status=order.status,
+        payment_code=str(order.payment_code) if order.payment_code else None,
         total_price=float(total_price),
         discount=float(discount),
         used_points=order.used_points,
@@ -376,16 +377,30 @@ async def create_order(
     return order_response(order, total_price)
 
 
-async def list_orders(session: AsyncSession, user_id: int) -> list[OrderResponse]:
+async def list_orders(
+    session: AsyncSession,
+    user_id: int,
+    *,
+    page: int,
+    page_size: int,
+) -> tuple[list[OrderResponse], int]:
+    total = (
+        await session.scalar(
+            select(func.count(Order.id)).where(Order.user_id == user_id)
+        )
+        or 0
+    )
     orders = (
         await session.scalars(
             select(Order)
             .options(*_order_load_options())
             .where(Order.user_id == user_id)
             .order_by(Order.created_at.desc(), Order.id.desc())
+            .offset((page - 1) * page_size)
+            .limit(page_size)
         )
     ).all()
-    return [order_response(order) for order in orders]
+    return [order_response(order) for order in orders], total
 
 
 async def get_order(

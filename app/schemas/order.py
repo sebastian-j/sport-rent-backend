@@ -39,8 +39,17 @@ class OrderResponse(BaseModel):
     user_id: int
     created_at: datetime
     status: OrderStatus
+    payment_code: str | None
     total_price: float
     discount: float
     used_points: bool
     address: OrderAddressRequest
     instances: list[OrderInstanceResponse]
+
+
+class PaginatedOrdersResponse(BaseModel):
+    items: list[OrderResponse]
+    page: int
+    pageSize: int
+    total: int
+    totalPages: int

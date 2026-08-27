@@ -1,11 +1,15 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies import get_current_user_id
 from app.db.session import get_db_session
-from app.schemas.order import CreateOrderRequest, OrderResponse
+from app.schemas.order import (
+    CreateOrderRequest,
+    OrderResponse,
+    PaginatedOrdersResponse,
+)
 from app.services import order as order_service
 from app.services.order_addresses import (
     InvalidOrderAddressError,
@@ -55,13 +59,28 @@ async def create_order(
 
 @router.get(
     "",
-    response_model=list[OrderResponse],
+    response_model=PaginatedOrdersResponse,
     summary="Lista zamówień użytkownika",
 )
 async def get_orders(
-    user_id: CurrentUser, session: DatabaseSession
-) -> list[OrderResponse]:
-    return await order_service.list_orders(session, user_id)
+    user_id: CurrentUser,
+    session: DatabaseSession,
+    page: Annotated[int, Query(ge=1)] = 1,
+    page_size: Annotated[int, Query(alias="pageSize", ge=1, le=100)] = 10,
+) -> PaginatedOrdersResponse:
+    items, total = await order_service.list_orders(
+        session,
+        user_id,
+        page=page,
+        page_size=page_size,
+    )
+    return PaginatedOrdersResponse(
+        items=items,
+        page=page,
+        pageSize=page_size,
+        total=total,
+        totalPages=(total + page_size - 1) // page_size,
+    )
 
 
 @router.get(
