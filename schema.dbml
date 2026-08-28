@@ -71,6 +71,7 @@ table orders {
   status status [default: "PENDING"]
   payment_code uuid
   used_points bool [default: false]
+  promo_code_id integer
 }
 
 table points_history {
@@ -194,6 +195,33 @@ table calendar_blocks {
   }
 }
 
+enum promo_discount_type {
+  "PERCENTAGE"
+  "FIXED_AMOUNT"
+}
+
+table promo_codes {
+  id integer [primary key]
+  code varchar(100) [unique, not null]
+  discount_type promo_discount_type [not null]
+  discount_value decimal(12,4) [not null]
+  minimum_order_value decimal(12,2)
+  is_active bool [not null, default: true]
+  valid_from datetime
+  valid_until datetime
+  created_at datetime [not null]
+  usage_count integer [not null, default: 0]
+  max_uses integer
+
+  checks {
+    `(discount_type = 'PERCENTAGE' AND discount_value > 0 AND discount_value <= 1) OR (discount_type = 'FIXED_AMOUNT' AND discount_value > 0)`
+    `minimum_order_value IS NULL OR minimum_order_value >= 0`
+    `usage_count >= 0`
+    `max_uses IS NULL OR max_uses > 0`
+    `valid_from IS NULL OR valid_until IS NULL OR valid_from <= valid_until`
+  }
+}
+
 ref: users.id < orders.user_id
 ref: orders.id - order_addresses.order_id
 ref: orders.id < order_instances.order_id
@@ -213,3 +241,4 @@ ref: categories.id < subcategories.category_id
 ref: categories.id < products.category_id
 ref: subcategories.id < products.subcategory_id
 ref: manufacturers.id < products.manufacturer_id
+ref: promo_codes.id < orders.promo_code_id

@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 from datetime import datetime
 from decimal import Decimal
 from enum import StrEnum
+from typing import TYPE_CHECKING
 
 from sqlalchemy import (
     Boolean,
@@ -12,7 +15,7 @@ from sqlalchemy import (
     String,
     func,
 )
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 
@@ -77,6 +80,9 @@ class PromoCode(Base):
         Integer,
         nullable=True,
     )
+    orders: Mapped[list[Order]] = relationship(
+        back_populates="promo_code",
+    )
 
     __table_args__ = (
         CheckConstraint(
@@ -104,3 +110,7 @@ class PromoCode(Base):
             name="check_promo_validity_dates",
         ),
     )
+
+
+if TYPE_CHECKING:
+    from app.models.order import Order

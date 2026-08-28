@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import enum
 from datetime import date, datetime
+from decimal import Decimal
 from typing import TYPE_CHECKING
 from uuid import UUID
 
@@ -10,10 +11,11 @@ from sqlalchemy import (
     Date,
     DateTime,
     Enum,
-    Float,
     ForeignKey,
     Integer,
+    Numeric,
     Uuid,
+    false,
     func,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -61,10 +63,18 @@ class Order(Base):
     used_points: Mapped[bool] = mapped_column(
         Boolean,
         default=False,
-        server_default="false",
+        server_default=false(),
         nullable=False,
     )
+    promo_code_id: Mapped[int | None] = mapped_column(
+        ForeignKey("promo_codes.id"),
+        index=True,
+        nullable=True,
+    )
     user: Mapped[User] = relationship(
+        back_populates="orders",
+    )
+    promo_code: Mapped[PromoCode | None] = relationship(
         back_populates="orders",
     )
     address: Mapped[OrderAddress] = relationship(
@@ -107,8 +117,8 @@ class OrderInstance(Base):
         Date,
         nullable=False,
     )
-    price: Mapped[float] = mapped_column(
-        Float,
+    price: Mapped[Decimal] = mapped_column(
+        Numeric(10, 2),
         nullable=False,
     )
     order: Mapped[Order] = relationship(
@@ -121,4 +131,5 @@ if TYPE_CHECKING:
     from app.models.loyalty_transaction import LoyaltyTransaction
     from app.models.order_address import OrderAddress
     from app.models.product import Instance
+    from app.models.promo_codes import PromoCode
     from app.models.user import User
