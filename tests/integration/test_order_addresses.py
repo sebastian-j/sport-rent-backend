@@ -1,11 +1,9 @@
-import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.orm import selectinload
 
 from app.models import Address, Order, OrderStatus, User
 from app.services.order_addresses import (
-    InvalidOrderAddressError,
     create_order_address_snapshot,
     snapshot_default_address,
 )
@@ -43,6 +41,8 @@ async def test_order_address_is_independent_from_user_default_address(
         order = Order(
             user_id=user.id,
             status=OrderStatus.PENDING,
+            recipient_first_name="Jan",
+            recipient_last_name="Kowalski",
             address=snapshot_default_address(user),
         )
         session.add(order)
@@ -64,8 +64,10 @@ async def test_order_address_is_independent_from_user_default_address(
     assert order is not None
     assert order.address.city == "Warszawa"
     assert order.address.first_line == "ul. Domowa 1"
-    assert order.address.first_name == "Jan"
-    assert order.address.last_name == "Kowalski"
+    assert order.address.first_name is None
+    assert order.address.last_name is None
+    assert order.recipient_first_name == "Jan"
+    assert order.recipient_last_name == "Kowalski"
 
 
 def test_order_address_supports_another_person_or_company() -> None:
@@ -101,19 +103,19 @@ def test_order_address_supports_another_person_or_company() -> None:
     assert company.nip == "1234567890"
 
 
-def test_order_address_requires_a_person_or_company() -> None:
-    with pytest.raises(
-        InvalidOrderAddressError,
-        match="A person or company is required",
-    ):
-        create_order_address_snapshot(
-            first_name=None,
-            last_name=None,
-            first_line="ul. Niekompletna 5",
-            second_line=None,
-            postal_code="00-001",
-            city="Warszawa",
-            country="Polska",
-            company=None,
-            nip=None,
-        )
+def test_order_address_allows_address_without_person_or_company() -> None:
+    address = create_order_address_snapshot(
+        first_name=None,
+        last_name=None,
+        first_line="ul. Niekompletna 5",
+        second_line=None,
+        postal_code="00-001",
+        city="Warszawa",
+        country="Polska",
+        company=None,
+        nip=None,
+    )
+
+    assert address.first_name is None
+    assert address.last_name is None
+    assert address.company is None
