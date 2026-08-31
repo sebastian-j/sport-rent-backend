@@ -29,11 +29,6 @@ def create_order_address_snapshot(
             "First name and last name must be provided together"
         )
 
-    if not company and not (has_first_name and has_last_name):
-        raise InvalidOrderAddressError(
-            "A person or company is required for an order address"
-        )
-
     return OrderAddress(
         first_name=first_name,
         last_name=last_name,
@@ -52,15 +47,9 @@ def snapshot_default_address(user: User) -> OrderAddress:
     if address is None:
         raise MissingDefaultAddressError
 
-    first_name = address.first_name
-    last_name = address.last_name
-    if not address.company and first_name is None and last_name is None:
-        first_name = user.first_name
-        last_name = user.last_name
-
     return create_order_address_snapshot(
-        first_name=first_name,
-        last_name=last_name,
+        first_name=address.first_name,
+        last_name=address.last_name,
         first_line=address.first_line,
         second_line=address.second_line,
         postal_code=address.postal_code,
