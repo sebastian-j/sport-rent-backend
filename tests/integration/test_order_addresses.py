@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
@@ -43,6 +45,7 @@ async def test_order_address_is_independent_from_user_default_address(
         order = Order(
             user_id=user.id,
             status=OrderStatus.PENDING,
+            total_price=Decimal("0.00"),
             address=snapshot_default_address(user),
         )
         session.add(order)

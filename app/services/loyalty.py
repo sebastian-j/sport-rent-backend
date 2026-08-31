@@ -3,7 +3,13 @@ from decimal import Decimal
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import LoyaltyTransaction, LoyaltyTransactionType, User
+from app.models import (
+    LoyaltyTransaction,
+    LoyaltyTransactionType,
+    Order,
+    OrderStatus,
+    User,
+)
 
 MAX_LOYALTY_POINTS_AMOUNT = 2_147_483_647
 MONEY_PER_EARNED_POINT = Decimal("10.00")
@@ -71,6 +77,25 @@ def calculate_max_redeemable_points(order_value: Decimal) -> int:
 
     maximum_discount = order_value * MAX_POINTS_PAYMENT_SHARE
     return int(maximum_discount // MONEY_PER_REDEEMED_POINT)
+
+
+async def get_lifetime_qualifying_spend(
+    session: AsyncSession,
+    user_id: int,
+) -> Decimal:
+    total = await session.scalar(
+        select(func.sum(Order.total_price)).where(
+            Order.user_id == user_id,
+            Order.status.in_(
+                (
+                    OrderStatus.PAID,
+                    OrderStatus.GIVEN_OUT,
+                    OrderStatus.FINISHED,
+                )
+            ),
+        )
+    )
+    return total or Decimal("0.00")
 
 
 async def get_balance(session: AsyncSession, user_id: int) -> int:
@@ -212,3 +237,89 @@ async def spend_points(
     session.add(transaction)
     await session.flush()
     return transaction
+
+
+async def apply_loyalty_for_paid_order(
+    session: AsyncSession,
+    order: Order,
+) -> LoyaltyTransaction | None:
+    if order.status is not OrderStatus.PAID:
+        raise ValueError("Loyalty can only be applied to a paid order")
+
+    existing_transaction = await session.scalar(
+        select(LoyaltyTransaction).where(
+            LoyaltyTransaction.order_id == order.id,
+            LoyaltyTransaction.type == LoyaltyTransactionType.EARN,
+        )
+    )
+    if existing_transaction is not None:
+        return existing_transaction
+
+    earned_points = calculate_earned_points(order.total_price)
+    if earned_points == 0:
+        return None
+
+    return await earn_points(
+        session,
+        order.user_id,
+        order.id,
+        earned_points,
+        description=f"Points earned for order #{order.id}",
+    )
+
+
+async def apply_loyalty_for_cancelled_order(
+    session: AsyncSession,
+    order: Order,
+) -> list[LoyaltyTransaction]:
+    if order.status is not OrderStatus.CANCELLED:
+        raise ValueError("Loyalty can only be reversed for a cancelled order")
+
+    await _lock_user(session, order.user_id)
+
+    order_transactions = list(
+        await session.scalars(
+            select(LoyaltyTransaction).where(
+                LoyaltyTransaction.order_id == order.id,
+            )
+        )
+    )
+    transactions_by_type = {
+        transaction.type: transaction for transaction in order_transactions
+    }
+    applied_transactions: list[LoyaltyTransaction] = []
+    new_transactions: list[LoyaltyTransaction] = []
+
+    spent_transaction = transactions_by_type.get(LoyaltyTransactionType.SPEND)
+    if spent_transaction is not None:
+        refund_transaction = transactions_by_type.get(LoyaltyTransactionType.REFUND)
+        if refund_transaction is None:
+            refund_transaction = LoyaltyTransaction(
+                user_id=order.user_id,
+                order_id=order.id,
+                type=LoyaltyTransactionType.REFUND,
+                amount=-spent_transaction.amount,
+                description=f"Points refunded for cancelled order #{order.id}",
+            )
+            new_transactions.append(refund_transaction)
+        applied_transactions.append(refund_transaction)
+
+    earned_transaction = transactions_by_type.get(LoyaltyTransactionType.EARN)
+    if earned_transaction is not None:
+        reversal_transaction = transactions_by_type.get(LoyaltyTransactionType.REVERSAL)
+        if reversal_transaction is None:
+            reversal_transaction = LoyaltyTransaction(
+                user_id=order.user_id,
+                order_id=order.id,
+                type=LoyaltyTransactionType.REVERSAL,
+                amount=-earned_transaction.amount,
+                description=f"Points reversed for cancelled order #{order.id}",
+            )
+            new_transactions.append(reversal_transaction)
+        applied_transactions.append(reversal_transaction)
+
+    if new_transactions:
+        session.add_all(new_transactions)
+        await session.flush()
+
+    return applied_transactions

@@ -72,12 +72,34 @@ table orders {
   payment_code uuid
   used_points bool [default: false]
   promo_code_id integer
+  total_price decimal(12,2) [not null]
 }
 
-table points_history {
+enum loyalty_transaction_type {
+  "EARN"
+  "SPEND"
+  "REFUND"
+  "REVERSAL"
+  "ADJUSTMENT"
+}
+
+table loyalty_transactions {
   id integer [primary key]
-  order_id integer [not null]
-  points integer
+  user_id integer [not null]
+  order_id integer
+  type loyalty_transaction_type [not null]
+  amount integer [not null]
+  description varchar(255)
+  created_at datetime [not null]
+
+  indexes {
+    (order_id, type) [unique]
+    (user_id, created_at, id) [name: 'ix_loyalty_transactions_user_created_at']
+  }
+
+  checks {
+    `(type IN ('EARN', 'REFUND') AND amount > 0) OR (type IN ('SPEND', 'REVERSAL') AND amount < 0) OR (type = 'ADJUSTMENT' AND amount <> 0)`
+  }
 }
 
 enum status {
@@ -231,7 +253,8 @@ ref: users.id < favorites.user_id
 ref: products.id < favorites.product_id
 ref: addresses.id - users.default_address_id
 ref: products.id < product_images.product_id
-ref: orders.id < points_history.order_id
+ref: users.id < loyalty_transactions.user_id
+ref: orders.id < loyalty_transactions.order_id [delete: set null]
 ref: users.id < cart_items.user_id
 ref: products.id < cart_items.product_id
 ref: product_sizes.id < cart_items.product_size_id

@@ -71,6 +71,10 @@ class Order(Base):
         index=True,
         nullable=True,
     )
+    total_price: Mapped[Decimal] = mapped_column(
+        Numeric(12, 2),
+        nullable=False,
+    )
     user: Mapped[User] = relationship(
         back_populates="orders",
     )

@@ -20,7 +20,7 @@ class OrderAddressRequest(BaseModel):
 class CreateOrderRequest(BaseModel):
     address: OrderAddressRequest | None = None
     promo_code: str | None = None
-    used_points: bool = False
+    points_to_spend: int = Field(default=0, ge=0)
 
 
 class OrderInstanceResponse(BaseModel):

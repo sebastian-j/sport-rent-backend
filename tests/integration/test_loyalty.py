@@ -1,5 +1,6 @@
 from collections.abc import AsyncIterator
 from datetime import UTC, datetime, timedelta
+from decimal import Decimal
 
 import pytest
 import pytest_asyncio
@@ -17,8 +18,11 @@ from app.services.loyalty import (
     MAX_LOYALTY_POINTS_AMOUNT,
     InsufficientLoyaltyPointsError,
     InvalidLoyaltyPointsAmountError,
+    apply_loyalty_for_cancelled_order,
+    apply_loyalty_for_paid_order,
     earn_points,
     get_balance,
+    get_lifetime_qualifying_spend,
     spend_points,
 )
 from tests.support import SeededUser
@@ -193,7 +197,11 @@ async def test_spend_points_creates_negative_transaction(
     clean_loyalty_transactions: None,
 ) -> None:
     async with test_session_factory.begin() as session:
-        order = Order(user_id=test_user.id, status=OrderStatus.PAID)
+        order = Order(
+            user_id=test_user.id,
+            status=OrderStatus.PAID,
+            total_price=Decimal("0.00"),
+        )
         session.add_all(
             [
                 order,
@@ -226,7 +234,11 @@ async def test_earn_points_creates_positive_transaction(
     clean_loyalty_transactions: None,
 ) -> None:
     async with test_session_factory.begin() as session:
-        order = Order(user_id=test_user.id, status=OrderStatus.PAID)
+        order = Order(
+            user_id=test_user.id,
+            status=OrderStatus.PAID,
+            total_price=Decimal("0.00"),
+        )
         session.add(order)
         await session.flush()
         transaction = await earn_points(
@@ -250,7 +262,11 @@ async def test_loyalty_history_survives_order_deletion(
     clean_loyalty_transactions: None,
 ) -> None:
     async with test_session_factory.begin() as session:
-        order = Order(user_id=test_user.id, status=OrderStatus.PAID)
+        order = Order(
+            user_id=test_user.id,
+            status=OrderStatus.PAID,
+            total_price=Decimal("0.00"),
+        )
         session.add(order)
         await session.flush()
         transaction = await earn_points(
@@ -305,7 +321,11 @@ async def test_earn_points_accepts_maximum_integer_amount(
     clean_loyalty_transactions: None,
 ) -> None:
     async with test_session_factory.begin() as session:
-        order = Order(user_id=test_user.id, status=OrderStatus.PAID)
+        order = Order(
+            user_id=test_user.id,
+            status=OrderStatus.PAID,
+            total_price=Decimal("0.00"),
+        )
         session.add(order)
         await session.flush()
         transaction = await earn_points(
@@ -324,7 +344,11 @@ async def test_spend_points_rejects_amount_above_balance(
     clean_loyalty_transactions: None,
 ) -> None:
     async with test_session_factory.begin() as session:
-        order = Order(user_id=test_user.id, status=OrderStatus.PAID)
+        order = Order(
+            user_id=test_user.id,
+            status=OrderStatus.PAID,
+            total_price=Decimal("0.00"),
+        )
         session.add_all(
             [
                 order,
@@ -346,3 +370,199 @@ async def test_spend_points_rejects_amount_above_balance(
 
     async with test_session_factory() as session:
         assert await get_balance(session, test_user.id) == 40
+
+
+async def test_lifetime_qualifying_spend_uses_only_completed_payments(
+    test_user: SeededUser,
+    test_session_factory: async_sessionmaker[AsyncSession],
+    clean_loyalty_transactions: None,
+) -> None:
+    async with test_session_factory.begin() as session:
+        session.add_all(
+            [
+                Order(
+                    user_id=test_user.id,
+                    status=status,
+                    total_price=total_price,
+                )
+                for status, total_price in (
+                    (OrderStatus.PAID, Decimal("100.00")),
+                    (OrderStatus.GIVEN_OUT, Decimal("150.00")),
+                    (OrderStatus.FINISHED, Decimal("250.00")),
+                    (OrderStatus.PENDING, Decimal("1000.00")),
+                    (OrderStatus.UNPAID, Decimal("1000.00")),
+                    (OrderStatus.CANCELLED, Decimal("1000.00")),
+                )
+            ]
+        )
+
+    async with test_session_factory() as session:
+        total = await get_lifetime_qualifying_spend(session, test_user.id)
+
+    assert total == Decimal("500.00")
+
+
+@pytest.mark.parametrize(
+    ("total_price", "expected_points"),
+    [
+        (Decimal("9.99"), 0),
+        (Decimal("10.00"), 1),
+        (Decimal("475.00"), 47),
+    ],
+)
+async def test_applies_loyalty_points_for_paid_order_total(
+    total_price: Decimal,
+    expected_points: int,
+    test_user: SeededUser,
+    test_session_factory: async_sessionmaker[AsyncSession],
+    clean_loyalty_transactions: None,
+) -> None:
+    async with test_session_factory.begin() as session:
+        order = Order(
+            user_id=test_user.id,
+            status=OrderStatus.PAID,
+            total_price=total_price,
+        )
+        session.add(order)
+        await session.flush()
+
+        transaction = await apply_loyalty_for_paid_order(session, order)
+
+        if expected_points == 0:
+            assert transaction is None
+        else:
+            assert transaction is not None
+            assert transaction.type is LoyaltyTransactionType.EARN
+            assert transaction.amount == expected_points
+
+    async with test_session_factory() as session:
+        assert await get_balance(session, test_user.id) == expected_points
+
+
+async def test_apply_loyalty_for_paid_order_is_idempotent(
+    test_user: SeededUser,
+    test_session_factory: async_sessionmaker[AsyncSession],
+    clean_loyalty_transactions: None,
+) -> None:
+    async with test_session_factory.begin() as session:
+        order = Order(
+            user_id=test_user.id,
+            status=OrderStatus.PAID,
+            total_price=Decimal("100.00"),
+        )
+        session.add(order)
+        await session.flush()
+
+        first_transaction = await apply_loyalty_for_paid_order(session, order)
+        second_transaction = await apply_loyalty_for_paid_order(session, order)
+
+        assert first_transaction is not None
+        assert second_transaction is not None
+        assert second_transaction.id == first_transaction.id
+
+    async with test_session_factory() as session:
+        assert await get_balance(session, test_user.id) == 10
+
+
+async def test_rejects_applying_loyalty_to_unpaid_order(
+    test_user: SeededUser,
+    test_session_factory: async_sessionmaker[AsyncSession],
+    clean_loyalty_transactions: None,
+) -> None:
+    async with test_session_factory.begin() as session:
+        order = Order(
+            user_id=test_user.id,
+            status=OrderStatus.UNPAID,
+            total_price=Decimal("100.00"),
+        )
+        session.add(order)
+        await session.flush()
+
+        with pytest.raises(
+            ValueError,
+            match="Loyalty can only be applied to a paid order",
+        ):
+            await apply_loyalty_for_paid_order(session, order)
+
+
+async def test_cancelled_order_refunds_spent_and_reverses_earned_points(
+    test_user: SeededUser,
+    test_session_factory: async_sessionmaker[AsyncSession],
+    clean_loyalty_transactions: None,
+) -> None:
+    async with test_session_factory.begin() as session:
+        order = Order(
+            user_id=test_user.id,
+            status=OrderStatus.CANCELLED,
+            total_price=Decimal("100.00"),
+        )
+        order.loyalty_transactions.extend(
+            [
+                LoyaltyTransaction(
+                    user_id=test_user.id,
+                    type=LoyaltyTransactionType.SPEND,
+                    amount=-20,
+                ),
+                LoyaltyTransaction(
+                    user_id=test_user.id,
+                    type=LoyaltyTransactionType.EARN,
+                    amount=10,
+                ),
+            ]
+        )
+        session.add(order)
+        await session.flush()
+
+        first_result = await apply_loyalty_for_cancelled_order(session, order)
+        second_result = await apply_loyalty_for_cancelled_order(session, order)
+
+        assert [
+            (transaction.type, transaction.amount) for transaction in first_result
+        ] == [
+            (LoyaltyTransactionType.REFUND, 20),
+            (LoyaltyTransactionType.REVERSAL, -10),
+        ]
+        assert [transaction.id for transaction in second_result] == [
+            transaction.id for transaction in first_result
+        ]
+
+    async with test_session_factory() as session:
+        assert await get_balance(session, test_user.id) == 0
+
+
+async def test_cancelled_order_without_loyalty_transactions_has_no_effects(
+    test_user: SeededUser,
+    test_session_factory: async_sessionmaker[AsyncSession],
+    clean_loyalty_transactions: None,
+) -> None:
+    async with test_session_factory.begin() as session:
+        order = Order(
+            user_id=test_user.id,
+            status=OrderStatus.CANCELLED,
+            total_price=Decimal("100.00"),
+        )
+        session.add(order)
+        await session.flush()
+
+        assert await apply_loyalty_for_cancelled_order(session, order) == []
+
+
+async def test_rejects_reversing_loyalty_for_non_cancelled_order(
+    test_user: SeededUser,
+    test_session_factory: async_sessionmaker[AsyncSession],
+    clean_loyalty_transactions: None,
+) -> None:
+    async with test_session_factory.begin() as session:
+        order = Order(
+            user_id=test_user.id,
+            status=OrderStatus.PAID,
+            total_price=Decimal("100.00"),
+        )
+        session.add(order)
+        await session.flush()
+
+        with pytest.raises(
+            ValueError,
+            match="Loyalty can only be reversed for a cancelled order",
+        ):
+            await apply_loyalty_for_cancelled_order(session, order)

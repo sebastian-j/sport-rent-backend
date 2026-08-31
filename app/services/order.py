@@ -10,7 +10,6 @@ from sqlalchemy.orm import selectinload
 
 from app.models import (
     CartItem,
-    LoyaltyTransactionType,
     Order,
     OrderInstance,
     OrderStatus,
@@ -32,9 +31,6 @@ from app.services.order_addresses import (
     create_order_address_snapshot,
     snapshot_default_address,
 )
-
-# TODO - TEMPORARY
-POINTS_TO_CURRENCY = Decimal("1")
 
 
 class OrderValidationError(ValueError):
@@ -105,29 +101,6 @@ def order_subtotal(order: Order) -> Decimal:
     return subtotal
 
 
-def order_total(order: Order) -> Decimal:
-    subtotal = order_subtotal(order)
-
-    total_price = (
-        _apply_promo_amount(subtotal, order.promo_code)
-        if order.promo_code is not None
-        else subtotal
-    )
-
-    if order.used_points:
-        points_spent = sum(
-            -transaction.amount
-            for transaction in order.loyalty_transactions
-            if transaction.type is LoyaltyTransactionType.SPEND
-        )
-        total_price = max(
-            total_price - (Decimal(points_spent) * POINTS_TO_CURRENCY),
-            Decimal("0.00"),
-        )
-
-    return total_price
-
-
 def _primary_product_image(product: Product) -> str | None:
     if not product.images:
         return None
@@ -141,7 +114,7 @@ def _primary_product_image(product: Product) -> str | None:
 
 def order_response(order: Order, total_price: Decimal | None = None) -> OrderResponse:
     if total_price is None:
-        total_price = order_total(order)
+        total_price = order.total_price
 
     discount = max(order_subtotal(order) - total_price, Decimal("0.00"))
 
@@ -174,8 +147,6 @@ def order_response(order: Order, total_price: Decimal | None = None) -> OrderRes
 def _order_load_options():
     return (
         selectinload(Order.address),
-        selectinload(Order.promo_code),
-        selectinload(Order.loyalty_transactions),
         selectinload(Order.instances)
         .selectinload(OrderInstance.instance)
         .selectinload(Instance.product)
@@ -333,6 +304,7 @@ async def create_order(
         payment_code=uuid4(),
         used_points=False,
         promo_code_id=promo.id if promo else None,
+        total_price=total_price,
         address=address,
         instances=order_instances,
     )
@@ -342,28 +314,38 @@ async def create_order(
     if promo is not None:
         promo.usage_count += 1
 
-    if request.used_points:
-        balance = await loyalty_service.get_balance(session, user_id)
-        if balance <= 0:
-            raise OrderValidationError("No loyalty points available to spend")
+    points_to_spend = request.points_to_spend
 
-        max_points_for_total = int(total_price // POINTS_TO_CURRENCY)
-        points_to_spend = min(balance, max_points_for_total)
-        if points_to_spend <= 0:
-            raise OrderValidationError("Order total is too low to spend loyalty points")
-
-        await loyalty_service.spend_points(
+    if points_to_spend > 0:
+        lifetime_qualifying_spend = await loyalty_service.get_lifetime_qualifying_spend(
             session,
             user_id,
-            order.id,
-            points_to_spend,
-            description=f"Points spent on order #{order.id}",
         )
+
+        try:
+            loyalty_service.validate_points_redemption(
+                points_to_spend,
+                total_price,
+                lifetime_qualifying_spend,
+            )
+            await loyalty_service.spend_points(
+                session,
+                user_id,
+                order.id,
+                points_to_spend,
+                description=f"Points spent on order #{order.id}",
+            )
+        except (
+            loyalty_service.InvalidLoyaltyPointsAmountError,
+            loyalty_service.LoyaltyProgramLockedError,
+            loyalty_service.LoyaltyPointsRedemptionLimitError,
+            loyalty_service.InsufficientLoyaltyPointsError,
+        ) as error:
+            raise OrderValidationError(str(error)) from error
+
         order.used_points = True
-        total_price = max(
-            total_price - (Decimal(points_to_spend) * POINTS_TO_CURRENCY),
-            Decimal("0.00"),
-        )
+        total_price -= loyalty_service.calculate_points_discount(points_to_spend)
+    order.total_price = total_price
 
     await session.execute(delete(CartItem).where(CartItem.user_id == user_id))
     await session.commit()
