@@ -64,6 +64,18 @@ class Instance(Base):
     )
     size: Mapped[str | None] = mapped_column(String(50), nullable=True)
 
+    hsqldb_inventory_code: Mapped[str | None] = mapped_column(
+        String(50),
+        nullable=True,
+    )
+
+    __table_args__ = (
+        UniqueConstraint(
+            "hsqldb_inventory_code",
+            name="uq_instances_hsqldb_inventory_code",
+        ),
+    )
+
     product: Mapped[Product] = relationship(back_populates="instances")
 
 
@@ -72,6 +84,10 @@ class Product(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
+    hsqldb_name: Mapped[str | None] = mapped_column(
+        String(255),
+        nullable=True,
+    )
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     price: Mapped[float] = mapped_column(Float, nullable=False)
     slug: Mapped[str | None] = mapped_column(
@@ -89,7 +105,10 @@ class Product(Base):
         Integer, ForeignKey("manufacturers.id", ondelete="SET NULL"), nullable=True
     )
 
-    __table_args__ = (CheckConstraint("price > 0", name="check_price_positive"),)
+    __table_args__ = (
+        CheckConstraint("price > 0", name="check_price_positive"),
+        UniqueConstraint("hsqldb_name", name="uq_products_hsqldb_name"),
+    )
 
     category: Mapped[Category | None] = relationship(back_populates="products")
     subcategory: Mapped[Subcategory | None] = relationship(back_populates="products")

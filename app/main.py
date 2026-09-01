@@ -8,6 +8,7 @@ from app.api.routes import (
     category,
     favorites,
     health,
+    hsqldb_sync,
     loyalty,
     manufacturer,
     orders,
@@ -33,6 +34,7 @@ app.include_router(cart.router)
 app.include_router(category.router)
 app.include_router(favorites.router)
 app.include_router(health.router)
+app.include_router(hsqldb_sync.router)
 app.include_router(loyalty.router)
 app.include_router(manufacturer.router)
 app.include_router(orders.router)

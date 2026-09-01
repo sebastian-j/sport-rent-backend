@@ -3,6 +3,7 @@ from app.models.address import Address
 from app.models.auth_session import AuthSession
 from app.models.cart import CartItem
 from app.models.category import Category
+from app.models.hsqldb_reservation import HsqldbReservation
 from app.models.loyalty_transaction import LoyaltyTransaction, LoyaltyTransactionType
 from app.models.manufacturer import Manufacturer
 from app.models.order import Order, OrderInstance, OrderStatus
@@ -27,6 +28,7 @@ __all__ = [
     "Category",
     "CartItem",
     "Favorite",
+    "HsqldbReservation",
     "Instance",
     "LoyaltyTransaction",
     "LoyaltyTransactionType",

@@ -114,6 +114,7 @@ table products {
   category_id integer
   subcategory_id integer
   manufacturer_id integer
+  hsqldb_name varchar(255) [unique]
 
   checks {
     `price > 0`
@@ -161,6 +162,19 @@ table instances {
   product_id integer [not null]
   status instance_status [default: "AVAILABLE"]
   size varchar
+  hsqldb_inventory_code varchar(50) [unique]
+}
+
+table hsqldb_reservations {
+  source_position_id bigint [primary key]
+  instance_id integer [not null]
+  begin_at datetime
+  end_at datetime
+  source_status integer
+
+  indexes {
+    (instance_id, begin_at, end_at)
+  }
 }
 
 table cart_items {
@@ -236,6 +250,7 @@ ref: users.id < cart_items.user_id
 ref: products.id < cart_items.product_id
 ref: product_sizes.id < cart_items.product_size_id
 ref: instances.id < calendar_blocks.instance_id
+ref: instances.id < hsqldb_reservations.instance_id [delete: cascade]
 ref: products.id < product_sizes.product_id
 ref: categories.id < subcategories.category_id
 ref: categories.id < products.category_id
