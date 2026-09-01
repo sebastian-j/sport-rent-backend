@@ -14,6 +14,7 @@ from app.models.product import (
     ProductImage,
     ProductSize,
 )
+from scripts.seeds.utils import slugify, unique_slug
 
 PRODUCTS_FILE_PATH = Path("app/assets/mock_products.json")
 
@@ -42,6 +43,8 @@ async def seed_products(
                 continue
             category_map[c_name] = category
 
+        taken_slugs = set(await session.scalars(select(Product.slug)))
+
         for p_data in products_data:
             category_id = None
             if p_data.get("category"):
@@ -55,10 +58,13 @@ async def seed_products(
             if result.scalars().first():
                 continue
 
+            product_slug = unique_slug(slugify(p_data["name"]), taken_slugs)
+            taken_slugs.add(product_slug)
+
             product = Product(
                 id=p_data["id"],
                 name=p_data["name"],
-                slug=p_data["slug"],
+                slug=product_slug,
                 price=p_data.get("price"),
                 description=p_data.get("description"),
                 category_id=category_id,
@@ -69,7 +75,7 @@ async def seed_products(
             image_alts = p_data.get("imageAlts", [])
             if len(images) != len(image_alts):
                 raise ValueError(
-                    f"Product {p_data['slug']} must define one alt per image"
+                    f"Product {product_slug} must define one alt per image"
                 )
 
             for i, img_path in enumerate(images):

@@ -80,6 +80,11 @@ class Order(Base):
         String(100),
         nullable=False,
     )
+    promo_code_id: Mapped[int | None] = mapped_column(
+        ForeignKey("promo_codes.id"),
+        index=True,
+        nullable=True,
+    )
     user: Mapped[User] = relationship(
         back_populates="orders",
     )
