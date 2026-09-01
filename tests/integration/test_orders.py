@@ -25,6 +25,8 @@ def order_with_address(
         status=status,
         payment_code=uuid4(),
         created_at=created_at,
+        recipient_first_name="Jan",
+        recipient_last_name="Kowalski",
         address=OrderAddress(
             first_name="Jan",
             last_name="Kowalski",
@@ -186,6 +188,10 @@ async def test_get_order_returns_details(
     assert payload["used_points"] is False
     assert payload["total_price"] == 0.0
     assert payload["discount"] == 0.0
+    assert payload["recipient"] == {
+        "first_name": "Jan",
+        "last_name": "Kowalski",
+    }
     assert payload["instances"] == []
     assert payload["address"] == {
         "first_name": "Jan",
