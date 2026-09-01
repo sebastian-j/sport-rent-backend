@@ -193,7 +193,12 @@ async def test_spend_points_creates_negative_transaction(
     clean_loyalty_transactions: None,
 ) -> None:
     async with test_session_factory.begin() as session:
-        order = Order(user_id=test_user.id, status=OrderStatus.PAID)
+        order = Order(
+            user_id=test_user.id,
+            status=OrderStatus.PAID,
+            recipient_first_name="Jan",
+            recipient_last_name="Kowalski",
+        )
         session.add_all(
             [
                 order,
@@ -226,7 +231,12 @@ async def test_earn_points_creates_positive_transaction(
     clean_loyalty_transactions: None,
 ) -> None:
     async with test_session_factory.begin() as session:
-        order = Order(user_id=test_user.id, status=OrderStatus.PAID)
+        order = Order(
+            user_id=test_user.id,
+            status=OrderStatus.PAID,
+            recipient_first_name="Jan",
+            recipient_last_name="Kowalski",
+        )
         session.add(order)
         await session.flush()
         transaction = await earn_points(
@@ -250,7 +260,12 @@ async def test_loyalty_history_survives_order_deletion(
     clean_loyalty_transactions: None,
 ) -> None:
     async with test_session_factory.begin() as session:
-        order = Order(user_id=test_user.id, status=OrderStatus.PAID)
+        order = Order(
+            user_id=test_user.id,
+            status=OrderStatus.PAID,
+            recipient_first_name="Jan",
+            recipient_last_name="Kowalski",
+        )
         session.add(order)
         await session.flush()
         transaction = await earn_points(
@@ -305,7 +320,12 @@ async def test_earn_points_accepts_maximum_integer_amount(
     clean_loyalty_transactions: None,
 ) -> None:
     async with test_session_factory.begin() as session:
-        order = Order(user_id=test_user.id, status=OrderStatus.PAID)
+        order = Order(
+            user_id=test_user.id,
+            status=OrderStatus.PAID,
+            recipient_first_name="Jan",
+            recipient_last_name="Kowalski",
+        )
         session.add(order)
         await session.flush()
         transaction = await earn_points(
@@ -324,7 +344,12 @@ async def test_spend_points_rejects_amount_above_balance(
     clean_loyalty_transactions: None,
 ) -> None:
     async with test_session_factory.begin() as session:
-        order = Order(user_id=test_user.id, status=OrderStatus.PAID)
+        order = Order(
+            user_id=test_user.id,
+            status=OrderStatus.PAID,
+            recipient_first_name="Jan",
+            recipient_last_name="Kowalski",
+        )
         session.add_all(
             [
                 order,

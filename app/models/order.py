@@ -14,6 +14,7 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     Numeric,
+    String,
     Uuid,
     false,
     func,
@@ -64,6 +65,19 @@ class Order(Base):
         Boolean,
         default=False,
         server_default=false(),
+        nullable=False,
+    )
+    promo_code_id: Mapped[int | None] = mapped_column(
+        ForeignKey("promo_codes.id"),
+        index=True,
+        nullable=True,
+    )
+    recipient_first_name: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False,
+    )
+    recipient_last_name: Mapped[str] = mapped_column(
+        String(100),
         nullable=False,
     )
     promo_code_id: Mapped[int | None] = mapped_column(
