@@ -4,7 +4,7 @@ from datetime import date
 from decimal import Decimal
 from uuid import uuid4
 
-from sqlalchemy import delete, exists, func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -16,7 +16,7 @@ from app.models import (
     OrderStatus,
     User,
 )
-from app.models.product import Instance, InstanceStatus, Product
+from app.models.product import Instance, Product
 from app.models.promo_codes import DiscountType, PromoCode
 from app.schemas.order import (
     CreateOrderRequest,
@@ -28,6 +28,7 @@ from app.schemas.order import (
 from app.services import cart as cart_service
 from app.services import loyalty as loyalty_service
 from app.services import promo_code as promo_code_service
+from app.services.availability import available_instance_conditions
 from app.services.image import get_image_as_base64
 from app.services.order_addresses import (
     create_order_address_snapshot,
@@ -213,32 +214,20 @@ async def _allocate_instances(
     end_date: date,
     quantity: int,
 ) -> list[Instance]:
-    occupied = exists(
-        select(1)
-        .select_from(OrderInstance)
-        .join(Order, Order.id == OrderInstance.order_id)
-        .where(
-            OrderInstance.instance_id == Instance.id,
-            Order.status != OrderStatus.CANCELLED,
-            OrderInstance.start_date <= end_date,
-            OrderInstance.end_date >= start_date,
-        )
-    )
-
     query = (
         select(Instance)
         .where(
-            Instance.product_id == product_id,
-            Instance.status == InstanceStatus.AVAILABLE,
-            ~occupied,
+            *available_instance_conditions(
+                product_id=product_id,
+                size=size,
+                start_date=start_date,
+                end_date=end_date,
+            )
         )
         .order_by(Instance.id)
         .with_for_update()
         .limit(quantity)
     )
-    if size is not None:
-        query = query.where(Instance.size == size)
-
     instances = list(await session.scalars(query))
     if len(instances) < quantity:
         raise OrderValidationError(
