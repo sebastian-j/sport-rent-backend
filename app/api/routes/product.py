@@ -22,7 +22,6 @@ from app.schemas.product import (
     ProductResponse,
 )
 from app.services import accessory as accessory_service
-from app.services.image import convert_images_to_base64
 
 router = APIRouter(prefix="/product", tags=["product"])
 
@@ -59,7 +58,7 @@ def _to_product_response(
         price=product.price,
         description=product.description,
         category=product.category.name if product.category else None,
-        images=convert_images_to_base64([image.image for image in valid_images]),
+        images=[image.image for image in valid_images],
         imageAlts=[image.alt_text or "" for image in valid_images],
         manufacturer=product.manufacturer.name if product.manufacturer else None,
         sizes=sizes,
