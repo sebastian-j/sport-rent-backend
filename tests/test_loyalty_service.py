@@ -1,16 +1,218 @@
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 
 import pytest
 
+from app.models.loyalty_transaction import (
+    LoyaltyTransaction,
+    LoyaltyTransactionType,
+)
 from app.services.loyalty import (
     InvalidLoyaltyPointsAmountError,
     LoyaltyPointsRedemptionLimitError,
     LoyaltyProgramLockedError,
+    calculate_balance_from_transactions,
     calculate_earned_points,
     calculate_max_redeemable_points,
     calculate_points_discount,
+    calculate_points_expiration,
     validate_points_redemption,
 )
+
+
+def _transaction(
+    transaction_id: int,
+    amount: int,
+    created_at: datetime,
+    *,
+    expires_at: datetime | None = None,
+    transaction_type: LoyaltyTransactionType = LoyaltyTransactionType.ADJUSTMENT,
+    order_id: int | None = None,
+) -> LoyaltyTransaction:
+    return LoyaltyTransaction(
+        id=transaction_id,
+        user_id=1,
+        order_id=order_id,
+        type=transaction_type,
+        amount=amount,
+        created_at=created_at,
+        expires_at=expires_at,
+    )
+
+
+def test_calculates_balance_from_non_expiring_transactions() -> None:
+    now = datetime(2026, 1, 1, tzinfo=UTC)
+    transactions = [
+        _transaction(1, 150, now),
+        _transaction(2, -40, now + timedelta(hours=1)),
+    ]
+
+    assert (
+        calculate_balance_from_transactions(
+            transactions,
+            as_of=now + timedelta(hours=2),
+        )
+        == 110
+    )
+
+
+def test_spends_points_from_oldest_lot_first() -> None:
+    now = datetime(2026, 1, 1, tzinfo=UTC)
+    transactions = [
+        _transaction(1, 10, now, expires_at=now + timedelta(days=10)),
+        _transaction(2, 20, now, expires_at=now + timedelta(days=20)),
+        _transaction(3, -15, now + timedelta(days=5)),
+    ]
+
+    assert (
+        calculate_balance_from_transactions(
+            transactions,
+            as_of=now + timedelta(days=11),
+        )
+        == 15
+    )
+
+
+def test_does_not_include_points_expiring_at_balance_date() -> None:
+    now = datetime(2026, 1, 1, tzinfo=UTC)
+    expires_at = now + timedelta(days=10)
+    transactions = [
+        _transaction(1, 10, now, expires_at=expires_at),
+    ]
+
+    assert calculate_balance_from_transactions(transactions, as_of=expires_at) == 0
+
+
+def test_ignores_transactions_created_after_balance_date() -> None:
+    now = datetime(2026, 1, 1, tzinfo=UTC)
+    transactions = [
+        _transaction(1, 10, now),
+        _transaction(2, 20, now + timedelta(days=2)),
+    ]
+
+    assert (
+        calculate_balance_from_transactions(
+            transactions,
+            as_of=now + timedelta(days=1),
+        )
+        == 10
+    )
+
+
+def test_later_credit_first_covers_negative_balance() -> None:
+    now = datetime(2026, 1, 1, tzinfo=UTC)
+    transactions = [
+        _transaction(1, -10, now),
+        _transaction(2, 6, now + timedelta(days=1)),
+    ]
+
+    assert (
+        calculate_balance_from_transactions(
+            transactions,
+            as_of=now + timedelta(days=2),
+        )
+        == -4
+    )
+
+
+def test_refund_restores_points_to_their_original_fifo_lots() -> None:
+    now = datetime(2026, 1, 1, tzinfo=UTC)
+    transactions = [
+        _transaction(
+            1,
+            10,
+            now,
+            expires_at=now + timedelta(days=10),
+            transaction_type=LoyaltyTransactionType.EARN,
+            order_id=1,
+        ),
+        _transaction(
+            2,
+            20,
+            now + timedelta(days=1),
+            expires_at=now + timedelta(days=20),
+            transaction_type=LoyaltyTransactionType.EARN,
+            order_id=2,
+        ),
+        _transaction(
+            3,
+            -15,
+            now + timedelta(days=5),
+            transaction_type=LoyaltyTransactionType.SPEND,
+            order_id=3,
+        ),
+        _transaction(
+            4,
+            15,
+            now + timedelta(days=6),
+            transaction_type=LoyaltyTransactionType.REFUND,
+            order_id=3,
+        ),
+    ]
+
+    assert (
+        calculate_balance_from_transactions(
+            transactions,
+            as_of=now + timedelta(days=11),
+        )
+        == 20
+    )
+
+
+def test_refund_does_not_reactivate_already_expired_points() -> None:
+    now = datetime(2026, 1, 1, tzinfo=UTC)
+    transactions = [
+        _transaction(
+            1,
+            10,
+            now,
+            expires_at=now + timedelta(days=10),
+            transaction_type=LoyaltyTransactionType.EARN,
+            order_id=1,
+        ),
+        _transaction(
+            2,
+            -10,
+            now + timedelta(days=5),
+            transaction_type=LoyaltyTransactionType.SPEND,
+            order_id=2,
+        ),
+        _transaction(
+            3,
+            10,
+            now + timedelta(days=11),
+            transaction_type=LoyaltyTransactionType.REFUND,
+            order_id=2,
+        ),
+    ]
+
+    assert (
+        calculate_balance_from_transactions(
+            transactions,
+            as_of=now + timedelta(days=12),
+        )
+        == 0
+    )
+
+
+@pytest.mark.parametrize(
+    ("earned_at", "expected_expiration"),
+    [
+        (
+            datetime(2026, 1, 15, 12, 30, tzinfo=UTC),
+            datetime(2027, 1, 15, 12, 30, tzinfo=UTC),
+        ),
+        (
+            datetime(2028, 2, 29, 12, 30, tzinfo=UTC),
+            datetime(2029, 2, 28, 12, 30, tzinfo=UTC),
+        ),
+    ],
+)
+def test_calculates_points_expiration_after_twelve_months(
+    earned_at: datetime,
+    expected_expiration: datetime,
+) -> None:
+    assert calculate_points_expiration(earned_at) == expected_expiration
 
 
 def test_allows_order_without_points_redemption_while_program_is_locked() -> None:

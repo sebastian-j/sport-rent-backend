@@ -20,6 +20,7 @@ from app.services.loyalty import (
     InvalidLoyaltyPointsAmountError,
     apply_loyalty_for_cancelled_order,
     apply_loyalty_for_paid_order,
+    calculate_points_expiration,
     earn_points,
     get_balance,
     get_lifetime_qualifying_spend,
@@ -130,6 +131,9 @@ async def test_loyalty_history_returns_requested_page_and_metadata(
                     amount=index + 1,
                     description=f"Adjustment {index + 1}",
                     created_at=created_at + timedelta(days=index),
+                    expires_at=(
+                        datetime(2027, 1, 1, tzinfo=UTC) if index == 11 else None
+                    ),
                 )
                 for index in range(12)
             ]
@@ -165,6 +169,12 @@ async def test_loyalty_history_returns_requested_page_and_metadata(
     assert not set(first_page_ids) & set(second_page_ids)
     assert first_page_ids == sorted(first_page_ids, reverse=True)
     assert second_page_ids == sorted(second_page_ids, reverse=True)
+    assert datetime.fromisoformat(first_page["items"][0]["expires_at"]) == datetime(
+        2027,
+        1,
+        1,
+        tzinfo=UTC,
+    )
 
 
 @pytest.mark.parametrize(
@@ -255,6 +265,7 @@ async def test_earn_points_creates_positive_transaction(
 
     assert transaction.type is LoyaltyTransactionType.EARN
     assert transaction.amount == 75
+    assert transaction.expires_at == calculate_points_expiration(transaction.created_at)
 
     async with test_session_factory() as session:
         assert await get_balance(session, test_user.id) == 75

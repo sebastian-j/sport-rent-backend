@@ -12,6 +12,7 @@ class LoyaltyResponse(BaseModel):
 class LoyaltyHistoryItemResponse(BaseModel):
     id: int
     created_at: datetime
+    expires_at: datetime | None
     amount: int
     order_id: int | None
     type: LoyaltyTransactionType

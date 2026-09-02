@@ -45,6 +45,7 @@ async def get_points_history(
             LoyaltyHistoryItemResponse(
                 id=transaction.id,
                 created_at=transaction.created_at,
+                expires_at=transaction.expires_at,
                 amount=transaction.amount,
                 order_id=transaction.order_id,
                 type=transaction.type,

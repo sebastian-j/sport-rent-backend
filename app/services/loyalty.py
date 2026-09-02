@@ -1,3 +1,8 @@
+from calendar import monthrange
+from collections import deque
+from collections.abc import Sequence
+from dataclasses import dataclass
+from datetime import datetime
 from decimal import Decimal
 
 from sqlalchemy import func, select
@@ -16,6 +21,203 @@ MONEY_PER_EARNED_POINT = Decimal("10.00")
 MONEY_PER_REDEEMED_POINT = Decimal("0.50")
 MAX_POINTS_PAYMENT_SHARE = Decimal("0.30")
 LOYALTY_PROGRAM_UNLOCK_SPEND = Decimal("500.00")
+LOYALTY_POINTS_VALIDITY_YEARS = 1
+
+
+@dataclass
+class _PointLot:
+    source_key: tuple[datetime, int]
+    remaining: int
+    expires_at: datetime | None
+
+
+@dataclass(frozen=True)
+class _ConsumedPointLot:
+    source_key: tuple[datetime, int]
+    amount: int
+    expires_at: datetime | None
+
+
+def _remove_expired_lots(
+    lots: deque[_PointLot],
+    *,
+    as_of: datetime,
+) -> deque[_PointLot]:
+    return deque(
+        lot for lot in lots if lot.expires_at is None or lot.expires_at > as_of
+    )
+
+
+def _consume_oldest_lots(
+    lots: deque[_PointLot],
+    amount: int,
+) -> tuple[list[_ConsumedPointLot], int]:
+    consumed_lots: list[_ConsumedPointLot] = []
+    remaining_amount = amount
+
+    while remaining_amount > 0 and lots:
+        oldest_lot = lots[0]
+        consumed = min(remaining_amount, oldest_lot.remaining)
+        consumed_lots.append(
+            _ConsumedPointLot(
+                source_key=oldest_lot.source_key,
+                amount=consumed,
+                expires_at=oldest_lot.expires_at,
+            )
+        )
+
+        oldest_lot.remaining -= consumed
+        remaining_amount -= consumed
+
+        if oldest_lot.remaining == 0:
+            lots.popleft()
+
+    return consumed_lots, remaining_amount
+
+
+def _add_point_lot(
+    lots: deque[_PointLot],
+    transaction: LoyaltyTransaction,
+    amount: int,
+) -> None:
+    lots.append(
+        _PointLot(
+            source_key=(transaction.created_at, transaction.id or 0),
+            remaining=amount,
+            expires_at=transaction.expires_at,
+        )
+    )
+
+
+def _restore_refunded_lots(
+    lots: deque[_PointLot],
+    consumed_lots: Sequence[_ConsumedPointLot],
+    refund: LoyaltyTransaction,
+    amount: int,
+) -> None:
+    amount_to_restore = amount
+
+    for consumed_lot in consumed_lots:
+        restored = min(amount_to_restore, consumed_lot.amount)
+        amount_to_restore -= restored
+
+        if (
+            consumed_lot.expires_at is not None
+            and consumed_lot.expires_at <= refund.created_at
+        ):
+            continue
+
+        existing_lot = next(
+            (lot for lot in lots if lot.source_key == consumed_lot.source_key),
+            None,
+        )
+        if existing_lot is None:
+            lots.append(
+                _PointLot(
+                    source_key=consumed_lot.source_key,
+                    remaining=restored,
+                    expires_at=consumed_lot.expires_at,
+                )
+            )
+        else:
+            existing_lot.remaining += restored
+
+        if amount_to_restore == 0:
+            break
+
+    if amount_to_restore > 0:
+        _add_point_lot(lots, refund, amount_to_restore)
+
+    ordered_lots = sorted(lots, key=lambda lot: lot.source_key)
+    lots.clear()
+    lots.extend(ordered_lots)
+
+
+def calculate_balance_from_transactions(
+    transactions: Sequence[LoyaltyTransaction],
+    *,
+    as_of: datetime,
+) -> int:
+    lots: deque[_PointLot] = deque()
+    debt = 0
+    spent_lots_by_order_id: dict[int, list[_ConsumedPointLot]] = {}
+
+    ordered_transactions = sorted(
+        transactions,
+        key=lambda transaction: (
+            transaction.created_at,
+            transaction.id or 0,
+        ),
+    )
+
+    for transaction in ordered_transactions:
+        if transaction.created_at > as_of:
+            break
+
+        lots = _remove_expired_lots(
+            lots,
+            as_of=transaction.created_at,
+        )
+
+        if transaction.amount > 0:
+            credit = transaction.amount
+
+            if debt > 0:
+                covered_debt = min(credit, debt)
+                debt -= covered_debt
+                credit -= covered_debt
+
+            if credit > 0:
+                consumed_lots = (
+                    spent_lots_by_order_id.get(transaction.order_id)
+                    if transaction.type is LoyaltyTransactionType.REFUND
+                    and transaction.order_id is not None
+                    else None
+                )
+                if consumed_lots is None:
+                    _add_point_lot(lots, transaction, credit)
+                else:
+                    _restore_refunded_lots(
+                        lots,
+                        consumed_lots,
+                        transaction,
+                        credit,
+                    )
+
+            continue
+
+        consumed_lots, points_to_consume = _consume_oldest_lots(
+            lots,
+            -transaction.amount,
+        )
+        if (
+            transaction.type is LoyaltyTransactionType.SPEND
+            and transaction.order_id is not None
+        ):
+            spent_lots_by_order_id[transaction.order_id] = consumed_lots
+
+        if points_to_consume > 0:
+            debt += points_to_consume
+
+    active_lots = _remove_expired_lots(
+        lots,
+        as_of=as_of,
+    )
+    active_points = sum(lot.remaining for lot in active_lots)
+
+    return active_points - debt
+
+
+def calculate_points_expiration(earned_at: datetime) -> datetime:
+    expiration_year = earned_at.year + LOYALTY_POINTS_VALIDITY_YEARS
+    expiration_day = min(
+        earned_at.day,
+        monthrange(expiration_year, earned_at.month)[1],
+    )
+    return earned_at.replace(
+        year=expiration_year,
+        day=expiration_day,
+    )
 
 
 class LoyaltyProgramLockedError(ValueError):
@@ -99,12 +301,22 @@ async def get_lifetime_qualifying_spend(
 
 
 async def get_balance(session: AsyncSession, user_id: int) -> int:
-    balance = await session.scalar(
-        select(func.coalesce(func.sum(LoyaltyTransaction.amount), 0)).where(
-            LoyaltyTransaction.user_id == user_id
+    as_of = await _get_database_time(session)
+
+    transactions = list(
+        await session.scalars(
+            select(LoyaltyTransaction)
+            .where(LoyaltyTransaction.user_id == user_id)
+            .order_by(
+                LoyaltyTransaction.created_at,
+                LoyaltyTransaction.id,
+            )
         )
     )
-    return int(balance or 0)
+    return calculate_balance_from_transactions(
+        transactions,
+        as_of=as_of,
+    )
 
 
 async def get_history(
@@ -143,6 +355,13 @@ async def _lock_user(session: AsyncSession, user_id: int) -> None:
     )
     if existing_user_id is None:
         raise LoyaltyUserNotFoundError(f"User {user_id} not found")
+
+
+async def _get_database_time(session: AsyncSession) -> datetime:
+    current_time = await session.scalar(select(func.now()))
+    if current_time is None:
+        raise RuntimeError("Could not read the current database time")
+    return current_time
 
 
 def _require_valid_amount(amount: object) -> None:
@@ -196,6 +415,7 @@ async def earn_points(
 ) -> LoyaltyTransaction:
     _require_valid_amount(amount)
     await _lock_user(session, user_id)
+    earned_at = await _get_database_time(session)
 
     transaction = LoyaltyTransaction(
         user_id=user_id,
@@ -203,6 +423,8 @@ async def earn_points(
         type=LoyaltyTransactionType.EARN,
         amount=amount,
         description=description,
+        created_at=earned_at,
+        expires_at=calculate_points_expiration(earned_at),
     )
     session.add(transaction)
     await session.flush()

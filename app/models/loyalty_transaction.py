@@ -51,7 +51,10 @@ class LoyaltyTransaction(Base):
         server_default=func.now(),
         nullable=False,
     )
-
+    expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
     user: Mapped[User] = relationship(back_populates="loyalty_transactions")
     order: Mapped[Order | None] = relationship(back_populates="loyalty_transactions")
 
