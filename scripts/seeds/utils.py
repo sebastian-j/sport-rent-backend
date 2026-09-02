@@ -47,4 +47,4 @@ def find_image(name: str, directory: Path, storage_path: Path) -> str | None:
     if not matching_images:
         return None
 
-    return (storage_path / matching_images[0].name).as_posix()
+    return f"/{(storage_path / matching_images[0].name).as_posix()}"
