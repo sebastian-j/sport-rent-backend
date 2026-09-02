@@ -5,6 +5,11 @@ from pydantic import BaseModel, Field
 from app.models.order import OrderStatus
 
 
+class OrderRecipient(BaseModel):
+    first_name: str = Field(min_length=1)
+    last_name: str = Field(min_length=1)
+
+
 class OrderAddressRequest(BaseModel):
     first_name: str | None = None
     last_name: str | None = None
@@ -18,6 +23,7 @@ class OrderAddressRequest(BaseModel):
 
 
 class CreateOrderRequest(BaseModel):
+    recipient: OrderRecipient
     address: OrderAddressRequest | None = None
     promo_code: str | None = None
     points_to_spend: int = Field(default=0, ge=0)
@@ -43,6 +49,7 @@ class OrderResponse(BaseModel):
     total_price: float
     discount: float
     used_points: bool
+    recipient: OrderRecipient
     address: OrderAddressRequest
     instances: list[OrderInstanceResponse]
 

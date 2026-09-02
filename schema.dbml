@@ -73,6 +73,8 @@ table orders {
   used_points bool [default: false]
   promo_code_id integer
   total_price decimal(12,2) [not null]
+  recipient_first_name varchar [not null]
+  recipient_last_name varchar [not null]
 }
 
 enum loyalty_transaction_type {

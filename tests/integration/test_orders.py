@@ -33,6 +33,7 @@ ORDER_ADDRESS = {
     "city": "Kraków",
     "country": "Polska",
 }
+ORDER_RECIPIENT = {"first_name": "Jan", "last_name": "Kowalski"}
 
 
 def order_with_address(
@@ -47,6 +48,8 @@ def order_with_address(
         total_price=Decimal("0.00"),
         payment_code=uuid4(),
         created_at=created_at,
+        recipient_first_name="Jan",
+        recipient_last_name="Kowalski",
         address=OrderAddress(
             first_name="Jan",
             last_name="Kowalski",
@@ -133,6 +136,8 @@ async def seed_loyalty_checkout_state(
                     user_id=user_id,
                     status=OrderStatus.FINISHED,
                     total_price=qualifying_spend,
+                    recipient_first_name="Jan",
+                    recipient_last_name="Kowalski",
                 )
             )
         if balance != 0:
@@ -284,6 +289,10 @@ async def test_get_order_returns_details(
     assert payload["used_points"] is False
     assert payload["total_price"] == 0.0
     assert payload["discount"] == 0.0
+    assert payload["recipient"] == {
+        "first_name": "Jan",
+        "last_name": "Kowalski",
+    }
     assert payload["instances"] == []
     assert payload["address"] == {
         "first_name": "Jan",
@@ -356,7 +365,7 @@ async def test_creates_order_without_redeeming_points(
     response = await client.post(
         "/orders",
         headers=headers,
-        json={"address": ORDER_ADDRESS},
+        json={"recipient": ORDER_RECIPIENT, "address": ORDER_ADDRESS},
     )
 
     assert response.status_code == 201
@@ -392,6 +401,7 @@ async def test_creates_order_with_requested_loyalty_points(
         "/orders",
         headers=headers,
         json={
+            "recipient": ORDER_RECIPIENT,
             "address": ORDER_ADDRESS,
             "points_to_spend": 20,
         },
@@ -435,6 +445,7 @@ async def test_rejects_points_before_loyalty_program_unlock(
         "/orders",
         headers=headers,
         json={
+            "recipient": ORDER_RECIPIENT,
             "address": ORDER_ADDRESS,
             "points_to_spend": 1,
         },
@@ -458,6 +469,7 @@ async def test_rejects_points_above_thirty_percent_order_limit(
         "/orders",
         headers=headers,
         json={
+            "recipient": ORDER_RECIPIENT,
             "address": ORDER_ADDRESS,
             "points_to_spend": 61,
         },
@@ -485,6 +497,7 @@ async def test_rejects_points_above_available_balance(
         "/orders",
         headers=headers,
         json={
+            "recipient": ORDER_RECIPIENT,
             "address": ORDER_ADDRESS,
             "points_to_spend": 20,
         },

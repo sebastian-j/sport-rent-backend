@@ -201,6 +201,8 @@ async def test_spend_points_creates_negative_transaction(
             user_id=test_user.id,
             status=OrderStatus.PAID,
             total_price=Decimal("0.00"),
+            recipient_first_name="Jan",
+            recipient_last_name="Kowalski",
         )
         session.add_all(
             [
@@ -238,6 +240,8 @@ async def test_earn_points_creates_positive_transaction(
             user_id=test_user.id,
             status=OrderStatus.PAID,
             total_price=Decimal("0.00"),
+            recipient_first_name="Jan",
+            recipient_last_name="Kowalski",
         )
         session.add(order)
         await session.flush()
@@ -266,6 +270,8 @@ async def test_loyalty_history_survives_order_deletion(
             user_id=test_user.id,
             status=OrderStatus.PAID,
             total_price=Decimal("0.00"),
+            recipient_first_name="Jan",
+            recipient_last_name="Kowalski",
         )
         session.add(order)
         await session.flush()
@@ -325,6 +331,8 @@ async def test_earn_points_accepts_maximum_integer_amount(
             user_id=test_user.id,
             status=OrderStatus.PAID,
             total_price=Decimal("0.00"),
+            recipient_first_name="Jan",
+            recipient_last_name="Kowalski",
         )
         session.add(order)
         await session.flush()
@@ -348,6 +356,8 @@ async def test_spend_points_rejects_amount_above_balance(
             user_id=test_user.id,
             status=OrderStatus.PAID,
             total_price=Decimal("0.00"),
+            recipient_first_name="Jan",
+            recipient_last_name="Kowalski",
         )
         session.add_all(
             [
@@ -384,6 +394,8 @@ async def test_lifetime_qualifying_spend_uses_only_completed_payments(
                     user_id=test_user.id,
                     status=status,
                     total_price=total_price,
+                    recipient_first_name="Jan",
+                    recipient_last_name="Kowalski",
                 )
                 for status, total_price in (
                     (OrderStatus.PAID, Decimal("100.00")),
@@ -422,6 +434,8 @@ async def test_applies_loyalty_points_for_paid_order_total(
             user_id=test_user.id,
             status=OrderStatus.PAID,
             total_price=total_price,
+            recipient_first_name="Jan",
+            recipient_last_name="Kowalski",
         )
         session.add(order)
         await session.flush()
@@ -449,6 +463,8 @@ async def test_apply_loyalty_for_paid_order_is_idempotent(
             user_id=test_user.id,
             status=OrderStatus.PAID,
             total_price=Decimal("100.00"),
+            recipient_first_name="Jan",
+            recipient_last_name="Kowalski",
         )
         session.add(order)
         await session.flush()
@@ -474,6 +490,8 @@ async def test_rejects_applying_loyalty_to_unpaid_order(
             user_id=test_user.id,
             status=OrderStatus.UNPAID,
             total_price=Decimal("100.00"),
+            recipient_first_name="Jan",
+            recipient_last_name="Kowalski",
         )
         session.add(order)
         await session.flush()
@@ -495,6 +513,8 @@ async def test_cancelled_order_refunds_spent_and_reverses_earned_points(
             user_id=test_user.id,
             status=OrderStatus.CANCELLED,
             total_price=Decimal("100.00"),
+            recipient_first_name="Jan",
+            recipient_last_name="Kowalski",
         )
         order.loyalty_transactions.extend(
             [
@@ -540,6 +560,8 @@ async def test_cancelled_order_without_loyalty_transactions_has_no_effects(
             user_id=test_user.id,
             status=OrderStatus.CANCELLED,
             total_price=Decimal("100.00"),
+            recipient_first_name="Jan",
+            recipient_last_name="Kowalski",
         )
         session.add(order)
         await session.flush()
@@ -557,6 +579,8 @@ async def test_rejects_reversing_loyalty_for_non_cancelled_order(
             user_id=test_user.id,
             status=OrderStatus.PAID,
             total_price=Decimal("100.00"),
+            recipient_first_name="Jan",
+            recipient_last_name="Kowalski",
         )
         session.add(order)
         await session.flush()

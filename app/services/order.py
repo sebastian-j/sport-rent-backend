@@ -21,6 +21,7 @@ from app.schemas.order import (
     CreateOrderRequest,
     OrderAddressRequest,
     OrderInstanceResponse,
+    OrderRecipient,
     OrderResponse,
 )
 from app.services import cart as cart_service
@@ -127,6 +128,10 @@ def order_response(order: Order, total_price: Decimal | None = None) -> OrderRes
         total_price=float(total_price),
         discount=float(discount),
         used_points=order.used_points,
+        recipient=OrderRecipient(
+            first_name=order.recipient_first_name,
+            last_name=order.recipient_last_name,
+        ),
         address=address_response(order.address),
         instances=[
             OrderInstanceResponse(
@@ -305,6 +310,8 @@ async def create_order(
         used_points=False,
         promo_code_id=promo.id if promo else None,
         total_price=total_price,
+        recipient_first_name=request.recipient.first_name,
+        recipient_last_name=request.recipient.last_name,
         address=address,
         instances=order_instances,
     )

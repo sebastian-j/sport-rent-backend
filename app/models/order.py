@@ -14,6 +14,7 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     Numeric,
+    String,
     Uuid,
     false,
     func,
@@ -73,6 +74,14 @@ class Order(Base):
     )
     total_price: Mapped[Decimal] = mapped_column(
         Numeric(12, 2),
+        nullable=False,
+    )
+    recipient_first_name: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False,
+    )
+    recipient_last_name: Mapped[str] = mapped_column(
+        String(100),
         nullable=False,
     )
     user: Mapped[User] = relationship(
