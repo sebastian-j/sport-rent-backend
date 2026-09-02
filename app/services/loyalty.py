@@ -358,7 +358,7 @@ async def _lock_user(session: AsyncSession, user_id: int) -> None:
 
 
 async def _get_database_time(session: AsyncSession) -> datetime:
-    current_time = await session.scalar(select(func.now()))
+    current_time = await session.scalar(select(func.clock_timestamp()))
     if current_time is None:
         raise RuntimeError("Could not read the current database time")
     return current_time
@@ -408,7 +408,7 @@ def validate_points_redemption(
 async def earn_points(
     session: AsyncSession,
     user_id: int,
-    order_id: int,
+    order_id: int | None,
     amount: int,
     *,
     description: str | None = None,
