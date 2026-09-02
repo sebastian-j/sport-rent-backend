@@ -18,7 +18,6 @@ from app.schemas.cart import (
     CartProductSize,
     UpdateCartItemRequest,
 )
-from app.services.image import get_image_as_base64
 
 
 class CartValidationError(ValueError):
@@ -330,11 +329,7 @@ def group_cart_items(items: Sequence[CartItem]) -> list[CartItemResponse]:
             response = CartItemResponse(
                 slug=product.slug,
                 product_name=product.name,
-                image=(
-                    get_image_as_base64(first_image.image) or first_image.image
-                    if first_image
-                    else ""
-                ),
+                image=(first_image.image if first_image else ""),
                 alt=first_image.alt_text if first_image else None,
                 price=product.price,
                 sizes=[
