@@ -71,10 +71,31 @@ table orders {
   status status [default: "PENDING"]
   payment_code uuid
   used_points bool [default: false]
+  points_to_spend integer [not null, default: 0]
   promo_code_id integer
   total_price decimal(12,2) [not null]
   recipient_first_name varchar [not null]
   recipient_last_name varchar [not null]
+}
+
+enum payment_status {
+  "PENDING"
+  "SUCCEEDED"
+  "FAILED"
+  "CANCELLED"
+}
+
+table payments {
+  id integer [primary key]
+  order_id integer [unique, not null]
+  provider varchar(50) [not null]
+  provider_payment_id varchar(255) [unique]
+  status payment_status [not null, default: "PENDING"]
+  amount decimal(12,2) [not null]
+  currency varchar(3) [not null, default: "PLN"]
+  redirect_url varchar(2048)
+  created_at datetime [not null]
+  completed_at datetime
 }
 
 enum loyalty_transaction_type {
@@ -249,6 +270,7 @@ table promo_codes {
 ref: users.id < orders.user_id
 ref: orders.id - order_addresses.order_id
 ref: orders.id < order_instances.order_id
+ref: orders.id - payments.order_id [delete: restrict]
 ref: instances.id < order_instances.instance_id
 ref: products.id < instances.product_id
 ref: users.id < favorites.user_id

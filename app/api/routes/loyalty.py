@@ -23,7 +23,18 @@ async def get_points(
     user_id: CurrentUser,
     session: DatabaseSession,
 ) -> LoyaltyResponse:
-    return LoyaltyResponse(balance=await loyalty_service.get_balance(session, user_id))
+    lifetime_spend = await loyalty_service.get_lifetime_qualifying_spend(
+        session,
+        user_id,
+    )
+    return LoyaltyResponse(
+        balance=await loyalty_service.get_balance(session, user_id),
+        lifetime_qualifying_spend=float(lifetime_spend),
+        redemption_unlocked=(
+            lifetime_spend >= loyalty_service.LOYALTY_PROGRAM_UNLOCK_SPEND
+        ),
+        unlock_spend_required=float(loyalty_service.LOYALTY_PROGRAM_UNLOCK_SPEND),
+    )
 
 
 @router.get("/history", response_model=LoyaltyHistoryResponse)

@@ -7,6 +7,9 @@ from app.models.loyalty_transaction import LoyaltyTransactionType
 
 class LoyaltyResponse(BaseModel):
     balance: int
+    lifetime_qualifying_spend: float
+    redemption_unlocked: bool
+    unlock_spend_required: float
 
 
 class LoyaltyHistoryItemResponse(BaseModel):

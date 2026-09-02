@@ -17,6 +17,7 @@ from app.services.password_reset_notifier import (
     EmailPasswordResetNotifier,
     PasswordResetNotifier,
 )
+from app.services.payment_provider import MockPaymentProvider, PaymentProvider
 
 bearer_scheme = HTTPBearer(auto_error=False)
 email_sender = SmtpEmailSender(
@@ -32,6 +33,7 @@ password_reset_notifier = EmailPasswordResetNotifier(
     from_email=settings.smtp_from_email,
     email_sender=email_sender,
 )
+payment_provider = MockPaymentProvider()
 
 
 def get_email_sender() -> EmailSender:
@@ -40,6 +42,10 @@ def get_email_sender() -> EmailSender:
 
 def get_password_reset_notifier() -> PasswordResetNotifier:
     return password_reset_notifier
+
+
+def get_payment_provider() -> PaymentProvider:
+    return payment_provider
 
 
 async def get_current_user_id(

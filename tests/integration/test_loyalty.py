@@ -91,7 +91,12 @@ async def test_loyalty_balance_uses_current_user_transactions(
     )
 
     assert response.status_code == 200
-    assert response.json() == {"balance": 110}
+    assert response.json() == {
+        "balance": 110,
+        "lifetime_qualifying_spend": 0.0,
+        "redemption_unlocked": False,
+        "unlock_spend_required": 500.0,
+    }
 
 
 async def test_empty_loyalty_history_returns_empty_page(

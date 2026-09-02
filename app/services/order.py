@@ -308,6 +308,7 @@ async def create_order(
         status=OrderStatus.UNPAID,
         payment_code=uuid4(),
         used_points=False,
+        points_to_spend=0,
         promo_code_id=promo.id if promo else None,
         total_price=total_price,
         recipient_first_name=request.recipient.first_name,
@@ -335,12 +336,18 @@ async def create_order(
                 total_price,
                 lifetime_qualifying_spend,
             )
+            balance = await loyalty_service.get_balance(session, user_id)
+            if balance < points_to_spend:
+                raise loyalty_service.InsufficientLoyaltyPointsError(
+                    available=balance,
+                    requested=points_to_spend,
+                )
             await loyalty_service.spend_points(
                 session,
                 user_id,
                 order.id,
                 points_to_spend,
-                description=f"Points spent on order #{order.id}",
+                description=f"Points reserved for order #{order.id}",
             )
         except (
             loyalty_service.InvalidLoyaltyPointsAmountError,
@@ -350,6 +357,7 @@ async def create_order(
         ) as error:
             raise OrderValidationError(str(error)) from error
 
+        order.points_to_spend = points_to_spend
         order.used_points = True
         total_price -= loyalty_service.calculate_points_discount(points_to_spend)
     order.total_price = total_price
