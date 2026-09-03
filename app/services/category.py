@@ -6,7 +6,6 @@ from app.models import Category
 from app.models.subcategory import Subcategory
 from app.schemas.category import CategoryResponse
 from app.schemas.subcategory import SubcategoryResponse
-from app.services.image import get_image_as_base64
 
 
 class CategoryNotFoundError(LookupError):
@@ -16,7 +15,7 @@ class CategoryNotFoundError(LookupError):
 def _to_subcategory_response(subcategory: Subcategory) -> SubcategoryResponse:
     return SubcategoryResponse(
         name=subcategory.name,
-        image=get_image_as_base64(subcategory.image) if subcategory.image else None,
+        image=subcategory.image,
         slug=subcategory.slug,
     )
 
@@ -24,7 +23,7 @@ def _to_subcategory_response(subcategory: Subcategory) -> SubcategoryResponse:
 def _to_category_response(category: Category) -> CategoryResponse:
     return CategoryResponse(
         name=category.name,
-        image=get_image_as_base64(category.image) if category.image else None,
+        image=category.image,
         slug=category.slug,
         subcategories=[
             _to_subcategory_response(subcategory)
@@ -45,15 +44,7 @@ async def get_random_category(session: AsyncSession) -> CategoryResponse:
     if category is None or category.image is None:
         raise CategoryNotFoundError("No categories with images found")
 
-    return CategoryResponse(
-        name=category.name,
-        image=get_image_as_base64(category.image) or category.image,
-        slug=category.slug,
-        subcategories=[
-            _to_subcategory_response(subcategory)
-            for subcategory in category.subcategories
-        ],
-    )
+    return _to_category_response(category)
 
 
 async def get_categories(session: AsyncSession) -> list[CategoryResponse]:
