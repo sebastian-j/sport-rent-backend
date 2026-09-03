@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,6 +17,7 @@ from app.schemas.user import (
     UserHistoryItemResponse,
     UserResponse,
 )
+from app.services import order as order_service
 
 
 class UserNotFoundError(LookupError):
@@ -24,15 +26,6 @@ class UserNotFoundError(LookupError):
 
 class OrderNotFoundError(LookupError):
     pass
-
-
-def _rental_days(order_instance: OrderInstance) -> int:
-    days = (order_instance.end_date - order_instance.start_date).days
-    if days < 0:
-        raise ValueError(f"Rental #{order_instance.id}: end_date before start_date")
-    if days == 0:
-        return 1
-    return days
 
 
 async def get_user(session: AsyncSession, user_id: int) -> UserResponse:
@@ -113,7 +106,11 @@ async def get_user_history(
         (
             await session.scalars(
                 select(Order)
-                .options(selectinload(Order.instances))
+                .options(
+                    selectinload(Order.instances),
+                    selectinload(Order.promo_code),
+                    selectinload(Order.loyalty_transactions),
+                )
                 .where(Order.user_id == user_id)
                 .order_by(Order.created_at.desc())
                 .offset(offset)
@@ -124,21 +121,16 @@ async def get_user_history(
         .all()
     )
 
-    items = []
-    for order in orders:
-        order_total = 0
-        for order_instance in order.instances:
-            order_total += order_instance.price * _rental_days(order_instance)
-
-        items.append(
-            UserHistoryItemResponse(
-                id=order.id,
-                created_at=order.created_at,
-                status=order.status.value,
-                payment_code=str(order.payment_code) if order.payment_code else None,
-                total=order_total,
-            )
+    items = [
+        UserHistoryItemResponse(
+            id=order.id,
+            created_at=order.created_at,
+            status=order.status.value,
+            payment_code=str(order.payment_code) if order.payment_code else None,
+            total=float(order_service.order_total(order)),
         )
+        for order in orders
+    ]
     total_pages = (total_orders + page_size - 1) // page_size
     return PaginatedUserHistoryResponse(
         items=items,
@@ -159,10 +151,12 @@ async def get_order_details(
             await session.scalars(
                 select(Order)
                 .options(
+                    selectinload(Order.promo_code),
+                    selectinload(Order.loyalty_transactions),
                     selectinload(Order.instances)
                     .selectinload(OrderInstance.instance)
                     .selectinload(Instance.product)
-                    .selectinload(Product.images)
+                    .selectinload(Product.images),
                 )
                 .where(Order.id == order_id)
             )
@@ -174,7 +168,10 @@ async def get_order_details(
     if not order or order.user_id != user_id:
         raise OrderNotFoundError("Order not found")
 
-    total = 0
+    total = order_service.order_total(order)
+    subtotal = order_service.order_subtotal(order)
+    discount = max(subtotal - total, Decimal("0.00"))
+
     items_response = []
     for order_instance in order.instances:
         product_obj = order_instance.instance.product
@@ -184,8 +181,11 @@ async def get_order_details(
             primary_img = min(product_obj.images, key=lambda img: img.display_order)
             image = primary_img.image
 
-        item_total = order_instance.price * _rental_days(order_instance)
-        total += item_total
+        item_total = order_service.line_total(
+            Decimal(str(order_instance.price)),
+            order_instance.start_date,
+            order_instance.end_date,
+        )
 
         items_response.append(
             OrderItemDetailsResponse(
@@ -198,7 +198,7 @@ async def get_order_details(
                     order_instance.start_date, datetime.min.time()
                 ),
                 end_date=datetime.combine(order_instance.end_date, datetime.min.time()),
-                unit_price=item_total,
+                unit_price=float(item_total),
             )
         )
 
@@ -206,7 +206,7 @@ async def get_order_details(
         id=order.id,
         created_at=order.created_at,
         status=order.status.value,
-        total=total,
-        discount=0.0,
+        total=float(total),
+        discount=float(discount),
         items=items_response,
     )
