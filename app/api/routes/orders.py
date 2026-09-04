@@ -3,23 +3,27 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.dependencies import get_current_user_id
+from app.api.dependencies import get_current_user_id, get_payment_provider
 from app.db.session import get_db_session
 from app.schemas.order import (
     CreateOrderRequest,
     OrderResponse,
     PaginatedOrdersResponse,
 )
+from app.schemas.payment import PaymentResponse
 from app.services import order as order_service
+from app.services import payment as payment_service
 from app.services.order_addresses import (
     InvalidOrderAddressError,
     MissingDefaultAddressError,
 )
+from app.services.payment_provider import PaymentProvider
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 
 CurrentUser = Annotated[int, Depends(get_current_user_id)]
 DatabaseSession = Annotated[AsyncSession, Depends(get_db_session)]
+PaymentProviderDependency = Annotated[PaymentProvider, Depends(get_payment_provider)]
 
 
 def bad_request(error: Exception) -> HTTPException:
@@ -28,6 +32,10 @@ def bad_request(error: Exception) -> HTTPException:
 
 def not_found(error: Exception) -> HTTPException:
     return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error))
+
+
+def conflict(error: Exception) -> HTTPException:
+    return HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error))
 
 
 def invalid_request(error: Exception) -> HTTPException:
@@ -95,3 +103,27 @@ async def get_order(
         return await order_service.get_order(session, user_id, order_id)
     except order_service.OrderNotFoundError as error:
         raise not_found(error) from error
+
+
+@router.post(
+    "/{order_id}/payment",
+    response_model=PaymentResponse,
+    summary="Start payment for an order",
+)
+async def start_order_payment(
+    order_id: int,
+    user_id: CurrentUser,
+    session: DatabaseSession,
+    provider: PaymentProviderDependency,
+) -> PaymentResponse:
+    try:
+        return await payment_service.start_order_payment(
+            session,
+            user_id,
+            order_id,
+            provider,
+        )
+    except payment_service.PaymentNotFoundError as error:
+        raise not_found(error) from error
+    except payment_service.PaymentValidationError as error:
+        raise conflict(error) from error

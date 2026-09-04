@@ -1,5 +1,6 @@
 import asyncio
 from datetime import date, timedelta
+from decimal import Decimal
 from uuid import uuid4
 
 from sqlalchemy import select
@@ -32,6 +33,7 @@ async def seed_orders(session_factory=async_session_factory) -> None:
             Order(
                 user_id=user1.id,
                 status=OrderStatus.FINISHED,
+                total_price=Decimal(str(product1.price)) * 5,
                 payment_code=uuid4(),
                 recipient_first_name="Jan",
                 recipient_last_name="Kowalski",
@@ -53,6 +55,7 @@ async def seed_orders(session_factory=async_session_factory) -> None:
             Order(
                 user_id=user1.id,
                 status=OrderStatus.PAID,
+                total_price=Decimal(str(product2.price)) * 5,
                 payment_code=uuid4(),
                 recipient_first_name="Jan",
                 recipient_last_name="Kowalski",

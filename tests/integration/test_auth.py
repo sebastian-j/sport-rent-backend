@@ -15,7 +15,15 @@ from app.core.config import settings
 from app.core.password_reset import hash_password_reset_token
 from app.core.passwords import verify_password
 from app.core.tokens import decode_access_token, decode_refresh_token
-from app.models import Address, AuthSession, PasswordResetToken, User
+from app.models import (
+    Address,
+    AuthSession,
+    LoyaltyTransaction,
+    LoyaltyTransactionType,
+    PasswordResetToken,
+    User,
+)
+from app.services.loyalty import calculate_points_expiration
 from tests.support import SeededUser
 
 REFRESH_COOKIE_NAME = "refresh_token"
@@ -151,6 +159,11 @@ async def test_register_creates_user_with_normalized_email_and_hashed_password(
             .where(User.email == "new.user@example.com")
         )
         row = result.one_or_none()
+        registration_bonus = await session.scalar(
+            select(LoyaltyTransaction).where(
+                LoyaltyTransaction.user_id == response.json()["id"]
+            )
+        )
 
     assert row is not None
     user, address = row
@@ -168,6 +181,14 @@ async def test_register_creates_user_with_normalized_email_and_hashed_password(
     assert address.country == "Polska"
     assert address.company is None
     assert address.nip is None
+    assert registration_bonus is not None
+    assert registration_bonus.order_id is None
+    assert registration_bonus.type is LoyaltyTransactionType.EARN
+    assert registration_bonus.amount == 10
+    assert registration_bonus.description == "Registration bonus"
+    assert registration_bonus.expires_at == calculate_points_expiration(
+        registration_bonus.created_at
+    )
 
 
 async def test_register_rejects_existing_normalized_email(
@@ -192,8 +213,12 @@ async def test_register_rejects_existing_normalized_email(
 
     async with test_session_factory() as session:
         user_count = await session.scalar(select(func.count()).select_from(User))
+        registration_bonus_count = await session.scalar(
+            select(func.count()).select_from(LoyaltyTransaction)
+        )
 
     assert user_count == 1
+    assert registration_bonus_count == 1
 
 
 async def test_register_rejects_too_short_password(
