@@ -8,6 +8,7 @@ from app.models.manufacturer import Manufacturer
 from app.models.order import Order, OrderInstance, OrderStatus
 from app.models.order_address import OrderAddress
 from app.models.password_reset_token import PasswordResetToken
+from app.models.payment import Payment, PaymentStatus
 from app.models.product import (
     Favorite,
     Instance,
@@ -32,6 +33,8 @@ __all__ = [
     "LoyaltyTransactionType",
     "Manufacturer",
     "PasswordResetToken",
+    "Payment",
+    "PaymentStatus",
     "Product",
     "ProductAccessory",
     "ProductImage",

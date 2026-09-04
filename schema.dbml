@@ -66,13 +66,62 @@ table orders {
   created_at datetime [not null]
   status order_status [not null, default: "PENDING"]
   payment_code uuid
-  used_points bool [not null, default: false]
+  used_points bool [default: false]
+  points_to_spend integer [not null, default: 0]
   promo_code_id integer
+  total_price decimal(12,2) [not null]
   recipient_first_name varchar [not null]
   recipient_last_name varchar [not null]
 }
 
-enum order_status {
+enum payment_status {
+  "PENDING"
+  "SUCCEEDED"
+  "FAILED"
+  "CANCELLED"
+}
+
+table payments {
+  id integer [primary key]
+  order_id integer [unique, not null]
+  provider varchar(50) [not null]
+  provider_payment_id varchar(255) [unique]
+  status payment_status [not null, default: "PENDING"]
+  amount decimal(12,2) [not null]
+  currency varchar(3) [not null, default: "PLN"]
+  redirect_url varchar(2048)
+  created_at datetime [not null]
+  completed_at datetime
+}
+
+enum loyalty_transaction_type {
+  "EARN"
+  "SPEND"
+  "REFUND"
+  "REVERSAL"
+  "ADJUSTMENT"
+}
+
+table loyalty_transactions {
+  id integer [primary key]
+  user_id integer [not null]
+  order_id integer
+  type loyalty_transaction_type [not null]
+  amount integer [not null]
+  description varchar(255)
+  created_at datetime [not null]
+
+  indexes {
+    (order_id, type) [unique]
+    (user_id, created_at, id) [name: 'ix_loyalty_transactions_user_created_at']
+  }
+
+  checks {
+    `(type IN ('EARN', 'REFUND') AND amount > 0) OR (type IN ('SPEND', 'REVERSAL') AND amount < 0) OR (type = 'ADJUSTMENT' AND amount <> 0)`
+  }
+}
+
+enum status {
   "PENDING"
   "UNPAID"
   "PAID"
@@ -269,12 +318,15 @@ table password_reset_tokens {
 ref: users.id < orders.user_id
 ref: orders.id - order_addresses.order_id
 ref: orders.id < order_instances.order_id
+ref: orders.id - payments.order_id [delete: restrict]
 ref: instances.id < order_instances.instance_id
 ref: products.id < instances.product_id
 ref: users.id < favorites.user_id
 ref: products.slug < favorites.product_slug
 ref: addresses.id - users.default_address_id
 ref: products.id < product_images.product_id
+ref: users.id < loyalty_transactions.user_id
+ref: orders.id < loyalty_transactions.order_id [delete: set null]
 ref: users.id < cart_items.user_id
 ref: products.id < cart_items.product_id
 ref: product_sizes.id < cart_items.product_size_id

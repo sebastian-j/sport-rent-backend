@@ -24,6 +24,7 @@ from app.core.tokens import (
     encode_refresh_token,
 )
 from app.models import Address, AuthSession, PasswordResetToken, User
+from app.services import loyalty as loyalty_service
 
 
 class InvalidCredentialsError(Exception):
@@ -95,6 +96,14 @@ async def register_user(
     session.add(user)
 
     try:
+        await session.flush()
+        await loyalty_service.earn_points(
+            session,
+            user.id,
+            None,
+            10,
+            description="Registration bonus",
+        )
         await session.commit()
     except IntegrityError:
         await session.rollback()

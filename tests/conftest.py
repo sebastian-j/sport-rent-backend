@@ -29,6 +29,7 @@ from app.models import (
     LoyaltyTransaction,
     Order,
     PasswordResetToken,
+    Payment,
     PromoCode,
     User,
 )
@@ -143,6 +144,7 @@ async def clear_auth_database(
 ) -> None:
     async with session_factory.begin() as session:
         await session.execute(delete(LoyaltyTransaction))
+        await session.execute(delete(Payment))
         await session.execute(delete(Order))
         await session.execute(delete(User))
         await session.execute(delete(Address))
