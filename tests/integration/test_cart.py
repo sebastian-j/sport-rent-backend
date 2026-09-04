@@ -135,6 +135,31 @@ async def cart_products(
             )
 
 
+async def test_product_availability_calendar_respects_size_and_quantity(
+    client: AsyncClient,
+    cart_products: None,
+) -> None:
+    available_response = await client.get(
+        "/product/rower-testowy-cart/availability-calendar",
+        params={"size": "M", "quantity": 6},
+    )
+    unavailable_response = await client.get(
+        "/product/rower-testowy-cart/availability-calendar",
+        params={"size": "M", "quantity": 7},
+    )
+
+    assert available_response.status_code == 200
+    assert available_response.json() == {
+        "unavailableDates": [],
+        "fullyUnavailable": False,
+    }
+    assert unavailable_response.status_code == 200
+    assert unavailable_response.json() == {
+        "unavailableDates": [],
+        "fullyUnavailable": True,
+    }
+
+
 @pytest.mark.parametrize(
     ("method", "path", "payload"),
     [

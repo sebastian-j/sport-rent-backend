@@ -16,9 +16,9 @@ async def main() -> None:
     try:
         await seed_users()
         await seed_categories()
-        await seed_manufacturers()
         await seed_loyalty_transactions()
         await seed_products()
+        await seed_manufacturers()
         await seed_product_accessories()
         await seed_subcategories()
         await seed_favorites()

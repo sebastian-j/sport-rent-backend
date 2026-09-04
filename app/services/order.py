@@ -27,7 +27,6 @@ from app.schemas.order import (
 from app.services import cart as cart_service
 from app.services import loyalty as loyalty_service
 from app.services import promo_code as promo_code_service
-from app.services.image import get_image_as_base64
 from app.services.order_addresses import (
     create_order_address_snapshot,
     snapshot_default_address,
@@ -106,11 +105,8 @@ def _primary_product_image(product: Product) -> str | None:
     if not product.images:
         return None
 
-    primary_image = next(
-        (image for image in product.images if image.display_order == 1),
-        product.images[0],
-    )
-    return get_image_as_base64(primary_image.image)
+    primary_image = min(product.images, key=lambda i: i.display_order)
+    return primary_image.image
 
 
 def order_response(order: Order, total_price: Decimal | None = None) -> OrderResponse:

@@ -5,16 +5,12 @@ Project rent {
 table users {
   id integer [primary key]
   email varchar [unique, not null]
-  password varchar [not null]
+  password_hash varchar [not null]
   first_name varchar
   last_name varchar
-  default_address_id integer
-  points integer // cache
-  created_at datetime
+  default_address_id integer [unique]
+  created_at datetime [not null]
   last_login_at datetime
-  newsletter_started_at datetime
-  internal_notes varchar
-  privacy_policy_accepted bool [default: false]
 }
 
 table categories {
@@ -67,8 +63,8 @@ table order_addresses {
 table orders {
   id integer [primary key]
   user_id integer [not null]
-  created_at datetime
-  status status [default: "PENDING"]
+  created_at datetime [not null]
+  status order_status [not null, default: "PENDING"]
   payment_code uuid
   used_points bool [default: false]
   points_to_spend integer [not null, default: 0]
@@ -138,12 +134,12 @@ table order_instances {
   id integer [primary key]
   order_id integer [not null]
   instance_id integer [not null]
-  startDate date
-  endDate date
-  price double // per day
+  start_date date [not null]
+  end_date date [not null]
+  price decimal [not null]
 
   checks {
-    `startDate <= endDate`
+    `start_date <= end_date`
     `price > 0`
   }
 }
@@ -188,10 +184,26 @@ table product_sizes {
   }
 }
 
+table product_accessories {
+  product_id integer [not null]
+  accessory_id integer [not null]
+  display_order tinyint [not null, default: 0]
+
+  indexes {
+    (product_id, accessory_id) [pk]
+    (product_id, display_order) [unique]
+  }
+
+  checks {
+    `product_id <> accessory_id`
+    `display_order >= 0`
+  }
+}
+
 table favorites {
   id integer [primary key]
   user_id integer [not null]
-  product_id integer [not null]
+  product_slug varchar [not null]
 }
 
 enum instance_status {
@@ -228,18 +240,6 @@ table cart_items {
   }
 }
 
-table calendar_blocks {
-  id integer [primary key]
-  instance_id integer [not null]
-  blocked_from date
-  blocked_until date
-  block_reason varchar
-
-  checks {
-    `blocked_from <= blocked_until`
-  }
-}
-
 enum promo_discount_type {
   "PERCENTAGE"
   "FIXED_AMOUNT"
@@ -267,6 +267,54 @@ table promo_codes {
   }
 }
 
+enum loyalty_transaction_type {
+  "EARN"
+  "SPEND"
+  "REFUND"
+  "REVERSAL"
+  "ADJUSTMENT"
+}
+
+table loyalty_transactions {
+  id integer [primary key]
+  user_id integer [not null]
+  order_id integer
+  type loyalty_transaction_type [not null]
+  amount integer [not null]
+  description varchar
+  created_at datetime [not null]
+
+  indexes {
+    (order_id, type) [unique]
+    (user_id, created_at, id) [name: 'ix_loyalty_transactions_user_created_at']
+  }
+
+  checks {
+    `(type IN ('EARN', 'REFUND') AND amount > 0) OR (type IN ('SPEND', 'REVERSAL') AND amount < 0) OR (type = 'ADJUSTMENT' AND amount <> 0)`
+  }
+}
+
+table auth_sessions {
+  id uuid [primary key]
+  user_id integer [not null]
+  current_jti uuid [unique, not null]
+  previous_jti uuid
+  previous_valid_until datetime
+  current_issued_at datetime [not null]
+  expires_at datetime [not null]
+  revoked_at datetime
+  created_at datetime [not null]
+}
+
+table password_reset_tokens {
+  id uuid [primary key]
+  user_id integer [not null]
+  token_hash varchar(64) [unique, not null]
+  expires_at datetime [not null]
+  used_at datetime
+  created_at datetime [not null]
+}
+
 ref: users.id < orders.user_id
 ref: orders.id - order_addresses.order_id
 ref: orders.id < order_instances.order_id
@@ -274,7 +322,7 @@ ref: orders.id - payments.order_id [delete: restrict]
 ref: instances.id < order_instances.instance_id
 ref: products.id < instances.product_id
 ref: users.id < favorites.user_id
-ref: products.id < favorites.product_id
+ref: products.slug < favorites.product_slug
 ref: addresses.id - users.default_address_id
 ref: products.id < product_images.product_id
 ref: users.id < loyalty_transactions.user_id
@@ -282,10 +330,15 @@ ref: orders.id < loyalty_transactions.order_id [delete: set null]
 ref: users.id < cart_items.user_id
 ref: products.id < cart_items.product_id
 ref: product_sizes.id < cart_items.product_size_id
-ref: instances.id < calendar_blocks.instance_id
 ref: products.id < product_sizes.product_id
 ref: categories.id < subcategories.category_id
 ref: categories.id < products.category_id
 ref: subcategories.id < products.subcategory_id
 ref: manufacturers.id < products.manufacturer_id
 ref: promo_codes.id < orders.promo_code_id
+ref: products.id < product_accessories.product_id
+ref: products.id < product_accessories.accessory_id
+ref: users.id < loyalty_transactions.user_id
+ref: orders.id < loyalty_transactions.order_id
+ref: users.id < auth_sessions.user_id
+ref: users.id < password_reset_tokens.user_id

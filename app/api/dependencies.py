@@ -80,14 +80,30 @@ async def get_current_user_id(
     return claims.user_id
 
 
-def get_optional_current_user_id(
+async def get_optional_current_user_id(
     credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> int | None:
     if credentials is None:
         return None
     token = credentials.credentials
+
     try:
         claims = decode_access_token(token)
-        return claims.user_id
     except jwt.InvalidTokenError:
         return None
+
+    now = datetime.datetime.now(datetime.UTC)
+    auth_session = await session.scalar(
+        select(AuthSession).where(
+            AuthSession.id == claims.session_id,
+            AuthSession.user_id == claims.user_id,
+            AuthSession.revoked_at.is_(None),
+            AuthSession.expires_at > now,
+        )
+    )
+
+    if auth_session is None:
+        return None
+
+    return claims.user_id
