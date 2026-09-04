@@ -21,9 +21,17 @@ from app.schemas.user import (
     UserHistoryItemResponse,
     UserResponse,
 )
-from app.services.image import get_image_as_base64
 
 router = APIRouter(prefix="/user", tags=["user"])
+
+
+def _primary_product_image(product: Product) -> str | None:
+    primary_image = min(
+        product.images,
+        key=lambda image: image.display_order,
+        default=None,
+    )
+    return primary_image.image if primary_image else None
 
 
 @router.get("", response_model=UserResponse)
@@ -188,14 +196,7 @@ async def get_order_details(
     items_response = []
     for order_instance in order.instances:
         product_obj = order_instance.instance.product
-
-        image_b64 = None
-        if product_obj.images:
-            primary_img = next(
-                (img for img in product_obj.images if img.display_order == 1),
-                product_obj.images[0],
-            )
-            image_b64 = get_image_as_base64(primary_img.image)
+        image = _primary_product_image(product_obj)
 
         days = (order_instance.end_date - order_instance.start_date).days
         if days < 0:
@@ -210,7 +211,7 @@ async def get_order_details(
             OrderItemDetailsResponse(
                 product_id=product_obj.id,
                 product_name=product_obj.name,
-                image=image_b64,
+                image=image,
                 size=order_instance.instance.size,
                 quantity=1,
                 start_date=datetime.combine(

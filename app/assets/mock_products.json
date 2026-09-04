@@ -6,10 +6,10 @@
             "slug": "rower-szosowy",
             "price": 89,
             "images": [
-                "assets/products/rower-szosowy/cover-01-1448x1086-v01.webp",
-                "assets/products/rower-szosowy/side-02-1448x1086-v01.webp",
-                "assets/products/rower-szosowy/rear-03-1448x1086-v01.webp",
-                "assets/products/rower-szosowy/detail-04-1448x1086-v01.webp"
+                "/assets/products/rower-szosowy/cover-01-1448x1086-v01.webp",
+                "/assets/products/rower-szosowy/side-02-1448x1086-v01.webp",
+                "/assets/products/rower-szosowy/rear-03-1448x1086-v01.webp",
+                "/assets/products/rower-szosowy/detail-04-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Granatowy rower szosowy z czarnym widelcem i kierownicą typu baranek, widok trzy czwarte od przodu",
@@ -42,10 +42,10 @@
             "slug": "rower-gorski-mtb",
             "price": 99,
             "images": [
-                "assets/products/rower-gorski-mtb/cover-01-1448x1086-v01.webp",
-                "assets/products/rower-gorski-mtb/side-02-1448x1086-v01.webp",
-                "assets/products/rower-gorski-mtb/rear-03-1448x1086-v01.webp",
-                "assets/products/rower-gorski-mtb/detail-04-1448x1086-v01.webp"
+                "/assets/products/rower-gorski-mtb/cover-01-1448x1086-v01.webp",
+                "/assets/products/rower-gorski-mtb/side-02-1448x1086-v01.webp",
+                "/assets/products/rower-gorski-mtb/rear-03-1448x1086-v01.webp",
+                "/assets/products/rower-gorski-mtb/detail-04-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Zielony rower górski hardtail z amortyzowanym widelcem i oponami terenowymi, widok trzy czwarte od przodu",
@@ -78,10 +78,10 @@
             "slug": "kask-rowerowy",
             "price": 25,
             "images": [
-                "assets/products/kask-rowerowy/cover-01-1448x1086-v01.webp",
-                "assets/products/kask-rowerowy/side-02-1448x1086-v01.webp",
-                "assets/products/kask-rowerowy/rear-03-1448x1086-v01.webp",
-                "assets/products/kask-rowerowy/detail-04-1448x1086-v01.webp"
+                "/assets/products/kask-rowerowy/cover-01-1448x1086-v01.webp",
+                "/assets/products/kask-rowerowy/side-02-1448x1086-v01.webp",
+                "/assets/products/kask-rowerowy/rear-03-1448x1086-v01.webp",
+                "/assets/products/kask-rowerowy/detail-04-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Matowy pomarańczowy kask rowerowy z czarnymi otworami wentylacyjnymi, widok trzy czwarte od przodu",
@@ -110,7 +110,7 @@
             "slug": "przyczepka-rowerowa-dla-dzieci",
             "price": 65,
             "images": [
-                "assets/products/przyczepka-rowerowa-dla-dzieci/cover-01-1448x1086-v01.webp"
+                "/assets/products/przyczepka-rowerowa-dla-dzieci/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Niebieska dwuosobowa przyczepka rowerowa dla dzieci z czarną ramą, dwoma kołami, dyszlem i pomarańczową chorągiewką"
@@ -126,7 +126,7 @@
             "slug": "przyczepka-rowerowa-bagazowa",
             "price": 49,
             "images": [
-                "assets/products/przyczepka-rowerowa-bagazowa/cover-01-1448x1086-v01.webp"
+                "/assets/products/przyczepka-rowerowa-bagazowa/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Czarna dwukołowa przyczepka rowerowa z pustą prostokątną skrzynią ładunkową i długim dyszlem, widok trzy czwarte"
@@ -142,7 +142,7 @@
             "slug": "przyczepka-rowerowa-dla-psa",
             "price": 55,
             "images": [
-                "assets/products/przyczepka-rowerowa-dla-psa/cover-01-1448x1086-v01.webp"
+                "/assets/products/przyczepka-rowerowa-dla-psa/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Oliwkowozielona przyczepka rowerowa dla psa z czarną ramą, siatkowymi panelami, dwoma kołami i dyszlem"
@@ -158,7 +158,7 @@
             "slug": "namiot-dwuosobowy",
             "price": 45,
             "images": [
-                "assets/products/namiot-dwuosobowy/cover-01-1448x1086-v01.webp"
+                "/assets/products/namiot-dwuosobowy/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Turkusowy dwuosobowy namiot kopułowy z grafitową podłogą i dwoma krzyżującymi się pałąkami, widok trzy czwarte"
@@ -174,7 +174,7 @@
             "slug": "namiot-trzyosobowy",
             "price": 59,
             "images": [
-                "assets/products/namiot-trzyosobowy/cover-01-1448x1086-v01.webp"
+                "/assets/products/namiot-trzyosobowy/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Rdzawopomarańczowy trzyosobowy namiot kopułowy z grafitowym dołem i przednim przedsionkiem, widok trzy czwarte"
@@ -190,7 +190,7 @@
             "slug": "namiot-czteroosobowy",
             "price": 75,
             "images": [
-                "assets/products/namiot-czteroosobowy/cover-01-1448x1086-v01.webp"
+                "/assets/products/namiot-czteroosobowy/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Leśnozielony czteroosobowy namiot kopułowy z grafitowym dołem i obszernym przednim przedsionkiem, widok trzy czwarte"
@@ -206,7 +206,7 @@
             "slug": "deska-sup",
             "price": 79,
             "images": [
-                "assets/products/deska-sup/cover-01-1448x1086-v01.webp"
+                "/assets/products/deska-sup/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Turkusowo-granatowa pompowana deska SUP z czarnym pokładem, centralnym uchwytem, statecznikiem i regulowanym wiosłem"
@@ -222,7 +222,7 @@
             "slug": "kajak-dwuosobowy",
             "price": 119,
             "images": [
-                "assets/products/kajak-dwuosobowy/cover-01-1448x1086-v01.webp"
+                "/assets/products/kajak-dwuosobowy/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Żółty dwuosobowy kajak sit-on-top z dwoma czarnymi siedziskami oraz dwoma dwupiórowymi wiosłami"
@@ -238,7 +238,7 @@
             "slug": "kamizelka-asekuracyjna",
             "price": 20,
             "images": [
-                "assets/products/kamizelka-asekuracyjna/cover-01-1448x1086-v01.webp"
+                "/assets/products/kamizelka-asekuracyjna/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Czerwono-granatowa kamizelka asekuracyjna z trzema czarnymi pasami i regulowanymi klamrami, widok trzy czwarte od przodu"
@@ -254,7 +254,7 @@
             "slug": "zestaw-via-ferrata",
             "price": 49,
             "images": [
-                "assets/products/zestaw-via-ferrata/cover-01-1448x1086-v01.webp"
+                "/assets/products/zestaw-via-ferrata/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Zestaw via ferrata z czerwonym absorberem energii, czarną pętlą mocującą, dwiema elastycznymi lonżami i dwoma karabinkami"
@@ -270,7 +270,7 @@
             "slug": "uprzaz-wspinaczkowa",
             "price": 35,
             "images": [
-                "assets/products/uprzaz-wspinaczkowa/cover-01-1448x1086-v01.webp"
+                "/assets/products/uprzaz-wspinaczkowa/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Czarno-granatowa uprząż wspinaczkowa z pasem biodrowym, dwiema regulowanymi pętlami udowymi, pętlą centralną i klamrami"
@@ -300,7 +300,7 @@
             "slug": "kask-wspinaczkowy",
             "price": 29,
             "images": [
-                "assets/products/kask-wspinaczkowy/cover-01-1448x1086-v01.webp"
+                "/assets/products/kask-wspinaczkowy/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Jasnoszary kask wspinaczkowy z turkusowym tyłem, czarnymi otworami wentylacyjnymi, paskami pod brodę i pokrętłem regulacji"
@@ -326,7 +326,7 @@
             "slug": "nosidelko-turystyczne-dla-dziecka",
             "price": 69,
             "images": [
-                "assets/products/nosidelko-turystyczne-dla-dziecka/cover-01-1448x1086-v01.webp"
+                "/assets/products/nosidelko-turystyczne-dla-dziecka/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Zielono-grafitowe nosidełko turystyczne dla dziecka ze stelażem, daszkiem, siedziskiem, pasami nośnymi i rozłożoną podpórką"
@@ -342,7 +342,7 @@
             "slug": "lekkie-nosidelko-turystyczne",
             "price": 55,
             "images": [
-                "assets/products/lekkie-nosidelko-turystyczne/cover-01-1448x1086-v01.webp"
+                "/assets/products/lekkie-nosidelko-turystyczne/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Niebiesko-grafitowe lekkie nosidełko turystyczne dla dziecka ze smukłym stelażem, siedziskiem, pasami i rozłożoną podpórką"
@@ -358,7 +358,7 @@
             "slug": "namiot-rodzinny",
             "price": 109,
             "images": [
-                "assets/products/namiot-rodzinny/cover-01-1448x1086-v01.webp"
+                "/assets/products/namiot-rodzinny/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Duży piaskowobeżowy namiot rodzinny o konstrukcji tunelowej z grafitowym dołem, trzema pałąkami i zamkniętymi wejściami"
@@ -374,7 +374,7 @@
             "slug": "namiot-kempingowy",
             "price": 85,
             "images": [
-                "assets/products/namiot-kempingowy/cover-01-1448x1086-v01.webp"
+                "/assets/products/namiot-kempingowy/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Granatowy namiot kempingowy o konstrukcji kopułowej z grafitowym dołem, zamkniętym wejściem i bocznym otworem wentylacyjnym"
@@ -390,7 +390,7 @@
             "slug": "namiot-dachowy",
             "price": 179,
             "images": [
-                "assets/products/namiot-dachowy/cover-01-1448x1086-v01.webp"
+                "/assets/products/namiot-dachowy/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Otwarty oliwkowo-czarny namiot dachowy ze sztywną skorupą, prostokątną podstawą, siatkowymi oknami i teleskopową drabiną"
@@ -406,7 +406,7 @@
             "slug": "rower-miejski",
             "price": 69,
             "images": [
-                "assets/products/rower-miejski/cover-01-1448x1086-v01.webp"
+                "/assets/products/rower-miejski/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Bordowy rower miejski z obniżoną ramą, wyprostowaną kierownicą, błotnikami, osłoną łańcucha i tylnym bagażnikiem"
@@ -436,7 +436,7 @@
             "slug": "rower-elektryczny",
             "price": 149,
             "images": [
-                "assets/products/rower-elektryczny/cover-01-1448x1086-v01.webp"
+                "/assets/products/rower-elektryczny/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Grafitowy elektryczny rower trekkingowy z obniżoną ramą, baterią w dolnej rurze, silnikiem centralnym, amortyzatorem i bagażnikiem"
@@ -466,7 +466,7 @@
             "slug": "sakwy-rowerowe",
             "price": 29,
             "images": [
-                "assets/products/sakwy-rowerowe/cover-01-1448x1086-v01.webp"
+                "/assets/products/sakwy-rowerowe/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Para rdzawoczerwonych sakw rowerowych z czarnymi zwijanymi zamknięciami, wzmocnionymi dołami i hakami do bagażnika"
@@ -482,7 +482,7 @@
             "slug": "jednokolowa-przyczepka-rowerowa",
             "price": 59,
             "images": [
-                "assets/products/jednokolowa-przyczepka-rowerowa/cover-01-1448x1086-v01.webp"
+                "/assets/products/jednokolowa-przyczepka-rowerowa/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Czarna jednokołowa przyczepka rowerowa z terenową oponą, granatową torbą ładunkową i dwuramiennym mocowaniem do osi"
@@ -498,7 +498,7 @@
             "slug": "skladana-przyczepka-rowerowa",
             "price": 54,
             "images": [
-                "assets/products/skladana-przyczepka-rowerowa/cover-01-1448x1086-v01.webp"
+                "/assets/products/skladana-przyczepka-rowerowa/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Musztardowo-czarna składana przyczepka rowerowa z dwoma kołami, materiałową skrzynią, przegubami ramy i dyszlem"
@@ -514,7 +514,7 @@
             "slug": "namiot-trekkingowy",
             "price": 64,
             "images": [
-                "assets/products/namiot-trekkingowy/cover-01-1448x1086-v01.webp"
+                "/assets/products/namiot-trekkingowy/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Niski oliwkowy namiot trekkingowy z grafitową podłogą, pomarańczowym zamkiem, lekkimi pałąkami i bocznym przedsionkiem"
@@ -530,7 +530,7 @@
             "slug": "namiot-zimowy",
             "price": 99,
             "images": [
-                "assets/products/namiot-zimowy/cover-01-1448x1086-v01.webp"
+                "/assets/products/namiot-zimowy/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Czerwony zimowy namiot geodezyjny z grafitowym dołem, wieloma krzyżującymi się pałąkami, przedsionkiem i osłoniętymi otworami"
@@ -546,7 +546,7 @@
             "slug": "kajak-dmuchany",
             "price": 89,
             "images": [
-                "assets/products/kajak-dmuchany/cover-01-1448x1086-v01.webp"
+                "/assets/products/kajak-dmuchany/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Turkusowo-grafitowy dmuchany kajak dwuosobowy z dwiema czarnymi siedziskami, komorami powietrznymi i dwoma wiosłami"
@@ -562,7 +562,7 @@
             "slug": "kanadyjka-dwuosobowa",
             "price": 109,
             "images": [
-                "assets/products/kanadyjka-dwuosobowa/cover-01-1448x1086-v01.webp"
+                "/assets/products/kanadyjka-dwuosobowa/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Ciemnozielona otwarta kanadyjka z dwiema drewnianymi ławkami, centralnym jarzmem i dwoma jednopiórowymi wiosłami"
@@ -578,7 +578,7 @@
             "slug": "wioslo-kajakowe",
             "price": 19,
             "images": [
-                "assets/products/wioslo-kajakowe/cover-01-1448x1086-v01.webp"
+                "/assets/products/wioslo-kajakowe/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Dwupiórowe wiosło kajakowe z regulowanym czarnym drążkiem, centralnym łączeniem i dwiema turkusowymi łopatami"
@@ -594,7 +594,7 @@
             "slug": "lina-wspinaczkowa-60-m",
             "price": 39,
             "images": [
-                "assets/products/lina-wspinaczkowa-60-m/cover-01-1448x1086-v01.webp"
+                "/assets/products/lina-wspinaczkowa-60-m/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Zwój pomarańczowej liny wspinaczkowej z granatowym wzorem i dwoma widocznymi zakończeniami"
@@ -610,7 +610,7 @@
             "slug": "zestaw-karabinkow-wspinaczkowych",
             "price": 24,
             "images": [
-                "assets/products/zestaw-karabinkow-wspinaczkowych/cover-01-1448x1086-v01.webp"
+                "/assets/products/zestaw-karabinkow-wspinaczkowych/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Pięć srebrnych karabinków wspinaczkowych o gruszkowym kształcie z pomarańczowymi zakręcanymi tulejami"
@@ -626,7 +626,7 @@
             "slug": "buty-wspinaczkowe",
             "price": 34,
             "images": [
-                "assets/products/buty-wspinaczkowe/cover-01-1448x1086-v01.webp"
+                "/assets/products/buty-wspinaczkowe/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Para granatowych butów wspinaczkowych z czarną gumą, rdzawymi panelami na piętach i dwoma paskami na rzep"
@@ -676,7 +676,7 @@
             "slug": "nosidelko-turystyczne-premium",
             "price": 79,
             "images": [
-                "assets/products/nosidelko-turystyczne-premium/cover-01-1448x1086-v01.webp"
+                "/assets/products/nosidelko-turystyczne-premium/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Bordowo-grafitowe nosidełko turystyczne premium ze stelażem, daszkiem, wyściełanym siedziskiem, pasami i dużym pasem biodrowym"
@@ -692,7 +692,7 @@
             "slug": "nosidelko-z-oslona-przeciwdeszczowa",
             "price": 74,
             "images": [
-                "assets/products/nosidelko-z-oslona-przeciwdeszczowa/cover-01-1448x1086-v01.webp"
+                "/assets/products/nosidelko-z-oslona-przeciwdeszczowa/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Grafitowe nosidełko turystyczne ze stelażem i rozłożoną żółtą osłoną przeciwdeszczową z dużym przezroczystym oknem"
@@ -708,7 +708,7 @@
             "slug": "namiot-tunelowy",
             "price": 119,
             "images": [
-                "assets/products/namiot-tunelowy/cover-01-1448x1086-v01.webp"
+                "/assets/products/namiot-tunelowy/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Wydłużony oliwkowy namiot tunelowy z grafitowym dołem, trzema równoległymi pałąkami, zamkniętym wejściem i bocznym wywietrznikiem"
@@ -724,7 +724,7 @@
             "slug": "namiot-samorozkladajacy",
             "price": 49,
             "images": [
-                "assets/products/namiot-samorozkladajacy/cover-01-1448x1086-v01.webp"
+                "/assets/products/namiot-samorozkladajacy/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Niebieski namiot samorozkładający o zaokrąglonej konstrukcji obręczowej, z grafitowym dołem, żółtym zamkiem i dwoma wywietrznikami"
@@ -740,7 +740,7 @@
             "slug": "namiot-ekspedycyjny",
             "price": 139,
             "images": [
-                "assets/products/namiot-ekspedycyjny/cover-01-1448x1086-v01.webp"
+                "/assets/products/namiot-ekspedycyjny/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Żółty namiot ekspedycyjny o konstrukcji geodezyjnej z grafitowymi wzmocnieniami, wieloma pałąkami, przedsionkiem i osłoniętymi wywietrznikami"
@@ -756,7 +756,7 @@
             "slug": "zestaw-naprawczy-do-roweru",
             "price": 18,
             "images": [
-                "assets/products/zestaw-naprawczy-do-roweru/cover-01-1448x1086-v01.webp"
+                "/assets/products/zestaw-naprawczy-do-roweru/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Rowerowy zestaw naprawczy z czarnym etui, multinarzędziem, pompką, dętką, łatkami i trzema pomarańczowymi łyżkami"
@@ -772,7 +772,7 @@
             "slug": "wodoodporny-worek-transportowy",
             "price": 22,
             "images": [
-                "assets/products/wodoodporny-worek-transportowy/cover-01-1448x1086-v01.webp"
+                "/assets/products/wodoodporny-worek-transportowy/cover-01-1448x1086-v01.webp"
             ],
             "imageAlts": [
                 "Pomarańczowy cylindryczny worek transportowy z rolowanym zamknięciem, czarną klamrą, wzmocnionym dnem, uchwytem i paskiem"
