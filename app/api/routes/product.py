@@ -1,287 +1,77 @@
 from datetime import date
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import exists, func, select
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 from app.api.dependencies import get_optional_current_user_id
 from app.db.session import get_db_session
-from app.models.category import Category
-from app.models.manufacturer import Manufacturer
-from app.models.order import Order, OrderInstance, OrderStatus
-from app.models.product import Favorite, Instance, InstanceStatus, Product
-from app.models.subcategory import Subcategory
 from app.schemas.product import (
-    CategoryResponse,
-    PriceFacetResponse,
     ProductAvailabilityCalendarResponse,
     ProductAvailabilityResponse,
     ProductFacetsResponse,
     ProductQueryParams,
     ProductResponse,
 )
-from app.services import accessory as accessory_service
-from app.services.availability import (
-    ReservedInstancePeriod,
-    calculate_unavailable_dates,
-)
+from app.services import product as product_service
 
 router = APIRouter(prefix="/product", tags=["product"])
 
-
-async def _get_favorite_slugs(
-    session: AsyncSession,
-    user_id: int | None,
-) -> set[str]:
-    if user_id is None:
-        return set()
-    return set(
-        await session.scalars(
-            select(Favorite.product_slug).where(Favorite.user_id == user_id)
-        )
-    )
+OptionalUser = Annotated[int | None, Depends(get_optional_current_user_id)]
+DatabaseSession = Annotated[AsyncSession, Depends(get_db_session)]
 
 
-def _to_product_response(
-    product: Product,
-    favorite_slugs: set[str],
-) -> ProductResponse:
+def not_found(error: Exception) -> HTTPException:
+    return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error))
 
-    sorted_images = sorted(product.images, key=lambda image: image.display_order)
-    valid_images = [image for image in sorted_images if image.image]
-    sizes = (
-        [{"size": size.size, "description": size.description} for size in product.sizes]
-        if product.sizes
-        else None
-    )
-    return ProductResponse(
-        id=product.id,
-        name=product.name,
-        slug=product.slug,
-        price=product.price,
-        description=product.description,
-        category=product.category.name if product.category else None,
-        images=[image.image for image in valid_images],
-        imageAlts=[image.alt_text or "" for image in valid_images],
-        manufacturer=product.manufacturer.name if product.manufacturer else None,
-        sizes=sizes,
-        isFavorite=product.slug in favorite_slugs,
+
+def invalid_request(error: Exception) -> HTTPException:
+    return HTTPException(
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(error)
     )
 
 
 @router.get("", response_model=list[ProductResponse])
 async def get_products(
     params: Annotated[ProductQueryParams, Query()],
-    user_id: Annotated[int | None, Depends(get_optional_current_user_id)],
-    session: Annotated[AsyncSession, Depends(get_db_session)],
+    user_id: OptionalUser,
+    session: DatabaseSession,
 ):
-    sort = params.sort
-    order = params.order
-    min_price = params.minPrice
-    max_price = params.maxPrice
-    categories = params.category
-    subcategories = params.subcategory
-    manufacturer = params.manufacturer
-    search_query = params.query
-    page = params.page
-    page_size = params.pageSize
-
-    product_query = (
-        select(Product)
-        .options(
-            selectinload(Product.images),
-            selectinload(Product.category),
-            selectinload(Product.manufacturer),
-            selectinload(Product.sizes),
-        )
-        .where(Product.visibility_status.is_(True))
-    )
-
-    if min_price is not None:
-        product_query = product_query.where(Product.price >= min_price)
-    if max_price is not None:
-        product_query = product_query.where(Product.price <= max_price)
-    if search_query:
-        product_query = product_query.where(Product.name.ilike(f"%{search_query}%"))
-    if categories:
-        product_query = product_query.outerjoin(Product.category).where(
-            Category.name.in_(categories)
-        )
-    if subcategories:
-        product_query = product_query.outerjoin(Product.subcategory).where(
-            Subcategory.name.in_(subcategories)
-        )
-    if manufacturer:
-        product_query = product_query.outerjoin(Product.manufacturer).where(
-            Manufacturer.name.in_(manufacturer)
-        )
-
-    if sort and order:
-        is_desc = order == "desc"
-        if sort == "price":
-            product_query = product_query.order_by(
-                Product.price.desc() if is_desc else Product.price.asc(),
-                Product.id.asc(),
-            )
-        elif sort == "name":
-            product_query = product_query.order_by(
-                Product.name.desc() if is_desc else Product.name.asc(), Product.id.asc()
-            )
-    else:
-        product_query = product_query.order_by(Product.id.asc())
-
-    start_index = (page - 1) * page_size
-    product_query = product_query.offset(start_index).limit(page_size)
-
-    paginated_products = (await session.scalars(product_query)).unique().all()
-
-    favorite_slugs = await _get_favorite_slugs(session, user_id)
-    return [
-        _to_product_response(product, favorite_slugs) for product in paginated_products
-    ]
+    return await product_service.get_products(session, params, user_id)
 
 
 @router.get("/count", response_model=ProductFacetsResponse)
 async def get_categories_count(
     params: Annotated[ProductQueryParams, Query()],
-    session: Annotated[AsyncSession, Depends(get_db_session)],
+    session: DatabaseSession,
 ):
-    min_price = params.minPrice
-    max_price = params.maxPrice
-    search_query = params.query
-    selected_categories = params.category
-    selected_subcategories = params.subcategory
-    selected_manufacturers = params.manufacturer
-
-    base_query = select(Product).where(Product.visibility_status.is_(True))
-
-    if min_price is not None:
-        base_query = base_query.where(Product.price >= min_price)
-    if max_price is not None:
-        base_query = base_query.where(Product.price <= max_price)
-    if search_query:
-        base_query = base_query.where(Product.name.ilike(f"%{search_query}%"))
-    if selected_categories:
-        base_query = base_query.join(Product.category).where(
-            Category.name.in_(selected_categories)
-        )
-    if selected_subcategories:
-        base_query = base_query.join(Product.subcategory).where(
-            Subcategory.name.in_(selected_subcategories)
-        )
-    if selected_manufacturers:
-        base_query = base_query.join(Product.manufacturer).where(
-            Manufacturer.name.in_(selected_manufacturers)
-        )
-
-    category_query = (
-        select(Category.name, func.count(Product.id))
-        .select_from(Product)
-        .outerjoin(Product.category)
-        .where(Product.visibility_status.is_(True))
-    )
-    if min_price is not None:
-        category_query = category_query.where(Product.price >= min_price)
-    if max_price is not None:
-        category_query = category_query.where(Product.price <= max_price)
-    if search_query:
-        category_query = category_query.where(Product.name.ilike(f"%{search_query}%"))
-    if selected_subcategories:
-        category_query = category_query.join(Product.subcategory).where(
-            Subcategory.name.in_(selected_subcategories)
-        )
-    if selected_manufacturers:
-        category_query = category_query.join(Product.manufacturer).where(
-            Manufacturer.name.in_(selected_manufacturers)
-        )
-
-    category_query = category_query.group_by(Category.name)
-    category_results = (await session.execute(category_query)).all()
-
-    categories = [
-        CategoryResponse(name=row[0] if row[0] else "Bez kategorii", count=row[1])
-        for row in category_results
-    ]
-
-    total_count_query = select(func.count()).select_from(base_query.subquery())
-    total_count = await session.scalar(total_count_query) or 0
-
-    price_query = select(
-        func.min(Product.price),
-        func.max(Product.price),
-    ).where(Product.visibility_status.is_(True))
-
-    if search_query:
-        price_query = price_query.where(Product.name.ilike(f"%{search_query}%"))
-    if selected_categories:
-        price_query = price_query.join(Product.category).where(
-            Category.name.in_(selected_categories)
-        )
-    if selected_subcategories:
-        price_query = price_query.join(Product.subcategory).where(
-            Subcategory.name.in_(selected_subcategories)
-        )
-    if selected_manufacturers:
-        price_query = price_query.join(Product.manufacturer).where(
-            Manufacturer.name.in_(selected_manufacturers)
-        )
-
-    price_min, price_max = (await session.execute(price_query)).one()
-
-    return ProductFacetsResponse(
-        categories=categories,
-        total=total_count,
-        price=PriceFacetResponse(
-            min=price_min or 0,
-            max=price_max or 0,
-        ),
-    )
+    return await product_service.get_product_facets(session, params)
 
 
 @router.get("/{product_slug}", response_model=ProductResponse)
 async def get_product(
     product_slug: str,
-    user_id: Annotated[int | None, Depends(get_optional_current_user_id)],
-    session: Annotated[AsyncSession, Depends(get_db_session)],
+    user_id: OptionalUser,
+    session: DatabaseSession,
 ):
-    p = await session.scalar(
-        select(Product)
-        .options(
-            selectinload(Product.images),
-            selectinload(Product.category),
-            selectinload(Product.manufacturer),
-            selectinload(Product.sizes),
-        )
-        .where(Product.slug == product_slug, Product.visibility_status.is_(True))
-    )
-
-    if not p:
-        raise HTTPException(status_code=404, detail="Product not found")
-
-    favorite_slugs = await _get_favorite_slugs(session, user_id)
-    return _to_product_response(p, favorite_slugs)
+    try:
+        return await product_service.get_product(session, product_slug, user_id)
+    except product_service.ProductNotFoundError as error:
+        raise not_found(error) from error
 
 
 @router.get("/{product_slug}/accessories", response_model=list[ProductResponse])
 async def get_product_accessories(
     product_slug: str,
-    user_id: Annotated[int | None, Depends(get_optional_current_user_id)],
-    session: Annotated[AsyncSession, Depends(get_db_session)],
+    user_id: OptionalUser,
+    session: DatabaseSession,
 ) -> list[ProductResponse]:
     try:
-        accessories = await accessory_service.get_suggested_accessories(
-            session,
-            product_slug,
+        return await product_service.get_product_accessories(
+            session, product_slug, user_id
         )
-    except accessory_service.ProductNotFoundError as error:
-        raise HTTPException(status_code=404, detail="Product not found") from error
-
-    favorite_slugs = await _get_favorite_slugs(session, user_id)
-    return [
-        _to_product_response(accessory, favorite_slugs) for accessory in accessories
-    ]
+    except product_service.ProductNotFoundError as error:
+        raise not_found(error) from error
 
 
 @router.get("/{product_slug}/availability", response_model=ProductAvailabilityResponse)
@@ -289,48 +79,21 @@ async def get_product_availability(
     product_slug: str,
     start_date: date,
     end_date: date,
-    session: Annotated[AsyncSession, Depends(get_db_session)],
+    session: DatabaseSession,
     size: str | None = None,
 ):
-    if start_date > end_date:
-        raise HTTPException(
-            status_code=422, detail="start_date cannot be after end_date"
+    try:
+        return await product_service.get_product_availability(
+            session,
+            product_slug,
+            start_date,
+            end_date,
+            size,
         )
-
-    product = await session.scalar(
-        select(Product.id).where(
-            Product.slug == product_slug,
-            Product.visibility_status.is_(True),
-        )
-    )
-    if product is None:
-        raise HTTPException(status_code=404, detail="Product not found")
-
-    occupied_instance = exists(
-        select(1)
-        .select_from(OrderInstance)
-        .join(Order, Order.id == OrderInstance.order_id)
-        .where(
-            OrderInstance.instance_id == Instance.id,
-            Order.status != OrderStatus.CANCELLED,
-            OrderInstance.start_date <= end_date,
-            OrderInstance.end_date >= start_date,
-        )
-    )
-
-    availability_query = select(func.count(Instance.id)).where(
-        Instance.product_id == product,
-        Instance.status == InstanceStatus.AVAILABLE,
-        ~occupied_instance,
-    )
-    if size is not None:
-        availability_query = availability_query.where(Instance.size == size)
-
-    available_quantity = await session.scalar(availability_query) or 0
-    return ProductAvailabilityResponse(
-        available=available_quantity > 0,
-        availableQuantity=available_quantity,
-    )
+    except product_service.InvalidDateRangeError as error:
+        raise invalid_request(error) from error
+    except product_service.ProductNotFoundError as error:
+        raise not_found(error) from error
 
 
 @router.get(
@@ -339,58 +102,16 @@ async def get_product_availability(
 )
 async def get_product_availability_calendar(
     product_slug: str,
-    session: Annotated[AsyncSession, Depends(get_db_session)],
+    session: DatabaseSession,
     quantity: Annotated[int, Query(ge=1, le=100)] = 1,
     size: str | None = None,
 ) -> ProductAvailabilityCalendarResponse:
-    product_id = await session.scalar(
-        select(Product.id).where(
-            Product.slug == product_slug,
-            Product.visibility_status.is_(True),
+    try:
+        return await product_service.get_product_availability_calendar(
+            session,
+            product_slug,
+            quantity,
+            size,
         )
-    )
-    if product_id is None:
-        raise HTTPException(status_code=404, detail="Product not found")
-
-    instances_query = select(Instance.id).where(
-        Instance.product_id == product_id,
-        Instance.status == InstanceStatus.AVAILABLE,
-    )
-    if size is not None:
-        instances_query = instances_query.where(Instance.size == size)
-    instance_ids = list(await session.scalars(instances_query))
-
-    reservations: list[ReservedInstancePeriod] = []
-    if instance_ids:
-        rows = await session.execute(
-            select(
-                OrderInstance.instance_id,
-                OrderInstance.start_date,
-                OrderInstance.end_date,
-            )
-            .join(Order, Order.id == OrderInstance.order_id)
-            .where(
-                OrderInstance.instance_id.in_(instance_ids),
-                Order.status != OrderStatus.CANCELLED,
-                OrderInstance.end_date >= date.today(),
-            )
-        )
-        reservations = [
-            ReservedInstancePeriod(
-                instance_id=instance_id,
-                start_date=start_date,
-                end_date=end_date,
-            )
-            for instance_id, start_date, end_date in rows
-        ]
-
-    unavailable_dates, fully_unavailable = calculate_unavailable_dates(
-        instance_count=len(instance_ids),
-        requested_quantity=quantity,
-        reservations=reservations,
-        today=date.today(),
-    )
-    return ProductAvailabilityCalendarResponse(
-        unavailableDates=unavailable_dates,
-        fullyUnavailable=fully_unavailable,
-    )
+    except product_service.ProductNotFoundError as error:
+        raise not_found(error) from error
