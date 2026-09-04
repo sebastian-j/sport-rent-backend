@@ -14,11 +14,6 @@ from app.schemas.product import (
     ProductResponse,
 )
 from app.services import product as product_service
-from app.services import accessory as accessory_service
-from app.services.availability import (
-    ReservedInstancePeriod,
-    calculate_unavailable_dates,
-)
 
 router = APIRouter(prefix="/product", tags=["product"])
 
