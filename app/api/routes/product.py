@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.dependencies import get_optional_current_user_id
 from app.db.session import get_db_session
 from app.schemas.product import (
+    ProductAvailabilityCalendarResponse,
     ProductAvailabilityResponse,
     ProductFacetsResponse,
     ProductQueryParams,
@@ -91,5 +92,26 @@ async def get_product_availability(
         )
     except product_service.InvalidDateRangeError as error:
         raise invalid_request(error) from error
+    except product_service.ProductNotFoundError as error:
+        raise not_found(error) from error
+
+
+@router.get(
+    "/{product_slug}/availability-calendar",
+    response_model=ProductAvailabilityCalendarResponse,
+)
+async def get_product_availability_calendar(
+    product_slug: str,
+    session: DatabaseSession,
+    quantity: Annotated[int, Query(ge=1, le=100)] = 1,
+    size: str | None = None,
+) -> ProductAvailabilityCalendarResponse:
+    try:
+        return await product_service.get_product_availability_calendar(
+            session,
+            product_slug,
+            quantity,
+            size,
+        )
     except product_service.ProductNotFoundError as error:
         raise not_found(error) from error

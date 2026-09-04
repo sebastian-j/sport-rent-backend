@@ -12,12 +12,17 @@ from app.models.subcategory import Subcategory
 from app.schemas.product import (
     CategoryResponse,
     PriceFacetResponse,
+    ProductAvailabilityCalendarResponse,
     ProductAvailabilityResponse,
     ProductFacetsResponse,
     ProductQueryParams,
     ProductResponse,
 )
 from app.services import accessory as accessory_service
+from app.services.availability import (
+    ReservedInstancePeriod,
+    calculate_unavailable_dates,
+)
 
 
 class ProductNotFoundError(LookupError):
@@ -319,4 +324,63 @@ async def get_product_availability(
     return ProductAvailabilityResponse(
         available=available_quantity > 0,
         availableQuantity=available_quantity,
+    )
+
+
+async def get_product_availability_calendar(
+    session: AsyncSession,
+    product_slug: str,
+    quantity: int = 1,
+    size: str | None = None,
+) -> ProductAvailabilityCalendarResponse:
+    product_id = await session.scalar(
+        select(Product.id).where(
+            Product.slug == product_slug,
+            Product.visibility_status.is_(True),
+        )
+    )
+    if product_id is None:
+        raise ProductNotFoundError("Product not found")
+
+    instances_query = select(Instance.id).where(
+        Instance.product_id == product_id,
+        Instance.status == InstanceStatus.AVAILABLE,
+    )
+    if size is not None:
+        instances_query = instances_query.where(Instance.size == size)
+    instance_ids = list(await session.scalars(instances_query))
+
+    reservations: list[ReservedInstancePeriod] = []
+    if instance_ids:
+        rows = await session.execute(
+            select(
+                OrderInstance.instance_id,
+                OrderInstance.start_date,
+                OrderInstance.end_date,
+            )
+            .join(Order, Order.id == OrderInstance.order_id)
+            .where(
+                OrderInstance.instance_id.in_(instance_ids),
+                Order.status != OrderStatus.CANCELLED,
+                OrderInstance.end_date >= date.today(),
+            )
+        )
+        reservations = [
+            ReservedInstancePeriod(
+                instance_id=instance_id,
+                start_date=start_date,
+                end_date=end_date,
+            )
+            for instance_id, start_date, end_date in rows
+        ]
+
+    unavailable_dates, fully_unavailable = calculate_unavailable_dates(
+        instance_count=len(instance_ids),
+        requested_quantity=quantity,
+        reservations=reservations,
+        today=date.today(),
+    )
+    return ProductAvailabilityCalendarResponse(
+        unavailableDates=unavailable_dates,
+        fullyUnavailable=fully_unavailable,
     )
