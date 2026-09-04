@@ -44,7 +44,7 @@ async def seed_manufacturers(
                 continue
 
             product = await session.scalar(
-                select(Product).where(Product.slug == p_data["slug"])
+                select(Product).where(Product.id == p_data["id"])
             )
             if product is not None and product.manufacturer_id is None:
                 product.manufacturer_id = manufacturer_map[manufacturer_name].id

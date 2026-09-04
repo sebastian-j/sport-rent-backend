@@ -1,3 +1,5 @@
+from datetime import date
+
 from pydantic import BaseModel, Field
 
 MIN_PRICE = 0
@@ -28,6 +30,11 @@ class ProductResponse(BaseModel):
 class ProductAvailabilityResponse(BaseModel):
     available: bool
     availableQuantity: int
+
+
+class ProductAvailabilityCalendarResponse(BaseModel):
+    unavailableDates: list[date]
+    fullyUnavailable: bool
 
 
 class ProductQueryParams(BaseModel):
